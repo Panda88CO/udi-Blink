@@ -109,7 +109,6 @@ class BlinkSetup (udi_interface.Node):
 
     def addNodes (self, deviceList):
 
-
         for dev in range(0,len(self.deviceList)):
             if self.deviceList[dev]['type']  in self.supportedYoTypes:
                 logging.info('adding/checking device : {} - {}'.format(self.deviceList[dev]['name'], self.deviceList[dev]['type']))

@@ -1,0 +1,23 @@
+{
+    "name": "BlinkControl",
+    "docs": "https://github.com/Panda88CO/udi-Blink",
+    "type": "python3",
+    "executable": "BlinkController.py",
+    "install": "install.sh",
+    "install_cloud": "install_cloud.sh",
+    "description": "Nodeserver to allow integration of Blink Cameras. ",
+    "notice": "Uses APIs from https://github.com/fronzbot/blinkpy - not official Blink APIs.",
+    "shortPoll": "30",
+    "longPoll": "180",
+    "profile_version": "0.1.0",
+    "credits": [
+        {
+            "title": "A NodeServer to integrate Blink Camera Systems",
+            "author": "Panda88CO",
+            "version": "0.1.0",
+            "date": "Sept 28,  2022",
+            "source": "https://github.com/Panda88CO/udi-Blink",
+            "license": "https://github.com/Panda88CO/udi-Blink/blob/main/license"
+        }
+    ]
+}

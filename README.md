@@ -1,2 +1,2 @@
 # udi-Blink
-Blink Node Server fir udi
+Blink Node Server for udi

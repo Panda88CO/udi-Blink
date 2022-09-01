@@ -147,15 +147,6 @@ class BlinkSetup (udi_interface.Node):
 
     def checkNodes(self):
         logging.info('Updating Nodes')
-        self.deviceList = self.yoAccess.getDeviceList()
-        nodes = self.poly.getNodes()
-        for dev in range(0,len(self.deviceList)):
-            devList = []
-            name = self.deviceList[dev]['deviceId'][-14:]
-            if name not in nodes:
-                #device was likely off line during inital instellation or added afterwards
-                devList.append(self.deviceList[dev])
-                self.addNodes(devList)
 
 
     def systemPoll (self, polltype):

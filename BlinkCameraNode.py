@@ -21,17 +21,15 @@ except ImportError:
 
 
                
-class blink_sync_module(udi_interface.Node):
+class blink_camera(udi_interface.Node):
 
-    def __init__(self, polyglot, primary, address, name, blink):
+    def __init__(self, polyglot, primary, address, name, camera):
         super().__init__( polyglot, primary, address, name)   
         logging.debug('blink INIT- {}'.format(name))
-        self.blink = blink   
+        self.blink = camera   
         self.name = name
         self.poly = polyglot
-        #self.Parameters = Custom(polyglot, 'customparams')
-        # subscribe to the events we want
-        #polyglot.subscribe(polyglot.CUSTOMPARAMS, self.parameterHandler)
+      
         #polyglot.subscribe(polyglot.POLL, self.poll)
         polyglot.subscribe(polyglot.START, self.start, self.address)
         polyglot.subscribe(polyglot.STOP, self.stop)
@@ -67,7 +65,7 @@ class blink_sync_module(udi_interface.Node):
             if camera.attributes['sync_module'] == self.name:
                 cameraName = name
                 nodeName = camera.attributes['camera_id']
-                self.blink_camera(self.poly, nodeName, nodeName, cameraName, camera)
+                self.blink_camera(self.poly, nodeName, nodeName, cameraName, self.blink
         self.nodeDefineDone = True
 
 
@@ -75,33 +73,6 @@ class blink_sync_module(udi_interface.Node):
         logging.debug('stop - Cleaning up')
 
     
-def systemPoll (self, polltype):
-        if self.nodeDefineDone:
-            logging.debug('System Poll executing: {}'.format(polltype))
-
-            if 'longPoll' in polltype:
-                #Keep token current
-                #self.node.setDriver('GV0', self.temp_unit, True, True)
-                try:
-                    if not self.yoAccess.refresh_token(): #refresh failed
-                        while not self.yoAccess.request_new_token():
-                                time.sleep(60)
-                    #logging.info('Updating device status')
-                    nodes = self.poly.getNodes()
-                    for nde in nodes:
-                        if nde != 'setup':   # but not the controller node
-                            nodes[nde].checkOnline()
-                except Exception as e:
-                    logging.debug('Exeption occcured : {}'.format(e))
-   
-                
-            if 'shortPoll' in polltype:
-                self.heartbeat()
-                nodes = self.poly.getNodes()
-                for nde in nodes:
-                    if nde != 'setup':   # but not the controller node
-                        nodes[nde].checkDataUpdate()
-
 
 
     def updateISYdrivers(self, level):
@@ -139,19 +110,19 @@ def systemPoll (self, polltype):
 
                 }
 
-    if PG_CLOUD_ONLY:
-        drivers= [{'driver': 'GV1', 'value':0, 'uom':51}
-                 ,{'driver': 'GV2', 'value':0, 'uom':25}
-                 ,{'driver': 'GV3', 'value':0, 'uom':25}
-                 ,{'driver': 'GV4', 'value':0, 'uom':25}
-                 ,{'driver': 'GV5', 'value':0, 'uom':58}
-                 ,{'driver': 'GV6', 'value':0, 'uom':58}
-                 ,{'driver': 'GV7', 'value':0, 'uom':58}
-                 ,{'driver': 'GV8', 'value':0, 'uom':58}
-                 ,{'driver': 'GV9', 'value':0, 'uom':58}
-                 ,{'driver': 'GV10', 'value':0, 'uom':58}
-                 ,{'driver': 'GV11', 'value':0, 'uom':58}
-                 ,{'driver': 'GV12', 'value':0, 'uom':58}
+
+    drivers= [{'driver': 'GV1', 'value':0, 'uom':51}
+                ,{'driver': 'GV2', 'value':0, 'uom':25}
+                ,{'driver': 'GV3', 'value':0, 'uom':25}
+                ,{'driver': 'GV4', 'value':0, 'uom':25}
+                ,{'driver': 'GV5', 'value':0, 'uom':58}
+                ,{'driver': 'GV6', 'value':0, 'uom':58}
+                ,{'driver': 'GV7', 'value':0, 'uom':58}
+                ,{'driver': 'GV8', 'value':0, 'uom':58}
+                ,{'driver': 'GV9', 'value':0, 'uom':58}
+                ,{'driver': 'GV10', 'value':0, 'uom':58}
+                ,{'driver': 'GV11', 'value':0, 'uom':58}
+                ,{'driver': 'GV12', 'value':0, 'uom':58}
 
         ] 
 

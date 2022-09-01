@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 try:
     import udi_interface
     logging = udi_interface.LOGGER
@@ -23,7 +24,7 @@ import time
 
 from blinkpy.blinkpy import Blink
 from blinkpy.auth import Auth
-
+from BlinkSyncNode import blink_sync_module
 
 
 
@@ -114,7 +115,7 @@ class BlinkSetup (udi_interface.Node):
                     nodeName = syncUnit[0:14]
                 else:
                     nodeName = syncUnit
-                self.blinkAddSyncUnit(self.poly, nodeName, nodeName, syncUnit, self.blink)
+                self.blink_sync_module(self.poly, nodeName, nodeName, syncUnit, self.blink)
 
         self.poly.updateProfile()
 
@@ -129,8 +130,7 @@ class BlinkSetup (udi_interface.Node):
             #    if node != 'setup':   # but not the controller node
             #        nodes[node].setDriver('ST', 0, True, True)
             time.sleep(2)
-        if self.yoAccess:
-            self.yoAccess.shut_down()
+
         self.poly.stop()
         exit()
  
@@ -175,9 +175,8 @@ class BlinkSetup (udi_interface.Node):
                         if nde != 'setup':   # but not the controller node
                             nodes[nde].checkOnline()
                 except Exception as e:
-                    logging.debug('Exeption occcured during request_new_token : {}'.format(e))
-                    self.yoAccess = YoLinkInitPAC (self.uaid, self.secretKey)
-                    self.deviceList = self.yoAccess.getDeviceList()           
+                    logging.debug('Exeption occcured : {}'.format(e))
+   
                 
             if 'shortPoll' in polltype:
                 self.heartbeat()

@@ -1,87 +1,111 @@
 #!/usr/bin/env python3
-PG_CLOUD_ONLY = False
+import os
+import time
 
 try:
-    import polyinterface
+    import udi_interface
+    logging = udi_interface.logging
+    Custom = udi_interface.Custom
 except ImportError:
-    import pgc_interface as polyinterface
-    PG_CLOUD_ONLY = True
+    import logging
+    import sys
+    #logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+    logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] [%(threadName)s] %(message)s",
+    handlers=[
+        logging.FileHandler("debug1.log"),
+        logging.StreamHandler(sys.stdout) ]
+    )
 
-#from os import truncate
-import sys
-import TeslaInfo
-import ISYprofile
 
-LOGGER = polyinterface.LOGGER
+
                
-class teslaPWSetupNode(polyinterface.Node):
+class blink_sync_module(udi_interface.Node):
 
-    def __init__(self, controller, primary, address, name, TPW):
-        super().__init__(controller, primary, address, name)
-
-        LOGGER.info('_init_ Tesla Power Wall setup Node')
-        self.ISYforced = False
-        self.TPW = TPW
-        self.address = address 
-        self.id = address
+    def __init__(self, polyglot, primary, address, name, blink):
+        super().__init__( polyglot, primary, address, name)   
+        logging.debug('blink INIT- {}'.format(name))
+        self.blink = blink   
         self.name = name
-        self.hb = 0
+        self.poly = polyglot
+        #self.Parameters = Custom(polyglot, 'customparams')
+        # subscribe to the events we want
+        #polyglot.subscribe(polyglot.CUSTOMPARAMS, self.parameterHandler)
+        #polyglot.subscribe(polyglot.POLL, self.poll)
+        polyglot.subscribe(polyglot.START, self.start, self.address)
+        polyglot.subscribe(polyglot.STOP, self.stop)
+        self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
+        self.n_queue = []        
 
-        if not(PG_CLOUD_ONLY):
-             self.drivers = []
+        # start processing events and create add our controller node
+        polyglot.ready()
+        self.poly.addNode(self)
+        self.wait_for_node_done()
+        self.node = self.poly.getNode(address)
+        self.node.setDriver('ST', 1, True, True)
+    
+    def node_queue(self, data):
+        self.n_queue.append(data['address'])
+
+    def wait_for_node_done(self):
+        while len(self.n_queue) == 0:
+            time.sleep(0.1)
+        self.n_queue.pop()
 
         self.nodeDefineDone = False
-        LOGGER.debug('Start Tesla Power Wall Setup Node')  
+        logging.debug('Start {} sync module Node'.format(self.name))  
 
-        self.ISYparams = self.TPW.supportedParamters(self.id)
-        #LOGGER.debug ('Node = ISYparams :' + str(self.ISYparams))
 
-        self.ISYcriticalParams = self.TPW.criticalParamters(self.id)
-        #LOGGER.debug ('Node = ISYcriticalParams :' + str(self.ISYcriticalParams))
     
-        if not(PG_CLOUD_ONLY):
-            for key in self.ISYparams:
-                info = self.ISYparams[key]
-
-                if info != {}:
-                    value = self.TPW.getISYvalue(key, self.id)
-                    LOGGER.debug('SetupNode: driver' + str(key)+ ' value:' + str(value) + ' uom:' + str(info['uom']) )
-                    self.drivers.append({'driver':key, 'value':value, 'uom':info['uom'] })
-            LOGGER.debug( 'Setup node init - DONE')
 
         #self.heartbeat()
 
 
     def start(self):                
-        self.updateISYdrivers('all')
-        #self.reportDrivers()
+        for name, camera in self.blink.cameras.items():
+            if camera.attributes['sync_module'] == self.name:
+                cameraName = name
+                nodeName = camera.attributes['camera_id']
+                self.blink_camera(self.poly, nodeName, nodeName, cameraName, self.blink
         self.nodeDefineDone = True
 
 
     def stop(self):
-        LOGGER.debug('stop - Cleaning up')
+        logging.debug('stop - Cleaning up')
 
     
-    def shortPoll(self):
-        #No need to poll data - done by Controller
-        LOGGER.debug('Tesla Power Wall setupNode shortPoll')
+def systemPoll (self, polltype):
         if self.nodeDefineDone:
-            self.updateISYdrivers('critical')
-        else:
-           LOGGER.info('Setup Node: waiting for system/nodes to get created')
+            logging.debug('System Poll executing: {}'.format(polltype))
 
+            if 'longPoll' in polltype:
+                #Keep token current
+                #self.node.setDriver('GV0', self.temp_unit, True, True)
+                try:
+                    if not self.yoAccess.refresh_token(): #refresh failed
+                        while not self.yoAccess.request_new_token():
+                                time.sleep(60)
+                    #logging.info('Updating device status')
+                    nodes = self.poly.getNodes()
+                    for nde in nodes:
+                        if nde != 'setup':   # but not the controller node
+                            nodes[nde].checkOnline()
+                except Exception as e:
+                    logging.debug('Exeption occcured : {}'.format(e))
+   
                 
+            if 'shortPoll' in polltype:
+                self.heartbeat()
+                nodes = self.poly.getNodes()
+                for nde in nodes:
+                    if nde != 'setup':   # but not the controller node
+                        nodes[nde].checkDataUpdate()
 
-    def longPoll(self):
-        #No need to poll data - done by Controller
-        LOGGER.debug('Tesla Power Wall  sentupNode longPoll')
-        if self.nodeDefineDone:
-           self.updateISYdrivers('all')
-        else:
-           LOGGER.info('Setup Node: waiting for system/nodes to get created')
+
 
     def updateISYdrivers(self, level):
-        LOGGER.debug('Node updateISYdrivers')
+        logging.debug('Node updateISYdrivers')
         params = []
         if level == 'all':
             params = self.ISYparams
@@ -90,139 +114,28 @@ class teslaPWSetupNode(polyinterface.Node):
                     info = params[key]
                     if info != {}:
                         value = self.TPW.getISYvalue(key, self.id)
-                        #LOGGER.debug('Update ISY drivers :' + str(key)+ ' ' + info['systemVar']+ ' value:' + str(value) )
+                        #logging.debug('Update ISY drivers :' + str(key)+ ' ' + info['systemVar']+ ' value:' + str(value) )
                         self.setDriver(key, int(value), report = True, force = True)      
         elif level == 'critical':
             params = self.ISYcriticalParams
             if params:
                 for key in params:
                     value = self.TPW.getISYvalue(key, self.id)
-                    #LOGGER.debug('Update ISY drivers :' + str(key)+ ' value: ' + str(value) )
+                    #logging.debug('Update ISY drivers :' + str(key)+ ' value: ' + str(value) )
                     self.setDriver(key, int(value), report = True, force = True)        
 
         else:
-           LOGGER.debug('Wrong parameter passed: ' + str(level))
-        LOGGER.debug('updateISYdrivers - setupnode DONE')
+           logging.debug('Wrong parameter passed: ' + str(level))
+        logging.debug('updateISYdrivers - setupnode DONE')
 
 
 
-    def setStormMode(self, command):
-        LOGGER.debug('setStormMode')
-        value = int(command.get('value'))
-        self.TPW.setTPW_stormMode(value)
-        ISYvar = self.TPW.getStormModeISYVar(self.id)
-        self.setDriver(ISYvar, value, report = True,force = True)
-        #self.reportDrivers() 
-        
-    def setOperatingMode(self, command):
-        LOGGER.debug('setOperatingMode')
-        value = int(command.get('value'))
-        self.TPW.setTPW_operationMode(value)
-        ISYvar = self.TPW.getOperatingModeISYVar(self.id)
-        self.setDriver(ISYvar, value, report = True,force = True)
-        #self.reportDrivers() 
-    
-    def setBackupPercent(self, command):
-        LOGGER.debug('setBackupPercent')
-        value = float(command.get('value'))
-        self.TPW.setTPW_backoffLevel(value)
-        ISYvar = self.TPW.getBackupPercentISYVar(self.id)
-        self.setDriver(ISYvar, value, report = True,force = True)
-        #self.reportDrivers() 
-
-    def setTOUmode(self, command):
-        LOGGER.debug('setTOUmode')
-        value = int(command.get('value'))
-        self.TPW.setTPW_touMode(value)
-        ISYvar = self.TPW.getTOUmodeISYVar(self.id)
-        self.setDriver(ISYvar, value, report = True,force = True)
-        #self.reportDrivers() 
-
-    def setWeekendOffpeakStart(self, command):
-        LOGGER.debug('setWeekendOffpeakStart')
-        value = int(command.get('value'))
-        self.TPW.setTPW_updateTouSchedule('off_peak', 'weekend', 'start', value)
-        ISYvar = self.TPW.getTouWeekendOffpeakStartISYVar(self.id)
-        self.setDriver(ISYvar, value, report = True,force = True)
-        #self.reportDrivers() 
-
-    def setWeekendOffpeakEnd(self, command):
-        LOGGER.debug('setWeekendOffpeakEnd')
-        value = int(command.get('value'))
-        self.TPW.setTPW_updateTouSchedule('off_peak', 'weekend', 'end', value)
-        ISYvar = self.TPW.getTouWeekendOffpeakEndISYVar(self.id)
-        self.setDriver(ISYvar, value, report = True,force = True)
-        #self.reportDrivers() 
-
-    def setWeekendPeakStart(self, command):
-        LOGGER.debug('setWeekendPeakStart')
-        value = int(command.get('value'))
-        self.TPW.setTPW_updateTouSchedule('peak', 'weekend', 'start', value)
-        ISYvar = self.TPW.getTouWeekendPeakStartISYVar(self.id)
-        self.setDriver(ISYvar, value, report = True,force = True)
-        #self.reportDrivers()       
-
-    def setWeekendPeakEnd(self, command):
-        LOGGER.debug('setWeekendPeakEnd')
-        value = int(command.get('value'))
-        self.TPW.setTPW_updateTouSchedule('peak', 'weekend', 'end', value)
-        ISYvar = self.TPW.getTouWeekendPeakEndISYVar(self.id)
-        self.setDriver(ISYvar, value, report = True,force = True)
-        #self.reportDrivers()    
-
-    def setWeekOffpeakStart(self, command):
-        LOGGER.debug('setWeekOffpeakStart')
-        value = int(command.get('value'))
-        self.TPW.setTPW_updateTouSchedule('off_peak', 'week', 'start', value)
-        ISYvar = self.TPW.getTouWeekOffpeakStartISYVar(self.id)
-        self.setDriver(ISYvar, value, report = True,force = True)
-        #self.reportDrivers() 
-
-    def setWeekOffpeakEnd(self, command):
-        LOGGER.debug('setWeekOffpeakEnd')
-        value = int(command.get('value'))
-        self.TPW.setTPW_updateTouSchedule('off_peak', 'week', 'end', value)
-        ISYvar = self.TPW.getTouWeekOffpeakEndISYVar(self.id)
-        self.setDriver(ISYvar, value, report = True,force = True)
-        #self.reportDrivers() 
-
-    def setWeekPeakStart(self, command):
-        LOGGER.debug('setWeekPeakStart')
-        value = int(command.get('value'))
-        self.TPW.setTPW_updateTouSchedule('peak', 'week', 'start', value)
-        ISYvar = self.TPW.getTouWeekPeakStartISYVar(self.id)
-        self.setDriver(ISYvar, value, report = True,force = True)
-        #self.reportDrivers()   
-
-    def setWeekPeakEnd(self, command):
-        LOGGER.debug('setWeekPeakEnd')
-        value = int(command.get('value'))
-        self.TPW.setTPW_updateTouSchedule('peak', 'week', 'end', value)
-        ISYvar = self.TPW.getTouWeekPeakEndISYVar(self.id)
-        self.setDriver(ISYvar, value, report = True,force = True)
-        #self.reportDrivers() 
-
-
-    def ISYupdate (self, command):
-        LOGGER.debug('ISY-update called  Setup Node')
-        if self.TPW.pollSystemData('all'):
-            self.updateISYdrivers('all')
-            #self.reportDrivers()
- 
+    def arm_all_cameras (self):
+        pass
 
     commands = { 'UPDATE': ISYupdate
-                ,'BACKUP_PCT' : setBackupPercent
-                ,'STORM_MODE' :setStormMode
-                ,'OP_MODE': setOperatingMode
-                ,'TOU_MODE':setTOUmode
-                ,'WE_O_PEAK_START': setWeekendOffpeakStart
-                ,'WE_O_PEAK_END':setWeekendOffpeakEnd
-                ,'WE_PEAK_START':setWeekendPeakStart
-                ,'WE_PEAK_END':setWeekendPeakEnd
-                ,'WK_O_PEAK_START':setWeekOffpeakStart
-                ,'WK_O_PEAK_END':setWeekOffpeakEnd
-                ,'WK_PEAK_START':setWeekPeakStart
-                ,'WK_PEAK_END':setWeekPeakEnd
+                ,'ARM_ALL' : arm_all_cameras
+            
 
                 }
 

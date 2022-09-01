@@ -15,7 +15,7 @@
          </accepts>
       </cmds>
    </nodeDef> 
-   <nodeDef id="pwstatus" nls="nlspwstatus">
+   <nodeDef id="blinksync" nls="nlsblinksync">
       <editors />
       <sts>
          <st id="GV1" editor="PWSTATUS1" />
@@ -47,7 +47,7 @@
          </accepts>
       </cmds>
    </nodeDef> 
-   <nodeDef id="pwsetup" nls="nlspwsetup">
+   <nodeDef id="blinkcamera" nls="nlsblinkcamera">
       <editors />
       <sts>
          <st id="GV1" editor="PWSETUP1" />

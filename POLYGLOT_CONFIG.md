@@ -3,7 +3,7 @@
 ## Installation
 
 
-### Polisy/ local Polyglot
+### Polisy
 
 
 

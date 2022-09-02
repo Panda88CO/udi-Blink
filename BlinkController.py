@@ -110,11 +110,8 @@ class BlinkSetup (udi_interface.Node):
     def addNodes (self, deviceList):
         for syncUnit in self.blink.sync:
             if syncUnit in self.syncUnitList:
-                logging.info('Adding sync unit {}'.format(syncUnit))
-                if len(syncUnit) >=14:
-                    nodeName = syncUnit[0:14]
-                else:
-                    nodeName = syncUnit
+                logging.info('Adding sync unit {} as {}'.format(syncUnit))
+                nodeName = self.blink.sync['id']
                 self.blink_sync_module(self.poly, nodeName, nodeName, syncUnit, self.blink)
 
         self.poly.updateProfile()
@@ -244,8 +241,8 @@ class BlinkSetup (udi_interface.Node):
     #            }
 
     drivers = [
-            {'driver': 'ST', 'value':1, 'uom':25},
-          # {'driver': 'GV0', 'value':0, 'uom':25},
+            {'driver': 'ST', 'value':1, 'uom':25}, # node
+            {'driver': 'GV0', 'value':0, 'uom':25}, # On-line 
            ]
 
 if __name__ == "__main__":

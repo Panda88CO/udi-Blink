@@ -75,7 +75,7 @@ class blink_sync_module(udi_interface.Node):
         logging.debug('stop - Cleaning up')
 
     
-def systemPoll (self, polltype):
+    def systemPoll (self, polltype):
         if self.nodeDefineDone:
             logging.debug('System Poll executing: {}'.format(polltype))
 
@@ -139,19 +139,9 @@ def systemPoll (self, polltype):
 
                 }
 
-    if PG_CLOUD_ONLY:
-        drivers= [{'driver': 'GV1', 'value':0, 'uom':51}
-                 ,{'driver': 'GV2', 'value':0, 'uom':25}
-                 ,{'driver': 'GV3', 'value':0, 'uom':25}
-                 ,{'driver': 'GV4', 'value':0, 'uom':25}
-                 ,{'driver': 'GV5', 'value':0, 'uom':58}
-                 ,{'driver': 'GV6', 'value':0, 'uom':58}
-                 ,{'driver': 'GV7', 'value':0, 'uom':58}
-                 ,{'driver': 'GV8', 'value':0, 'uom':58}
-                 ,{'driver': 'GV9', 'value':0, 'uom':58}
-                 ,{'driver': 'GV10', 'value':0, 'uom':58}
-                 ,{'driver': 'GV11', 'value':0, 'uom':58}
-                 ,{'driver': 'GV12', 'value':0, 'uom':58}
+    drivers= [{'driver': 'GV1', 'value':0, 'uom':51} # on line 
+             ,{'driver': 'GV2', 'value':0, 'uom':25} # Armed
+
 
         ] 
 

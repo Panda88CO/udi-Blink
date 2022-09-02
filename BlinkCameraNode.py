@@ -26,7 +26,7 @@ class blink_camera(udi_interface.Node):
     def __init__(self, polyglot, primary, address, name, camera):
         super().__init__( polyglot, primary, address, name)   
         logging.debug('blink INIT- {}'.format(name))
-        self.blink = camera   
+        self.camera = camera   
         self.name = name
         self.poly = polyglot
       
@@ -61,11 +61,8 @@ class blink_camera(udi_interface.Node):
 
 
     def start(self):                
-        for name, camera in self.blink.cameras.items():
-            if camera.attributes['sync_module'] == self.name:
-                cameraName = name
-                nodeName = camera.attributes['camera_id']
-                self.blink_camera(self.poly, nodeName, nodeName, cameraName, self.blink
+       
+
         self.nodeDefineDone = True
 
 
@@ -107,24 +104,20 @@ class blink_camera(udi_interface.Node):
     commands = { 'UPDATE': ISYupdate
                 ,'ARM_ALL' : arm_all_cameras
             
-
                 }
 
 
-    drivers= [{'driver': 'GV1', 'value':0, 'uom':51}
-                ,{'driver': 'GV2', 'value':0, 'uom':25}
-                ,{'driver': 'GV3', 'value':0, 'uom':25}
-                ,{'driver': 'GV4', 'value':0, 'uom':25}
-                ,{'driver': 'GV5', 'value':0, 'uom':58}
-                ,{'driver': 'GV6', 'value':0, 'uom':58}
-                ,{'driver': 'GV7', 'value':0, 'uom':58}
-                ,{'driver': 'GV8', 'value':0, 'uom':58}
-                ,{'driver': 'GV9', 'value':0, 'uom':58}
-                ,{'driver': 'GV10', 'value':0, 'uom':58}
-                ,{'driver': 'GV11', 'value':0, 'uom':58}
-                ,{'driver': 'GV12', 'value':0, 'uom':58}
-
-        ] 
+    drivers= [  {'driver': 'ST', 'value':0, 'uom':25},
+                {'driver': 'GV0', 'value':0, 'uom':51},
+                {'driver': 'GV1', 'value':0, 'uom':51}, # On line
+                {'driver': 'GV2', 'value':0, 'uom':25}, # Battery
+                {'driver': 'GV3', 'value':0, 'uom':25}, # Camera Type 
+                {'driver': 'GV4', 'value':0, 'uom':25}, # Motion Detection Enabled
+                {'driver': 'GV5', 'value':0, 'uom':58}, # Motion Detected
+                {'driver': 'GV6', 'value':0, 'uom':58}, # Temp
+                {'driver': 'GV7', 'value':0, 'uom':58}, # Recording
+                {'driver': 'GV8', 'value':0, 'uom':58}, # TBD
+                 ] 
 
         
 

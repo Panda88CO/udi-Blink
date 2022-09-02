@@ -94,16 +94,25 @@ class blink_camera(udi_interface.Node):
 
         else:
            logging.debug('Wrong parameter passed: ' + str(level))
-        logging.debug('updateISYdrivers - setupnode DONE')
+        #logging.debug('updateISYdrivers - setupnode DONE')
 
-
-
-    def arm_all_cameras (self):
+    
+    def ISYupdate (self):
+        pass 
+    
+    def snap_pitcure (self):
         pass
 
-    commands = { 'UPDATE': ISYupdate
-                ,'ARM_ALL' : arm_all_cameras
-            
+    def email_picture (self):
+        pass
+
+    def arm_camera (self):
+        pass
+
+    commands = { 'UPDATE': ISYupdate,
+                 'ARM' : arm_camera,
+                 'SNAP_PIC' : snap_pitcure,
+                #,'EMAIL_PIC' : email_picture,
                 }
 
 

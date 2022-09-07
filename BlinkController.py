@@ -32,8 +32,10 @@ from BlinkSyncNode import blink_sync_module
 class BlinkSetup (udi_interface.Node):
     def  __init__(self, polyglot, primary, address, name):
         super().__init__( polyglot, primary, address, name)  
-        
+        self.nodeDefineDone = False
         #logging.setLevel(30)
+        self.poly = polyglot
+        self.n_queue = []
         self.poly.subscribe(self.poly.STOP, self.stop)
         self.poly.subscribe(self.poly.START, self.start, address)
         self.poly.subscribe(self.poly.LOGLEVEL, self.handleLevelChange)
@@ -41,6 +43,7 @@ class BlinkSetup (udi_interface.Node):
         self.poly.subscribe(self.poly.POLL, self.systemPoll)
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
         self.n_queue = []
+        self.hb = 0
 
         self.Parameters = Custom(self.poly, 'customparams')
         self.Notices = Custom(self.poly, 'notices')
@@ -72,14 +75,16 @@ class BlinkSetup (udi_interface.Node):
     def start (self):
         logging.info('Executing start - BlinkSetup')
         #logging.setLevel(30)
+        #time.sleep(5)
+        logging.debug('nodeDefineDone {}'.format(self.nodeDefineDone))
         while not self.nodeDefineDone:
-            time.sleep(1)
-            logging.debug ('waiting for inital node to get created')
-       
+            logging.debug('Waiting for nodes to complete')
+            time.sleep(2)
+
         if self.userName == None or self.userName == '' or self.password==None or self.password=='':
             logging.error('username and password must be provided to start node server')
             exit() 
-
+        logging.debug("user name : {}, password : {}".format(self.userName, self.password)  )
         self.blink = Blink()
         # Can set no_prompt when initializing auth handler
         auth = Auth({"username":self.userName, "password":self.password}, no_prompt=True)

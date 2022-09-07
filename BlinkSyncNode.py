@@ -128,13 +128,15 @@ class blink_sync_module(udi_interface.Node):
            logging.debug('Wrong parameter passed: ' + str(level))
         logging.debug('updateISYdrivers - setupnode DONE')
 
-
+    def ISYupdate(self):
+        pass
 
     def arm_all_cameras (self):
         pass
 
-    commands = { 'UPDATE': ISYupdate
-                ,'ARM_ALL' : arm_all_cameras
+    commands = { 'UPDATE'   : ISYupdate,
+                 'QUERY'    : ISYupdate,
+                 'ARM_ALL'  : arm_all_cameras
             
 
                 }

@@ -48,63 +48,37 @@
       </cmds>
    </nodeDef> 
    <nodeDef id="blinkcamera" nls="nlsblinkcamera">
-      <editors />
+ <editors />
       <sts>
-         <st id="GV1" editor="PWSETUP1" />
-         <st id="GV2" editor="PWSETUP2" />
-         <st id="GV3" editor="PWSETUP3" />
-         <st id="GV4" editor="PWSETUP4" />
-         <st id="GV5" editor="PWSETUP5" />
-         <st id="GV6" editor="PWSETUP6" />
-         <st id="GV7" editor="PWSETUP7" />
-         <st id="GV8" editor="PWSETUP8" />
-         <st id="GV9" editor="PWSETUP9" />
-         <st id="GV10" editor="PWSETUP10" />
-         <st id="GV11" editor="PWSETUP11" />
-         <st id="GV12" editor="PWSETUP12" />
+         <st id="GV0" editor="swstate" />
+         <st id="GV1" editor="delay" />
+         <st id="GV2" editor="delay" />
+         <st id="GV8" editor="online" />
+         <st id="ST"  editor="status" />
       </sts>
       <cmds>
          <sends>
+            <cmd id="DON" editor="swstate"  />               
+            <cmd id="DOF" editor="swstate"  />   
          </sends>
          <accepts>
-            <cmd id="BACKUP_PCT" > 
-               <p id="" editor="PWSETUP1" init="GV1" /> 
-            </cmd> 
-            <cmd id="OP_MODE" > 
-               <p id="" editor="PWSETUP2" init="GV2" /> 
-            </cmd> 
-            <cmd id="STORM_MODE" > 
-               <p id="" editor="PWSETUP3" init="GV3" /> 
-            </cmd> 
-            <cmd id="TOU_MODE" > 
-               <p id="" editor="PWSETUP4" init="GV4" /> 
-            </cmd> 
-            <cmd id="WE_O_PEAK_START" > 
-               <p id="" editor="PWSETUP5" init="GV5" /> 
-            </cmd> 
-            <cmd id="WE_O_PEAK_END" > 
-               <p id="" editor="PWSETUP6" init="GV6" /> 
-            </cmd> 
-            <cmd id="WE_PEAK_START" > 
-               <p id="" editor="PWSETUP7" init="GV7" /> 
-            </cmd> 
-            <cmd id="WE_PEAK_END" > 
-               <p id="" editor="PWSETUP8" init="GV8" /> 
-            </cmd> 
-            <cmd id="WK_O_PEAK_START" > 
-               <p id="" editor="PWSETUP9" init="GV9" /> 
-            </cmd> 
-            <cmd id="WK_O_PEAK_END" > 
-               <p id="" editor="PWSETUP10" init="GV10" /> 
-            </cmd> 
-            <cmd id="WK_PEAK_START" > 
-               <p id="" editor="PWSETUP11" init="GV11" /> 
-            </cmd> 
-            <cmd id="WK_PEAK_END" > 
-               <p id="" editor="PWSETUP12" init="GV12" /> 
-            </cmd> 
             <cmd id="UPDATE" /> 
+            <cmd id="DON" /> 
+            <cmd id="DOF" /> 
+            <cmd id="QUERY" /> 
+
+            <cmd id="SWCTRL" > 
+               <p id="" editor="swctrl" init="1" /> 
+            </cmd >
+            <cmd id="ONDELAY" > 
+               <p id="" editor="delaymin" init="GV1" /> 
+             </cmd >   
+            <cmd id="OFFDELAY" > 
+               <p id="" editor="delaymin" init="GV2" /> 
+             </cmd >
          </accepts>
       </cmds>
    </nodeDef> 
 </nodeDefs> 
+
+     

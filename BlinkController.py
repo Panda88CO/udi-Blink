@@ -32,9 +32,11 @@ from BlinkSyncNode import blink_sync_module
 class BlinkSetup (udi_interface.Node):
     def  __init__(self, polyglot, primary, address, name):
         super().__init__( polyglot, primary, address, name)  
+        logging.setLevel(10)
         self.nodeDefineDone = False
-        #logging.setLevel(30)
+        self.handleParamsDone = False
         self.poly = polyglot
+        self.handleParamsDone = False
         self.n_queue = []
         self.poly.subscribe(self.poly.STOP, self.stop)
         self.poly.subscribe(self.poly.START, self.start, address)
@@ -44,7 +46,7 @@ class BlinkSetup (udi_interface.Node):
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
         self.n_queue = []
         self.hb = 0
-
+        self.userParam = ['TEMP_UNIT', 'USERNAME','PASSWORD', 'AUTH_KEY', 'SYNC_UNITS' ]
         self.Parameters = Custom(self.poly, 'customparams')
         self.Notices = Custom(self.poly, 'notices')
         logging.debug('BlinkSetup init')
@@ -74,17 +76,22 @@ class BlinkSetup (udi_interface.Node):
 
     def start (self):
         logging.info('Executing start - BlinkSetup')
-        #logging.setLevel(30)
+        logging.setLevel(10)
         #time.sleep(5)
         logging.debug('nodeDefineDone {}'.format(self.nodeDefineDone))
-        while not self.nodeDefineDone:
-            logging.debug('Waiting for nodes to complete')
+        while not self.nodeDefineDone and not self.handleParamsDone:
+            logging.debug('Waiting for setup to complete')
             time.sleep(2)
+        for param in self.userParam:
+            if param not in self.Parameters:
+                self.Parameters[param] = ''
+        logging.debug('self.Parameters : '.format(self.Parameters))
 
         if self.userName == None or self.userName == '' or self.password==None or self.password=='':
             logging.error('username and password must be provided to start node server')
+            self.poly.Notices['un'] = 'username and password must be provided to start node server'
             exit() 
-        logging.debug("user name : {}, password : {}".format(self.userName, self.password)  )
+        #logging.debug("user name : {}, password : {}".format(self.userName, self.password)  )
         self.blink = Blink()
         # Can set no_prompt when initializing auth handler
         auth = Auth({"username":self.userName, "password":self.password}, no_prompt=True)
@@ -93,6 +100,7 @@ class BlinkSetup (udi_interface.Node):
         if self.blink.key_required:
             if self.authkey == None or self.authKey == '':
                 logging.error('AuthKey required - please add to config')
+                self.poly.Notices['ak'] = 'username and password must be provided to start node server'
             else:
                 auth.send_auth_key(self.blink, self.authKey)
         self.blink.setup_post_verify()
@@ -106,7 +114,7 @@ class BlinkSetup (udi_interface.Node):
                     self.syncUnitList.append(sync)
 
 
-        self.addNodes(self.deviceList)
+        self.addNodes(self.syncUnitList)
 
         #self.poly.updateProfile()
 
@@ -115,16 +123,16 @@ class BlinkSetup (udi_interface.Node):
     def addNodes (self, deviceList):
         for syncUnit in self.blink.sync:
             if syncUnit in self.syncUnitList:
-                logging.info('Adding sync unit {} as {}'.format(syncUnit))
-                nodeName = self.blink.sync['id']
-                self.blink_sync_module(self.poly, nodeName, nodeName, syncUnit, self.blink)
+                #nodeName = self.blink.sync['id']
+                logging.info('Adding sync unit {}'.format(syncUnit))
+                self.blink_sync_module(self.poly, syncUnit, syncUnit, syncUnit, self.blink)
 
         self.poly.updateProfile()
 
 
     def stop(self):
         logging.info('Stop Called:')
-        #self.yoAccess.writeTtsFile() #save current TTS messages
+
         if 'self.node' in locals():
             self.node.setDriver('ST', 0, True, True)
             #nodes = self.poly.getNodes()
@@ -159,10 +167,7 @@ class BlinkSetup (udi_interface.Node):
                 #Keep token current
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
                 try:
-                    if not self.yoAccess.refresh_token(): #refresh failed
-                        while not self.yoAccess.request_new_token():
-                                time.sleep(60)
-                    #logging.info('Updating device status')
+
                     nodes = self.poly.getNodes()
                     for nde in nodes:
                         if nde != 'setup':   # but not the controller node
@@ -184,13 +189,25 @@ class BlinkSetup (udi_interface.Node):
         logging.info('New log level: {}'.format(level))
         logging.setLevel(level['level'])
 
+    def convert_temp_unit(self, unitS):
+        if unitS == '':
+            self.temp_unit = 0
+        elif unitS[0] == 'C' or unitS[0] == 'c':
+            self.temp_unit = 0
+        elif unitS[0] == 'F' or unitS[0] == 'f':
+            self.temp_unit = 1
+        elif unitS[0] == 'k' or unitS[0] == 'k':
+            self.temp_unit = 2
+        else:
+            logging.error('Unknown unit string (first char must be K,C,F: {}'.format(unitS))
+
 
 
     def handleParams (self, userParam ):
         logging.debug('handleParams')
-        supportParams = ['TEMP_UNIT', 'USERNAME','PASSWORD', 'AUTH_KEY']
+        
         self.Parameters.load(userParam)
-
+        logging.debug('handleParams load - {}'.format(userParam))
         self.poly.Notices.clear()
 
         try:
@@ -205,12 +222,12 @@ class BlinkSetup (udi_interface.Node):
                 self.poly.Notices['userName'] = 'Missing USERNAME parameter'
                 self.userName = ''
 
+
             if 'PASSWORD' in userParam:
                 self.password = userParam['PASSWORD']
             else:
                 self.poly.Notices['password'] = 'Missing PASSWORD parameter'
                 self.password = ''
-
 
             if 'AUTH_KEY' in userParam:
                 self.authKey = userParam['AUTH_KEY']
@@ -223,7 +240,6 @@ class BlinkSetup (udi_interface.Node):
             else:
                 self.poly.Notices['sync_units'] = 'Missing SYNC_UNITS parameter'
                 self.syncUnits = ''
-
 
             self.handleParamsDone = True
 

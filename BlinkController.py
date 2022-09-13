@@ -107,11 +107,12 @@ class BlinkSetup (udi_interface.Node):
         self.blink.refresh()
 
         if self.syncUnits!= None and self.syncUnits != '':
-            self.syncUnitList = []
+            self.syncUnitList = {}
             temp = self.syncUnits.upper()
             for sync in self.blink.sync:
                 if temp.find(sync.upper()) >= 0:
-                    self.syncUnitList.append(sync)
+                    tempAddres = self.poly.getValidAddress(sync)
+                    self.syncUnitList[sync]=tempAddres
 
 
         self.addNodes(self.syncUnitList)
@@ -123,9 +124,10 @@ class BlinkSetup (udi_interface.Node):
     def addNodes (self, deviceList):
         for syncUnit in self.blink.sync:
             if syncUnit in self.syncUnitList:
+                address = self.poly.getValidAddress(syncUnit)
                 #nodeName = self.blink.sync['id']
                 logging.info('Adding sync unit {}'.format(syncUnit))
-                self.blink_sync_module(self.poly, syncUnit, syncUnit, syncUnit, self.blink)
+                blink_sync_module(self.poly, address, address, syncUnit, self.blink)
 
         self.poly.updateProfile()
 
@@ -171,7 +173,8 @@ class BlinkSetup (udi_interface.Node):
                     nodes = self.poly.getNodes()
                     for nde in nodes:
                         if nde != 'setup':   # but not the controller node
-                            nodes[nde].checkOnline()
+                            pass
+                            #nodes[nde].checkOnline()
                 except Exception as e:
                     logging.debug('Exeption occcured : {}'.format(e))
    
@@ -181,7 +184,8 @@ class BlinkSetup (udi_interface.Node):
                 nodes = self.poly.getNodes()
                 for nde in nodes:
                     if nde != 'setup':   # but not the controller node
-                        nodes[nde].checkDataUpdate()
+                        pass
+                        #nodes[nde].checkDataUpdate()
     
 
 

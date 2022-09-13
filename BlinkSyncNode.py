@@ -17,6 +17,7 @@ except ImportError:
         logging.FileHandler("debug1.log"),
         logging.StreamHandler(sys.stdout) ]
     )
+import BlinkCameraNode as blink_camera
 
 
 
@@ -25,9 +26,10 @@ class blink_sync_module(udi_interface.Node):
 
     def __init__(self, polyglot, primary, address, name, blink):
         super().__init__( polyglot, primary, address, name)   
-        logging.debug('blink INIT- {}'.format(name))
+        logging.debug('blink SYNC INIT- {}'.format(name))
         self.blink = blink   
         self.name = name
+        self.address = address
         self.poly = polyglot
         #self.Parameters = Custom(polyglot, 'customparams')
         # subscribe to the events we want
@@ -62,12 +64,14 @@ class blink_sync_module(udi_interface.Node):
         #self.heartbeat()
 
 
-    def start(self):                
+    def start(self):        
+        logging.debug('Sync module Start {}'.format(self.name))        
         for name, camera in self.blink.cameras.items():
             if camera.attributes['sync_module'] == self.name:
                 cameraName = name
-                nodeName = camera.attributes['camera_id']
-                self.blink_camera(self.poly, nodeName, nodeName, cameraName, camera)
+                nodeName = self.poly.getValidAddress(name)
+                logging.debug('Adding Camera {} {} {}'.format(self.address,nodeName, cameraName))
+                blink_camera(self.poly, self.address, nodeName, cameraName, camera)
         self.nodeDefineDone = True
 
 
@@ -100,7 +104,8 @@ class blink_sync_module(udi_interface.Node):
                 nodes = self.poly.getNodes()
                 for nde in nodes:
                     if nde != 'setup':   # but not the controller node
-                        nodes[nde].checkDataUpdate()
+                        pass
+                        #nodes[nde].checkDataUpdate()
 
 
 

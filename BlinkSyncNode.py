@@ -23,22 +23,8 @@ from  BlinkCameraNode import blink_camera
 
                
 class blink_sync_module(udi_interface.Node):
-    id = 'blinksync'
-    
-    '''
-       drivers = [
-            'GV0' = TempC
-            'GV1' = Low Temp Alarm
-            'GV2' = high Temp Alarm 
-            'GV3' = Humidity
-            'GV4' = Low Humidity Alarm
-            'GV5' = High Humidity Alarm
-            'GV6' = BatteryLevel
-            'GV7' = BatteryAlarm
-            'GV8' = Online
-            ]
+   
 
-    ''' 
         
     def __init__(self, polyglot, primary, address, name, blink):
         super().__init__( polyglot, primary, address, name)   
@@ -131,6 +117,8 @@ class blink_sync_module(udi_interface.Node):
 
     def arm_all_cameras (self):
         pass
+
+    id = 'blinksync'
 
     commands = { 'UPDATE'   : ISYupdate,
                  'QUERY'    : ISYupdate,

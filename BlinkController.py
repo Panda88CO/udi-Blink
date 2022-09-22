@@ -124,11 +124,12 @@ class BlinkSetup (udi_interface.Node):
             for sync in self.blink.sync:
                 if temp.find(sync.upper()) >= 0:
                     #address = self.poly.getValidAddress(str(sync))
-                    address = str(sync).replace(' ','')
+                    address = str(sync).replace(' ','')[:14]
                     #name = self.poly.getValidName(str(sync))
-                    name = str(sync).replace(' ','')
-                    logging.info('Adding sync unit {} as {} , {}'.format(sync, address, name))
-                    blink_sync_module(self.poly, address, address, name, self.blink)
+                    #name = str(sync).replace(' ','')
+                    nodename = 'BlinkSync ' + str(sync)
+                    logging.info('Adding sync unit {} as {} , {}'.format(sync, address, nodename))
+                    blink_sync_module(self.poly, address, address, nodename, self.blink)
 
         self.poly.updateProfile()
 
@@ -281,7 +282,7 @@ if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
         polyglot.start('0.1.0')
-        BlinkSetup(polyglot, 'setup', 'setup', 'BlinkSetup')
+        BlinkSetup(polyglot, 'controller', 'controller', 'BlinkSetup')
 
         # Just sit and wait for events
         polyglot.runForever()

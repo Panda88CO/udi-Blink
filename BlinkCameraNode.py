@@ -88,6 +88,8 @@ class blink_camera(udi_interface.Node):
     def arm_camera (self):
         pass
 
+    id = 'blinkcamera'
+
     commands = { 'UPDATE': ISYupdate,
                  'ARM' : arm_camera,
                  'SNAP_PIC' : snap_pitcure,

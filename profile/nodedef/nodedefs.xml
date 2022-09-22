@@ -2,8 +2,8 @@
    <nodeDef id="controller" nls="nlscontroller">
       <editors />
       <sts>
-         <st id="ST" editor="CTRL_1" />
-         <st id="GV2" editor="CTRL_2" />
+         <st id="ST" editor="node" />
+         <st id="GV0" editor="online" />
       </sts>
       <cmds>
          <sends>
@@ -15,67 +15,55 @@
          </accepts>
       </cmds>
    </nodeDef> 
+
+
    <nodeDef id="blinksync" nls="nlsblinksync">
       <editors />
       <sts>
-         <st id="GV1" editor="PWSTATUS1" />
-         <st id="GV2" editor="PWSTATUS2" />
-         <st id="GV3" editor="PWSTATUS3" />
-         <st id="GV4" editor="PWSTATUS4" />
-         <st id="GV5" editor="PWSTATUS5" />
-         <st id="GV6" editor="PWSTATUS6" />
-         <st id="GV7" editor="PWSTATUS7" />
-         <st id="GV8" editor="PWSTATUS8" />
-         <st id="GV9" editor="PWSTATUS9" />
-         <st id="GV10" editor="PWSTATUS10" />
-         <st id="GV11" editor="PWSTATUS11" />
-         <st id="GV12" editor="PWSTATUS12" />
-         <st id="GV13" editor="PWSTATUS13" />
-         <st id="GV14" editor="PWSTATUS14" />
-         <st id="GV15" editor="PWSTATUS15" />
-         <st id="GV16" editor="PWSTATUS16" />
-         <st id="GV17" editor="PWSTATUS17" />
-         <st id="GV18" editor="PWSTATUS18" />
-         <st id="GV19" editor="PWSTATUS19" />
-         <st id="GV20" editor="PWSTATUS20" />
+         <st id="GV1" editor="online" />
+         <st id="GV2" editor="armed" />
       </sts>
       <cmds>
          <sends>
          </sends>
          <accepts>
             <cmd id="UPDATE" /> 
+            <cmd id="QUERY" /> 
+            <cmd id="ARM_ALL" > 
+               <p id="" editor="do_arm" init="0" /> 
          </accepts>
       </cmds>
    </nodeDef> 
+
+
    <nodeDef id="blinkcamera" nls="nlsblinkcamera">
  <editors />
       <sts>
-         <st id="GV0" editor="swstate" />
-         <st id="GV1" editor="delay" />
-         <st id="GV2" editor="delay" />
-         <st id="GV8" editor="online" />
-         <st id="ST"  editor="status" />
+         <st id="ST" editor="status" />
+         <st id="GV0" editor="status" />
+         <st id="GV1" editor="online" />
+         <st id="GV2" editor="battery" />
+         <st id="GV3" editor="cameratype" />
+         <st id="GV4" editor="MotionEn" />
+         <st id="GV5" editor="MotionDetc" />
+         <st id="GV6" editor="temp" />
+         <st id="GV7" editor="record" />
+                                                  
+         <st id="GV8" editor="TBD" />
+
       </sts>
       <cmds>
          <sends>
-            <cmd id="DON" editor="swstate"  />               
-            <cmd id="DOF" editor="swstate"  />   
+
          </sends>
          <accepts>
             <cmd id="UPDATE" /> 
-            <cmd id="DON" /> 
-            <cmd id="DOF" /> 
+            <cmd id="ARM">
+                <p id="" editor="d0_arm" init="1" /> 
+            </cmd >            
             <cmd id="QUERY" /> 
+            <cmd id="SNAP_PIC" /> 
 
-            <cmd id="SWCTRL" > 
-               <p id="" editor="swctrl" init="1" /> 
-            </cmd >
-            <cmd id="ONDELAY" > 
-               <p id="" editor="delaymin" init="GV1" /> 
-             </cmd >   
-            <cmd id="OFFDELAY" > 
-               <p id="" editor="delaymin" init="GV2" /> 
-             </cmd >
          </accepts>
       </cmds>
    </nodeDef> 

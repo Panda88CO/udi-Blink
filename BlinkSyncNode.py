@@ -17,18 +17,35 @@ except ImportError:
         logging.FileHandler("debug1.log"),
         logging.StreamHandler(sys.stdout) ]
     )
-import BlinkCameraNode as blink_camera
+from  BlinkCameraNode import blink_camera
 
 
 
                
 class blink_sync_module(udi_interface.Node):
+    id = 'blinksync'
+    
+    '''
+       drivers = [
+            'GV0' = TempC
+            'GV1' = Low Temp Alarm
+            'GV2' = high Temp Alarm 
+            'GV3' = Humidity
+            'GV4' = Low Humidity Alarm
+            'GV5' = High Humidity Alarm
+            'GV6' = BatteryLevel
+            'GV7' = BatteryAlarm
+            'GV8' = Online
+            ]
 
+    ''' 
+        
     def __init__(self, polyglot, primary, address, name, blink):
         super().__init__( polyglot, primary, address, name)   
         logging.debug('blink SYNC INIT- {}'.format(name))
         self.blink = blink   
         self.name = name
+        self.primary = primary
         self.address = address
         self.poly = polyglot
         #self.Parameters = Custom(polyglot, 'customparams')
@@ -68,10 +85,14 @@ class blink_sync_module(udi_interface.Node):
         logging.debug('Sync module Start {}'.format(self.name))        
         for name, camera in self.blink.cameras.items():
             if camera.attributes['sync_module'] == self.name:
-                cameraName = name
-                nodeName = self.poly.getValidAddress(name)
-                logging.debug('Adding Camera {} {} {}'.format(self.address,nodeName, cameraName))
-                blink_camera(self.poly, self.address, nodeName, cameraName, camera)
+                tempCamera = self.blink.cameras[name]
+                #cameraName = self.poly.getValidName(str(name))
+                cameraName = str(name)#.replace(' ','')
+                #nodeAdr = self.poly.getValidAddress(str(name))
+                nodeAdr = str(name).replace(' ','')
+                logging.debug('Adding Camera {} {} {}'.format(self.address,nodeAdr, cameraName))
+                #logging.debug('types : {} {} {} {}'.format(type(self.primary), type(nodeAdr), type(cameraName), type(tempCamera)))
+                blink_camera(self.poly, self.primary, nodeAdr, cameraName, tempCamera)
         self.nodeDefineDone = True
 
 
@@ -86,21 +107,12 @@ class blink_sync_module(udi_interface.Node):
             if 'longPoll' in polltype:
                 #Keep token current
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
-                try:
-                    if not self.yoAccess.refresh_token(): #refresh failed
-                        while not self.yoAccess.request_new_token():
-                                time.sleep(60)
-                    #logging.info('Updating device status')
-                    nodes = self.poly.getNodes()
-                    for nde in nodes:
-                        if nde != 'setup':   # but not the controller node
-                            nodes[nde].checkOnline()
-                except Exception as e:
-                    logging.debug('Exeption occcured : {}'.format(e))
+                logging.debug('long poll')            
    
                 
             if 'shortPoll' in polltype:
                 self.heartbeat()
+                logging.debug('short poll')    
                 nodes = self.poly.getNodes()
                 for nde in nodes:
                     if nde != 'setup':   # but not the controller node
@@ -111,26 +123,7 @@ class blink_sync_module(udi_interface.Node):
 
     def updateISYdrivers(self, level):
         logging.debug('Node updateISYdrivers')
-        params = []
-        if level == 'all':
-            params = self.ISYparams
-            if params:
-                for key in params:
-                    info = params[key]
-                    if info != {}:
-                        value = self.TPW.getISYvalue(key, self.id)
-                        #logging.debug('Update ISY drivers :' + str(key)+ ' ' + info['systemVar']+ ' value:' + str(value) )
-                        self.setDriver(key, int(value), report = True, force = True)      
-        elif level == 'critical':
-            params = self.ISYcriticalParams
-            if params:
-                for key in params:
-                    value = self.TPW.getISYvalue(key, self.id)
-                    #logging.debug('Update ISY drivers :' + str(key)+ ' value: ' + str(value) )
-                    self.setDriver(key, int(value), report = True, force = True)        
 
-        else:
-           logging.debug('Wrong parameter passed: ' + str(level))
         logging.debug('updateISYdrivers - setupnode DONE')
 
     def ISYupdate(self):
@@ -146,8 +139,9 @@ class blink_sync_module(udi_interface.Node):
 
                 }
 
-    drivers= [{'driver': 'GV1', 'value':0, 'uom':51} # on line 
-             ,{'driver': 'GV2', 'value':0, 'uom':25} # Armed
+    drivers= [ 
+                {'driver': 'GV1', 'value':0, 'uom':25}, # on line 
+                {'driver': 'GV2', 'value':0, 'uom':25} # Armed
 
 
         ] 

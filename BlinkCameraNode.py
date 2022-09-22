@@ -22,11 +22,11 @@ except ImportError:
 
                
 class blink_camera(udi_interface.Node):
-
+    id = 'blinkcamera'
     def __init__(self, polyglot, primary, address, name, camera):
         super().__init__( polyglot, primary, address, name)   
         logging.debug('blink INIT- {}'.format(name))
-        self.camera = camera   
+        self.camera = camera
         self.name = name
         self.poly = polyglot
       
@@ -74,28 +74,7 @@ class blink_camera(udi_interface.Node):
 
     def updateISYdrivers(self, level):
         logging.debug('Node updateISYdrivers')
-        params = []
-        if level == 'all':
-            params = self.ISYparams
-            if params:
-                for key in params:
-                    info = params[key]
-                    if info != {}:
-                        value = self.TPW.getISYvalue(key, self.id)
-                        #logging.debug('Update ISY drivers :' + str(key)+ ' ' + info['systemVar']+ ' value:' + str(value) )
-                        self.setDriver(key, int(value), report = True, force = True)      
-        elif level == 'critical':
-            params = self.ISYcriticalParams
-            if params:
-                for key in params:
-                    value = self.TPW.getISYvalue(key, self.id)
-                    #logging.debug('Update ISY drivers :' + str(key)+ ' value: ' + str(value) )
-                    self.setDriver(key, int(value), report = True, force = True)        
-
-        else:
-           logging.debug('Wrong parameter passed: ' + str(level))
-        #logging.debug('updateISYdrivers - setupnode DONE')
-
+     
     
     def ISYupdate (self):
         pass 
@@ -112,13 +91,14 @@ class blink_camera(udi_interface.Node):
     commands = { 'UPDATE': ISYupdate,
                  'ARM' : arm_camera,
                  'SNAP_PIC' : snap_pitcure,
+                 'QUERY' : ISYupdate,
                 #,'EMAIL_PIC' : email_picture,
                 }
 
 
     drivers= [  {'driver': 'ST', 'value':0, 'uom':25},
                 {'driver': 'GV0', 'value':0, 'uom':51},
-                {'driver': 'GV1', 'value':0, 'uom':51}, # On line
+                {'driver': 'GV1', 'value':0, 'uom':25}, # On line
                 {'driver': 'GV2', 'value':0, 'uom':25}, # Battery
                 {'driver': 'GV3', 'value':0, 'uom':25}, # Camera Type 
                 {'driver': 'GV4', 'value':0, 'uom':25}, # Motion Detection Enabled

@@ -144,7 +144,7 @@ class BlinkSetup (udi_interface.Node):
                     #name = str(sync).replace(' ','')
                     #nodename = 'BlinkSync ' + str(sync)
                     logging.info('Adding sync unit {} as {} , {}'.format(sync, address, nodename))
-                    blink_sync_module(self.poly, address, address, nodename, self.blink)
+                    blink_sync_module(self.poly, address, address, nodename, self.blink, sync)
 
         self.poly.updateProfile()
 

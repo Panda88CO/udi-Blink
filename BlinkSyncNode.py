@@ -27,11 +27,12 @@ class blink_sync_module(udi_interface.Node):
    
 
         
-    def __init__(self, polyglot, primary, address, name, blink):
+    def __init__(self, polyglot, primary, address, name, blink, sync_name):
         super().__init__( polyglot, primary, address, name)   
         logging.debug('blink SYNC INIT- {}'.format(name))
         self.nodeDefineDone = False
         self.blink = blink   
+        self.sync_name = sync_name
         self.name = name
         self.primary = primary
         self.address = address
@@ -87,8 +88,8 @@ class blink_sync_module(udi_interface.Node):
         self.node.setDriver('ST', 1, True, True)   
         logging.debug('Adding Cameras')
         for name, camera in self.blink.cameras.items():
-            logging.debug('camera loop {} {} '.format(name, camera))
-            if camera.attributes['sync_module'] == self.name:
+            logging.debug('camera loop {} {} {} {}'.format(name,camera.attributes['sync_module'], self.name, camera))
+            if camera.attributes['sync_module'] == self.sync_name:
                 tempCamera = self.blink.cameras[name]
                 cameraName = self.poly.getValidName(str(tempCamera))
                 #cameraName = str(name)#.replace(' ','')

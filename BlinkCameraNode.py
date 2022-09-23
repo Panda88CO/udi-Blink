@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import time
+import re
 
 try:
     import udi_interface
@@ -41,7 +42,7 @@ class blink_camera(udi_interface.Node):
         self.poly.addNode(self)
         self.wait_for_node_done()
         self.node = self.poly.getNode(address)
-        self.node.setDriver('ST', 1, True, True)
+        
     
     def node_queue(self, data):
         self.n_queue.append(data['address'])
@@ -61,7 +62,7 @@ class blink_camera(udi_interface.Node):
 
 
     def start(self):                
-       
+        self.node.setDriver('ST', 1, True, True)
 
         self.nodeDefineDone = True
 

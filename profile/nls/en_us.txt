@@ -12,7 +12,7 @@ online-99 = Unknown
 
 ND-blinksync-NAME = Sync Unit
 ND-blinksync-ICON = Input
-
+ST-nlsblinksync-ST-NAME = Node Status
 ST-nlsblinksync-GV1-NAME = On-Line
 ST-nlsblinksync-GV2-NAME = Arm Status
 armed-0 = Disarmed

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import time
+import re
 
 try:
     import udi_interface
@@ -29,6 +30,7 @@ class blink_sync_module(udi_interface.Node):
     def __init__(self, polyglot, primary, address, name, blink):
         super().__init__( polyglot, primary, address, name)   
         logging.debug('blink SYNC INIT- {}'.format(name))
+        self.nodeDefineDone = False
         self.blink = blink   
         self.name = name
         self.primary = primary
@@ -38,9 +40,10 @@ class blink_sync_module(udi_interface.Node):
         # subscribe to the events we want
         #polyglot.subscribe(polyglot.CUSTOMPARAMS, self.parameterHandler)
         #polyglot.subscribe(polyglot.POLL, self.poll)
-        polyglot.subscribe(polyglot.START, self.start, self.address)
-        polyglot.subscribe(polyglot.STOP, self.stop)
+        self.poly.subscribe(self.poly.START, self.start, self.address)
+        self.poly.subscribe(self.poly.STOP, self.stop)
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
+
         self.n_queue = []        
 
         # start processing events and create add our controller node
@@ -48,8 +51,10 @@ class blink_sync_module(udi_interface.Node):
         self.poly.addNode(self)
         self.wait_for_node_done()
         self.node = self.poly.getNode(address)
-        self.node.setDriver('ST', 1, True, True)
-    
+        logging.debug('Start {} sync module Node'.format(self.name))  
+        self.nodeDefineDone = True
+
+
     def node_queue(self, data):
         self.n_queue.append(data['address'])
 
@@ -58,24 +63,37 @@ class blink_sync_module(udi_interface.Node):
             time.sleep(0.1)
         self.n_queue.pop()
 
-        self.nodeDefineDone = False
-        logging.debug('Start {} sync module Node'.format(self.name))  
 
 
+    def getValidName(self, name):
+        name = bytes(name, 'utf-8').decode('utf-8','ignore')
+        return re.sub(r"[<>`~!@#$%^&*(){}[\]?/\\;:\"']+", "", name)
+
+    # remove all illegal characters from node address
+    def getValidAddress(self, name):
+        name = bytes(name, 'utf-8').decode('utf-8','ignore')
+        return re.sub(r"[<>`~!@#$%^&*(){}[\]?/\\;:\"'\-]+", "", name.lower()[:14])
     
 
         #self.heartbeat()
 
 
     def start(self):        
-        logging.debug('Sync module Start {}'.format(self.name))        
+        logging.debug('Sync module Start {}'.format(self.name))
+        while not self.nodeDefineDone:
+            time.sleep(2)
+            logging.info('Waiting for nodes to be created')
+
+        self.node.setDriver('ST', 1, True, True)   
+        logging.debug('Adding Cameras')
         for name, camera in self.blink.cameras.items():
+            logging.debug('camera loop {} {} '.format(name, camera))
             if camera.attributes['sync_module'] == self.name:
                 tempCamera = self.blink.cameras[name]
-                #cameraName = self.poly.getValidName(str(name))
-                cameraName = str(name)#.replace(' ','')
-                #nodeAdr = self.poly.getValidAddress(str(name))
-                nodeAdr = str(name).replace(' ','')
+                cameraName = self.poly.getValidName(str(tempCamera))
+                #cameraName = str(name)#.replace(' ','')
+                nodeAdr = self.poly.getValidAddress(str(tempCamera))
+                #nodeAdr = str(name).replace(' ','')[:14]
                 logging.debug('Adding Camera {} {} {}'.format(self.address,nodeAdr, cameraName))
                 #logging.debug('types : {} {} {} {}'.format(type(self.primary), type(nodeAdr), type(cameraName), type(tempCamera)))
                 blink_camera(self.poly, self.primary, nodeAdr, cameraName, tempCamera)
@@ -128,6 +146,7 @@ class blink_sync_module(udi_interface.Node):
                 }
 
     drivers= [ 
+                {'driver': 'ST', 'value':0, 'uom':25},
                 {'driver': 'GV1', 'value':0, 'uom':25}, # on line 
                 {'driver': 'GV2', 'value':0, 'uom':25} # Armed
 

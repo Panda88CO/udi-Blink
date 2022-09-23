@@ -21,7 +21,7 @@ except ImportError:
 #from os import truncate
 import sys
 import time 
-
+import re
 from blinkpy.blinkpy import Blink
 from blinkpy.auth import Auth
 from BlinkSyncNode import blink_sync_module
@@ -38,6 +38,8 @@ class BlinkSetup (udi_interface.Node):
         self.paramsProcessed = False
         self.poly = polyglot
         self.handleParamsDone = False
+        self.address = address
+        self.name = name
         self.n_queue = []
         self.poly.subscribe(self.poly.STOP, self.stop)
         self.poly.subscribe(self.poly.START, self.start, address)
@@ -59,7 +61,8 @@ class BlinkSetup (udi_interface.Node):
         self.wait_for_node_done()
 
         self.node = self.poly.getNode(self.address)
-        self.node.setDriver('ST', 1, True, True)
+        logging.debug('node: {}'.format(self.node))
+        #self.node.setDriver('ST', 1, True, True)
         logging.debug('BlinkSetup init DONE')
         self.nodeDefineDone = True
 
@@ -76,18 +79,26 @@ class BlinkSetup (udi_interface.Node):
         logging.debug('validate_params: {}'.format(self.Parameters.dump()))
         self.paramsProcessed = True
 
+    def getValidName(self, name):
+        name = bytes(name, 'utf-8').decode('utf-8','ignore')
+        return re.sub(r"[<>`~!@#$%^&*(){}[\]?/\\;:\"']+", "", name)
+
+    # remove all illegal characters from node address
+    def getValidAddress(self, name):
+        name = bytes(name, 'utf-8').decode('utf-8','ignore')
+        return re.sub(r"[<>`~!@#$%^&*(){}[\]?/\\;:\"'\-]+", "", name.lower()[:14])
 
     def start (self):
         logging.info('Executing start - BlinkSetup')
         logging.setLevel(10)
-        #self.poly.updateProfile()
-        #time.sleep(5)
-        logging.debug('nodeDefineDone {}'.format(self.nodeDefineDone))
-
-        while not self.paramsProcessed:
+        while not self.paramsProcessed or not self.nodeDefineDone:
             logging.debug('Waiting for setup to complete')
             time.sleep(2)
 
+        self.poly.updateProfile()
+        self.node.setDriver('ST', 1, True, True)
+        #time.sleep(5)
+        logging.debug('nodeDefineDone {}'.format(self.nodeDefineDone))
 
         if self.userName == None or self.userName == '' or self.password==None or self.password=='':
             logging.error('username and password must be provided to start node server')
@@ -99,13 +110,16 @@ class BlinkSetup (udi_interface.Node):
         # Can set no_prompt when initializing auth handler
         auth = Auth({"username":self.userName, "password":self.password}, no_prompt=True)
         self.blink.auth = auth
+        logging.info('Auth: {}'.format(auth))
         self.blink.start()
         if self.blink.key_required:
+            logging.info('Auth key required')
             if self.authkey == None or self.authKey == '':
                 logging.error('AuthKey required - please add to config')
                 self.poly.Notices['ak'] = 'username and password must be provided to start node server'
             else:
                 auth.send_auth_key(self.blink, self.authKey)
+        logging.debug('setup_post_verify')
         self.blink.setup_post_verify()
         self.blink.refresh()
         logging.info('Accessing Blink completed ')
@@ -123,11 +137,12 @@ class BlinkSetup (udi_interface.Node):
             temp = self.syncUnits.upper()
             for sync in self.blink.sync:
                 if temp.find(sync.upper()) >= 0:
-                    #address = self.poly.getValidAddress(str(sync))
-                    address = str(sync).replace(' ','')[:14]
-                    #name = self.poly.getValidName(str(sync))
+                    address = self.getValidAddress(str(sync))
+                    #address = str(sync).replace(' ','')[:14]
+                    name = 'Blink_' + str(sync)
+                    nodename = self.getValidName(name)
                     #name = str(sync).replace(' ','')
-                    nodename = 'BlinkSync ' + str(sync)
+                    #nodename = 'BlinkSync ' + str(sync)
                     logging.info('Adding sync unit {} as {} , {}'.format(sync, address, nodename))
                     blink_sync_module(self.poly, address, address, nodename, self.blink)
 

@@ -20,6 +20,7 @@
    <nodeDef id="blinksync" nls="nlsblinksync">
       <editors />
       <sts>
+         <st id="ST" editor="node" />
          <st id="GV1" editor="online" />
          <st id="GV2" editor="armed" />
       </sts>
@@ -40,7 +41,7 @@
    <nodeDef id="blinkcamera" nls="nlsblinkcamera">
  <editors />
       <sts>
-         <st id="ST" editor="status" />
+         <st id="ST" editor="node" />
          <st id="GV0" editor="status" />
          <st id="GV1" editor="online" />
          <st id="GV2" editor="battery" />

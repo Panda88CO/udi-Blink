@@ -137,14 +137,14 @@ class BlinkSetup (udi_interface.Node):
             temp = self.syncUnits.upper()
             for sync in self.blink.sync:
                 if temp.find(sync.upper()) >= 0:
-                    address = self.getValidAddress(str(sync))
+                    address = self.getValidAddress(str(sync.name))
                     #address = str(sync).replace(' ','')[:14]
                     name = 'Blink_' + str(sync)
-                    nodename = self.getValidName(name)
+                    nodename = self.getValidName(str('Blink_' +sync.name))
                     #name = str(sync).replace(' ','')
                     #nodename = 'BlinkSync ' + str(sync)
                     logging.info('Adding sync unit {} as {} , {}'.format(sync, address, nodename))
-                    blink_sync_module(self.poly, address, address, nodename, self.blink, sync)
+                    blink_sync_module(self.poly, address, address, nodename, sync )
 
         self.poly.updateProfile()
 

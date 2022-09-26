@@ -21,9 +21,9 @@ from blinkpy.auth import Auth
 
 class BlinkSystem(object):
     def __init__(self):
-        self.userName =userName
-        self.password = password
-        self.AUTHKey = AUTHKey
+        #self.userName =userName
+        #self.password = password
+        #self.AUTHKey = AUTHKey
 
 
         logging.info('Accessing Blink system')
@@ -84,7 +84,7 @@ class BlinkSystem(object):
     def get_blink_camera_unit(self, camera_name):
         logging.debug('get_blink_camera_unit - {} from {}'.format(camera_name ))
         return(self.blink.cameras[camera_name])
-        
+
 
     def blink_refresh_data(self):
         

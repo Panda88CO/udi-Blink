@@ -31,9 +31,9 @@ ST-nlsblinkcamera-GV1-NAME = Status
 ST-nlsblinkcamera-GV2-NAME = Online
 
 ST-nlsblinkcamera-GV3-NAME = CameraType
-cameratype-0 = Camera0
-cameratype-1 = Camera1
-cameratype-2 = Camera2
+cameratype-0 = Mini
+cameratype-1 = DoorBell
+cameratype-2 = Blink Outdoor
 cameratype-3 = Camera3
 cameratype-4 = Camera4
 cameratype-5 = Camera5

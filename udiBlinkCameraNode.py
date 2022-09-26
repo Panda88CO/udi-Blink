@@ -22,7 +22,7 @@ except ImportError:
 
 
                
-class blink_camera(udi_interface.Node):
+class blink_camera_node(udi_interface.Node):
     id = 'blinkcamera'
     def __init__(self, polyglot, primary, address, name, camera):
         super().__init__( polyglot, primary, address, name)   
@@ -30,7 +30,16 @@ class blink_camera(udi_interface.Node):
         self.camera = camera
         self.name = name
         self.poly = polyglot
-      
+        self.cameraType= {  'owl' : 1, #mini
+                            'lotus': 2, #doorbell
+                            'catalena':3, #outdoor
+                            'outdoorOld1':4,
+                            'outdoorOld2':5,
+                            'indoorOld':6,
+                            'default':99,
+                             }
+
+
         #polyglot.subscribe(polyglot.POLL, self.poll)
         polyglot.subscribe(polyglot.START, self.start, self.address)
         polyglot.subscribe(polyglot.STOP, self.stop)
@@ -63,18 +72,19 @@ class blink_camera(udi_interface.Node):
 
     def start(self):                
         self.node.setDriver('ST', 1, True, True)
-
         self.nodeDefineDone = True
 
 
     def stop(self):
         logging.debug('stop - Cleaning up')
 
-    
-
+    def getCameraData(self):
+        #data is updated 
+        logging.debug('Node getCameraData')
 
     def updateISYdrivers(self, level):
         logging.debug('Node updateISYdrivers')
+
      
     
     def ISYupdate (self):
@@ -106,7 +116,7 @@ class blink_camera(udi_interface.Node):
                 {'driver': 'GV3', 'value':0, 'uom':25}, # Camera Type 
                 {'driver': 'GV4', 'value':0, 'uom':25}, # Motion Detection Enabled
                 {'driver': 'GV5', 'value':0, 'uom':58}, # Motion Detected
-                {'driver': 'GV6', 'value':0, 'uom':58}, # Temp
+                {'driver': 'GV6', 'value':0, 'uom':58}, # TempC
                 {'driver': 'GV7', 'value':0, 'uom':58}, # Recording
                 {'driver': 'GV8', 'value':0, 'uom':58}, # TBD
                  ] 

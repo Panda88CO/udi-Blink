@@ -41,7 +41,7 @@
    <nodeDef id="blinkcamera" nls="nlsblinkcamera">
  <editors />
       <sts>
-         <st id="ST" editor="node" />
+         <st id="ST" editor= "node" />
          <st id="GV0" editor="status" />
          <st id="GV1" editor="online" />
          <st id="GV2" editor="battery" />
@@ -49,8 +49,7 @@
          <st id="GV4" editor="MotionEn" />
          <st id="GV5" editor="MotionDetc" />
          <st id="GV6" editor="temp" />
-         <st id="GV7" editor="record" />
-                                                  
+         <st id="GV7" editor="record" />                                                  
          <st id="GV8" editor="TBD" />
 
       </sts>

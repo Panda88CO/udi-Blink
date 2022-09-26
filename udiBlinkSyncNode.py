@@ -2,6 +2,7 @@
 import os
 import time
 import re
+import BlinkSystem
 
 try:
     import udi_interface
@@ -18,12 +19,11 @@ except ImportError:
         logging.FileHandler("debug1.log"),
         logging.StreamHandler(sys.stdout) ]
     )
-from  BlinkCameraNode import blink_camera
-
+from  udiBlinkCameraNode import blink_camera_node
 
 
                
-class blink_sync_module(udi_interface.Node):
+class blink_sync_node(udi_interface.Node):
    
 
         
@@ -31,7 +31,6 @@ class blink_sync_module(udi_interface.Node):
         super().__init__( polyglot, primary, address, name)   
         logging.debug('blink SYNC INIT- {}'.format(name))
         self.nodeDefineDone = False
-        self.blink = blink   
         self.sync_unit = sync_unit
         self.name = name
         self.primary = primary
@@ -68,7 +67,7 @@ class blink_sync_module(udi_interface.Node):
 
     def getValidName(self, name):
         name = bytes(name, 'utf-8').decode('utf-8','ignore')
-        return re.sub(r"[^A-Za-z0-9_]", "", name)
+        return re.sub(r"[^A-Za-z0-9_ ]", "", name)
 
     # remove all illegal characters from node address
     def getValidAddress(self, name):
@@ -85,19 +84,22 @@ class blink_sync_module(udi_interface.Node):
             logging.info('Waiting for nodes to be created')
 
         self.node.setDriver('ST', 1, True, True)   
-        logging.debug('Adding Cameras')
-        for camera_name in self.sync_unit.camera:
-            #camera_name  = camera.name
-            logging.debug('camera loop {} {} {} {}'.format(camera.name))
-       ####  NEED to investigate further 
-            tempCamera = camera.name
-            cameraName = self.poly.getValidName(str(tempCamera))
+
+        if self.sync_unit == None: #no sync units used
+            camera_list = self.blink_system.get_blink_camera_list()
+        else:
+            camera_list = self.blink_system.get_blink_sync_camera_list(self.sync_unit )
+
+        logging.debug('Adding Cameras in list: {}'.format(camera_list))             
+        for camera_name in camera_list:
+            camera_unit = self.blink_system.get_blink_camera_unit(camera_name)
+
+            nodeName = self.getValidName(str(camera_name))
             #cameraName = str(name)#.replace(' ','')
-            nodeAdr = self.poly.getValidAddress(str(tempCamera))
+            nodeAdr = self.getValidAddress(str(camera_name))
             #nodeAdr = str(name).replace(' ','')[:14]
-            logging.debug('Adding Camera {} {} {}'.format(self.address,nodeAdr, cameraName))
-            #logging.debug('types : {} {} {} {}'.format(type(self.primary), type(nodeAdr), type(cameraName), type(tempCamera)))
-            blink_camera(self.poly, self.primary, nodeAdr, cameraName, tempCamera)
+            logging.debug('Adding Camera {} {} {}'.format(self.address,nodeAdr, nodeName))
+            blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera_unit)
         self.nodeDefineDone = True
 
 

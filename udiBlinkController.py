@@ -32,9 +32,10 @@ except ImportError:
  
 
 class BlinkSetup (udi_interface.Node):
+    import udiFunctions
     def  __init__(self, polyglot, primary, address, name):
         super().__init__( polyglot, primary, address, name)  
-        import udiFunctions
+        
         logging.setLevel(10)
         self.blink_system = BlinkSystem()
         self.nodeDefineDone = False
@@ -70,7 +71,7 @@ class BlinkSetup (udi_interface.Node):
         logging.debug('BlinkSetup init DONE')
         self.nodeDefineDone = True
 
-
+    '''
     def node_queue(self, data):
         self.n_queue.append(data['address'])
 
@@ -87,7 +88,7 @@ class BlinkSetup (udi_interface.Node):
     def getValidAddress(self, name):
         name = bytes(name, 'utf-8').decode('utf-8','ignore')
         return re.sub(r"[^A-Za-z0-9_]", "", name.lower()[:14])
-    
+    '''
 
     def validate_params(self):
         logging.debug('validate_params: {}'.format(self.Parameters.dump()))
@@ -297,7 +298,7 @@ class BlinkSetup (udi_interface.Node):
 if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
-        polyglot.start('0.1.0')
+        polyglot.start('0.1.1')
         BlinkSetup(polyglot, 'controller', 'controller', 'BlinkSetup')
 
         # Just sit and wait for events

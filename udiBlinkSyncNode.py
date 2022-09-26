@@ -24,9 +24,7 @@ from  udiBlinkCameraNode import blink_camera_node
 
                
 class blink_sync_node(udi_interface.Node):
-   
-
-        
+    import udiFunctions 
     def __init__(self, polyglot, primary, address, name, sync_unit  ):
         super().__init__( polyglot, primary, address, name)   
         logging.debug('blink SYNC INIT- {}'.format(name))

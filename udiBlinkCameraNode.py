@@ -23,7 +23,8 @@ except ImportError:
 
                
 class blink_camera_node(udi_interface.Node):
-    id = 'blinkcamera'
+    import udiFunctions
+
     def __init__(self, polyglot, primary, address, name, camera):
         super().__init__( polyglot, primary, address, name)   
         logging.debug('blink INIT- {}'.format(name))

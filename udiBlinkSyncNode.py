@@ -24,13 +24,14 @@ from  udiBlinkCameraNode import blink_camera_node
 
                
 class blink_sync_node(udi_interface.Node):
-    import udiFunctions 
-    def __init__(self, polyglot, primary, address, name, sync_unit  ):
+    #import udiFunctions 
+    def __init__(self, polyglot, primary, address, name, sync_unit, blinkSys  ):
         super().__init__( polyglot, primary, address, name)   
         logging.debug('blink SYNC INIT- {}'.format(name))
         self.nodeDefineDone = False
         self.sync_unit = sync_unit
         self.name = name
+        self.blink = blinkSys
         self.primary = primary
         self.address = address
         self.poly = polyglot
@@ -84,20 +85,20 @@ class blink_sync_node(udi_interface.Node):
         self.node.setDriver('ST', 1, True, True)   
 
         if self.sync_unit == None: #no sync units used
-            camera_list = self.blink_system.get_blink_camera_list()
+            camera_list = self.blink.get_blink_camera_list()
         else:
-            camera_list = self.blink_system.get_blink_sync_camera_list(self.sync_unit )
+            camera_list = self.blink.get_blink_sync_camera_list(self.sync_unit )
 
         logging.debug('Adding Cameras in list: {}'.format(camera_list))             
         for camera_name in camera_list:
-            camera_unit = self.blink_system.get_blink_camera_unit(camera_name)
+            camera_unit = self.blink.get_blink_camera_unit(camera_name)
 
             nodeName = self.getValidName(str(camera_name))
             #cameraName = str(name)#.replace(' ','')
             nodeAdr = self.getValidAddress(str(camera_name))
             #nodeAdr = str(name).replace(' ','')[:14]
             logging.debug('Adding Camera {} {} {}'.format(self.address,nodeAdr, nodeName))
-            blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera_unit)
+            blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera_unit, self.blink)
         self.nodeDefineDone = True
 
 

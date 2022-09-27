@@ -1,8 +1,8 @@
 import re
 import time
 
-def node_queue(self, data):
-    self.n_queue.append(data['address'])
+#def node_queue(self, data):
+#    self.n_queue.append(data['address'])
 
 def wait_for_node_done(self):
     while len(self.n_queue) == 0:

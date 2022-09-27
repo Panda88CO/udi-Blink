@@ -17,9 +17,10 @@ except ImportError:
 
 from blinkpy.blinkpy import Blink
 from blinkpy.auth import Auth
+import re
 
 
-class BlinkSystem(object):
+class blink_system(object):
     def __init__(self):
         #self.userName =userName
         #self.password = password
@@ -55,10 +56,10 @@ class BlinkSystem(object):
 
     def get_blink_sync_unit(self, sync_unit_name):
         logging.debug('get_blink_sync_unit - {}'.format(sync_unit_name))
-        tempName = sync_unit_name.upper()
         for sync_name in self.blink.sync:
-            if tempName.find(sync_name.upper()) >= 0:
-                return(self.blink.sync[sync_name])
+            tmp = re.sub(r"[^A-Za-z0-9_,]", "", sync_name)
+            if tmp.upper() == sync_unit_name:
+                 return(self.blink.sync[sync_name])
         return(False)
         
     def get_blink_camera_list(self):
@@ -82,7 +83,7 @@ class BlinkSystem(object):
 
 
     def get_blink_camera_unit(self, camera_name):
-        logging.debug('get_blink_camera_unit - {} from {}'.format(camera_name ))
+        logging.debug('get_blink_camera_unit - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name])
 
 

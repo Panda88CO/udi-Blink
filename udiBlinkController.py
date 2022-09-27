@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from udiBlinkSyncNode import blink_sync_node
-import BlinkSystem
+from BlinkSystem import blink_system
 import sys
 import time 
 import re
@@ -32,12 +32,12 @@ except ImportError:
  
 
 class BlinkSetup (udi_interface.Node):
-    import udiFunctions
+    #import udiFunctions
     def  __init__(self, polyglot, primary, address, name):
         super().__init__( polyglot, primary, address, name)  
         
         logging.setLevel(10)
-        self.blink_system = BlinkSystem()
+        self.blink = blink_system()
         self.nodeDefineDone = False
         self.handleParamsDone = False
         self.paramsProcessed = False
@@ -53,7 +53,7 @@ class BlinkSetup (udi_interface.Node):
         self.poly.subscribe(self.poly.POLL, self.systemPoll)
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
         self.poly.subscribe(self.poly.CONFIGDONE, self.validate_params)
-        self.n_queue = []
+ 
         self.hb = 0
         self.userParam = ['TEMP_UNIT', 'USERNAME','PASSWORD', 'AUTH_KEY', 'SYNC_UNITS' ]
         self.Parameters = Custom(self.poly, 'customparams')
@@ -71,10 +71,10 @@ class BlinkSetup (udi_interface.Node):
         logging.debug('BlinkSetup init DONE')
         self.nodeDefineDone = True
 
-    '''
+
     def node_queue(self, data):
         self.n_queue.append(data['address'])
-
+    
     def wait_for_node_done(self):
         while len(self.n_queue) == 0:
             time.sleep(0.1)
@@ -88,11 +88,21 @@ class BlinkSetup (udi_interface.Node):
     def getValidAddress(self, name):
         name = bytes(name, 'utf-8').decode('utf-8','ignore')
         return re.sub(r"[^A-Za-z0-9_]", "", name.lower()[:14])
-    '''
+    
 
     def validate_params(self):
         logging.debug('validate_params: {}'.format(self.Parameters.dump()))
         self.paramsProcessed = True    
+
+    def strip_syncUnitStringtoList(self, syncString):
+        tmp = re.sub(r"[^A-Za-z0-9_,]", "", syncString)
+        #logging.debug(tmp)
+        tmp = tmp.split(',')
+        #logging.debug(tmp)
+        unitList = []
+        for syncunit in tmp:
+            unitList.append(syncunit.upper())
+        return(unitList)
 
     def start (self):
         logging.info('Executing start - BlinkSetup')
@@ -101,8 +111,8 @@ class BlinkSetup (udi_interface.Node):
             logging.debug('Waiting for setup to complete')
             time.sleep(2)
         self.poly.updateProfile()
-
-
+        self.syncUnits = self.strip_syncUnitStringtoList(self.syncUnitString)
+        #logging.debug('syncUnits / syncString: {} - {}'.format(self.syncUnits, self.syncUnitString))
 
         self.node.setDriver('ST', 1, True, True)
         #time.sleep(5)
@@ -112,7 +122,7 @@ class BlinkSetup (udi_interface.Node):
             self.poly.Notices['un'] = 'username and password must be provided to start node server'
             exit() 
         else:
-            success = self.blink_system.blink_auth(self.userName,self.password, self.authKey )
+            success = self.blink.blink_auth(self.userName,self.password, self.authKey )
             if 'AuthKey' == success:
                 logging.error('AuthKey required - please add to config')
                 self.poly.Notices['ak'] = 'username and password must be provided to start node server'
@@ -131,10 +141,10 @@ class BlinkSetup (udi_interface.Node):
 
     def add_sync_nodes (self):
         logging.debug('Adding sync units: {}'.format(self.syncUnits ))
-        if self.syncUnits!= None and self.syncUnits != '':
-            if self.syncUnits.upper() != 'NONE':
-                for sync_name in self.syncUnits.upper():
-                    sync_unit = self.blink_system.get_blink_sync_unit(sync_name)
+        if self.syncUnits!= None :
+            if not 'NONE' in self.syncUnits:
+                for sync_name in self.syncUnits:                    
+                    sync_unit = self.blink.get_blink_sync_unit(sync_name)
                     address = self.getValidAddress(str(sync_name))
                         #address = str(sync).replace(' ','')[:14]
                     name = 'Blink_' + str(sync_name)
@@ -142,11 +152,11 @@ class BlinkSetup (udi_interface.Node):
                     #name = str(sync).replace(' ','')
                     #nodename = 'BlinkSync ' + str(sync)
                     logging.info('Adding sync unit {} as {} , {}'.format(sync_unit, address, nodename))
-                    if not blink_sync_node(self.poly, address, address, nodename, sync_unit ):
+                    if not blink_sync_node(self.poly, address, address, nodename, sync_unit, self.blink ):
                         logging.error('Failed to create Sync_node {}'.format(sync_name))
-            else:
+            elif self.syncUnits != [] or 'NONE' in self.syncUnits:
                 logging.info('No sync specified - create dummy node {} for all cameras '.format('nosync')) 
-                if not blink_sync_node(self.poly, 'nosync', 'nosync', 'Blink Cameras', None ):
+                if not blink_sync_node(self.poly, 'nosync', 'nosync', 'Blink Cameras', None, self.blink ):
                     logging.error('Failed to create dummy node {}'.format('nosync')) 
         self.poly.updateProfile()
 
@@ -259,10 +269,11 @@ class BlinkSetup (udi_interface.Node):
                 self.authKey = ''
 
             if 'SYNC_UNITS' in userParam:
-                self.syncUnits = userParam['SYNC_UNITS']
+                self.syncUnitString = userParam['SYNC_UNITS']
+
             else:
                 self.poly.Notices['sync_units'] = 'Missing SYNC_UNITS parameter - Add NONE if no sync units'
-                self.syncUnits = ''
+                self.syncUnitString = ''
 
             self.handleParamsDone = True
 

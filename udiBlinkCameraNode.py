@@ -23,13 +23,14 @@ except ImportError:
 
                
 class blink_camera_node(udi_interface.Node):
-    import udiFunctions
+    #import udiFunctions
 
-    def __init__(self, polyglot, primary, address, name, camera):
+    def __init__(self, polyglot, primary, address, name, camera, blinkSys):
         super().__init__( polyglot, primary, address, name)   
         logging.debug('blink INIT- {}'.format(name))
         self.camera = camera
         self.name = name
+        self.blink = blinkSys
         self.poly = polyglot
         self.cameraType= {  'owl' : 1, #mini
                             'lotus': 2, #doorbell
@@ -116,10 +117,10 @@ class blink_camera_node(udi_interface.Node):
                 {'driver': 'GV2', 'value':0, 'uom':25}, # Battery
                 {'driver': 'GV3', 'value':0, 'uom':25}, # Camera Type 
                 {'driver': 'GV4', 'value':0, 'uom':25}, # Motion Detection Enabled
-                {'driver': 'GV5', 'value':0, 'uom':58}, # Motion Detected
-                {'driver': 'GV6', 'value':0, 'uom':58}, # TempC
-                {'driver': 'GV7', 'value':0, 'uom':58}, # Recording
-                {'driver': 'GV8', 'value':0, 'uom':58}, # TBD
+                {'driver': 'GV5', 'value':0, 'uom':25}, # Motion Detected
+                {'driver': 'GV6', 'value':0, 'uom':17}, # TempC
+                {'driver': 'GV7', 'value':0, 'uom':25}, # Recording
+                {'driver': 'GV8', 'value':0, 'uom':25}, # TBD
                  ] 
 
         

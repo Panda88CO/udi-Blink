@@ -54,23 +54,23 @@ class blink_system(object):
             return{'no login'}
 
 
-    def get_blink_sync_unit(self, sync_unit_name):
-        logging.debug('get_blink_sync_unit - {}'.format(sync_unit_name))
+    def get_sync_unit(self, sync_unit_name):
+        logging.debug('get_sync_unit - {}'.format(sync_unit_name))
         for sync_name in self.blink.sync:
             tmp = re.sub(r"[^A-Za-z0-9_,]", "", sync_name)
             if tmp.upper() == sync_unit_name:
                  return(self.blink.sync[sync_name])
         return(False)
         
-    def get_blink_camera_list(self):
-        logging.debug('get_blink_camera_list')
+    def get_camera_list(self):
+        logging.debug('get_camera_list')
         cam_list = []
         for cam_name in self.blink.cameras:
             cam_list.append(cam_name)
         return(cam_list)
         
-    def get_blink_sync_camera_list(self, sync_unit):
-        logging.debug('get_blink_sync_camera_list')
+    def get_sync_camera_list(self, sync_unit):
+        logging.debug('get_sync_camera_list')
         cam_list = []
         for camera in sync_unit.camera_list:
              cam_name = camera['name']
@@ -82,24 +82,15 @@ class blink_system(object):
     #    logging.debug('get_sync_blink_camera_unit - {} from {}'.format(camera_name,sync_unit ))
 
 
-    def get_blink_camera_unit(self, camera_name):
-        logging.debug('get_blink_camera_unit - {} '.format(camera_name ))
+    def get_camera_unit(self, camera_name):
+        logging.debug('get_camera_unit - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name])
 
 
-    def blink_refresh_data(self):
-        
+    def refresh_data(self):
+        logging.debug('blink_refresh_data')
+        self.blink.refresh()
 
 
-        logging.debug('Adding Cameras')
-        for camera_unit in self.sync_unit.camera_list:
-            camera_name  = camera_unit['name']
-            tempCamera = self.sync_unit.cameras[camera_name]
-            logging.debug('camera loop {}'.format(camera_name))
-       ####  NEED to investigate further 
-            tempCamera = camera_name
-            cameraName = self.getValidName(str(camera_name))
-            #cameraName = str(name)#.replace(' ','')
-            nodeAdr = self.getValidAddress(str(camera_name))
-            #nodeAdr = str(name).replace(' ','')[:14]
-            logging.debug('Adding Camera {} {} {}'.format(self.address,nodeAdr, cameraName))
+    def get_camera_data(self, camera_name):
+        logging.debug('blink_refresh_data: {}'.format(camera_name))

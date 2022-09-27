@@ -85,13 +85,13 @@ class blink_sync_node(udi_interface.Node):
         self.node.setDriver('ST', 1, True, True)   
 
         if self.sync_unit == None: #no sync units used
-            camera_list = self.blink.get_blink_camera_list()
+            camera_list = self.blink.get_camera_list()
         else:
-            camera_list = self.blink.get_blink_sync_camera_list(self.sync_unit )
+            camera_list = self.blink.get_sync_camera_list(self.sync_unit )
 
         logging.debug('Adding Cameras in list: {}'.format(camera_list))             
         for camera_name in camera_list:
-            camera_unit = self.blink.get_blink_camera_unit(camera_name)
+            camera_unit = self.blink.get_camera_unit(camera_name)
 
             nodeName = self.getValidName(str(camera_name))
             #cameraName = str(name)#.replace(' ','')

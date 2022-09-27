@@ -144,7 +144,7 @@ class BlinkSetup (udi_interface.Node):
         if self.syncUnits!= None :
             if not 'NONE' in self.syncUnits:
                 for sync_name in self.syncUnits:                    
-                    sync_unit = self.blink.get_blink_sync_unit(sync_name)
+                    sync_unit = self.blink.get_sync_unit(sync_name)
                     address = self.getValidAddress(str(sync_name))
                         #address = str(sync).replace(' ','')[:14]
                     name = 'Blink_' + str(sync_name)

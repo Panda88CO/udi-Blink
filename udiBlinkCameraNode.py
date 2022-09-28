@@ -32,6 +32,7 @@ class blink_camera_node(udi_interface.Node):
         self.name = name
         self.blink = blinkSys
         self.pic_email_enabled = False
+        self.nodeDefineDone = False
         self.poly = polyglot
         self.cameraType= {  'mini' : 1, #mini/owl
                             'doorbell': 2, #doorbell/lotus
@@ -65,8 +66,6 @@ class blink_camera_node(udi_interface.Node):
             time.sleep(0.1)
         self.n_queue.pop()
 
-        self.nodeDefineDone = False
-        logging.debug('Start {} camera module Node'.format(self.name))  
 
 
     def bat2isy(self, bat_status):
@@ -84,7 +83,9 @@ class blink_camera_node(udi_interface.Node):
         else:
             return(0)
 
-    def start(self):                
+    def start(self):   
+                
+        logging.debug('Start {} camera module Node'.format(self.name))               
         while not self.nodeDefineDone:
             logging.debug('camera - wait to node completed')
             time.sleep(2)

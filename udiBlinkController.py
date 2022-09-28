@@ -92,7 +92,7 @@ class BlinkSetup (udi_interface.Node):
 
     def validate_params(self):
         logging.debug('validate_params: {}'.format(self.Parameters.dump()))
-        self.paramsProcessed = True    
+        #self.paramsProcessed = True    
 
     def strip_syncUnitStringtoList(self, syncString):
         tmp = re.sub(r"[^A-Za-z0-9_,]", "", syncString)
@@ -268,7 +268,7 @@ class BlinkSetup (udi_interface.Node):
                 self.poly.Notices['sync_units'] = 'Missing SYNC_UNITS parameter - Add NONE if no sync units'
                 self.syncUnitString = ''
 
-            self.handleParamsDone = True
+            self.paramsProcessed = True
 
 
         except Exception as e:

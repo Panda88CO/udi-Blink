@@ -111,7 +111,8 @@ class blink_system(object):
 
     def get_camera_battery_info(self, camera_name):
         logging.debug('get_camera_battery_info - {} '.format(camera_name ))
-        return({'battery':self.blink.cameras[camera_name].battery_voltage ,'battery_voltage':self.blink.cameras[camera_name].battery_voltage} )
+        
+        return({'battery':self.blink.cameras[camera_name].battery ,'battery_voltage':self.blink.cameras[camera_name].battery_voltage} )
 
 
     def get_camera_arm_info(self, camera_name):

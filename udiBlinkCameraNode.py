@@ -97,20 +97,20 @@ class blink_camera_node(udi_interface.Node):
         logging.debug('Node getCameraData')
 
     def updateISYdrivers(self):
-        logging.debug('Camera updateISYdrivers - {}'.format(self.camera))
-        bat_info = self.blink.get_camera_battery_info(self.camera)
+        logging.debug('Camera updateISYdrivers - {}'.format(self.camera.name))
+        bat_info = self.blink.get_camera_battery_info(self.camera.name)
         logging.debug(bat_info)
         self.node.setDriver('GV1', self.bat2isy(bat_info['battery']))
         if None == bat_info['battery_voltage']:
             self.node.setDriver('GV2', 0)
         else:
             self.node.setDriver('GV2', bat_info['battery_voltage'])
-        self.node.setDriver('GV3', self.cameraType[self.blink. get_camera_type_info(self.camera)])
-        mot_info = self.blink.get_camera_motion_info(self.camera)
+        self.node.setDriver('GV3', self.cameraType[self.blink. get_camera_type_info(self.camera.name)])
+        mot_info = self.blink.get_camera_motion_info(self.camera.name)
         logging.debug(mot_info)
         self.node.setDriver('GV4', self.bool2isy(mot_info['motion_enabled']))
         self.node.setDriver('GV5', self.bool2isy(mot_info['motion_detected']))
-        temp_info = self.cameraType[self.blink.get_camera_temperatureC_info(self.camera)]
+        temp_info = self.blink.get_camera_temperatureC_info(self.camera.name)
         if  None ==  temp_info['temp_c']:
             self.node.setDriver('GV6', 0, True, True,  25)
         elif 'k' == self.blink.temp_unit:
@@ -119,7 +119,7 @@ class blink_camera_node(udi_interface.Node):
              self.node.setDriver('GV6', temp_info['temp_c'], True, True, 17)
         else:
              self.node.setDriver('GV6', temp_info['temp_c'], True, True, 4)
-        self.node.setDriver('GV7', self.cameraType[self.blink.get_camera_recording_info(self.camera)])
+        self.node.setDriver('GV7', self.blink.get_camera_recording_info(self.camera.name))
         self.node.setDriver('GV8', self.bool2isy(self.pic_email_enabled))
 
     

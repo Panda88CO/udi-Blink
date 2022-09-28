@@ -105,7 +105,7 @@ class blink_sync_node(udi_interface.Node):
             logging.debug('Adding Camera {} {} {}'.format(self.address,nodeAdr, nodeName))
             blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera_unit, self.blink)
         self.nodeDefineDone = True
-        self.node.setDriver('GV1', self.bool2isy(self.blink.online(self.sync_unit.name)), True, True)
+        self.node.setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit.name)), True, True)
         tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
         self.node.setDriver('GV2', self.bool2isy(tmp['armed']), True, True)
 
@@ -117,7 +117,7 @@ class blink_sync_node(udi_interface.Node):
 
     def updateISYdrivers(self):
         logging.debug('Sync updateISYdrivers - {}'.format(self.sync_unit.name))
-        self.node.setDriver('GV1', self.bool2isy(self.blink.online(self.sync_unit.name)), True, True)
+        self.node.setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit.name)), True, True)
         tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
         self.node.setDriver('GV2', self.bool2isy(tmp['armed']))
 

@@ -34,21 +34,21 @@ syncStr = 'SarATOGA, tAHOE  ,   TEST'
 syncUnits = strip_syncUnitStringtoList(syncStr)
 
 for sync_name in syncUnits:
-    sync_unit = blink.get_blink_sync_unit(sync_name)
+    sync_unit = blink.get_sync_unit(sync_name)
     if sync_unit == None: #no sync units used
-        camera_list = blink.get_blink_camera_list()
+        camera_list = blink.get_camera_list()
     elif sync_unit == False:
         camera_list = []
         print('Sync Unit specified not found')
     else:
-        camera_list = blink.get_blink_sync_camera_list(sync_unit )
+        camera_list = blink.get_sync_camera_list(sync_unit )
 
     for camera_name in camera_list:
-        camera_unit = blink.get_blink_camera_unit(camera_name)  
+        camera_unit = blink.get_camera_unit(camera_name)  
         print(camera_name)
+        print(blink.get_camera_data(camera_name))
 
-
-
+'''
 if  blink.key_required:
     blink.auth.send_auth_key(blink, '844022')
 blink.setup_post_verify()
@@ -62,7 +62,7 @@ for sync in blink.sync:
   print (sync)
   print(blink.sync[sync].arm)
 syncUnitList = []
-temp = syncString.upper()
+temp = syncStr.upper()
 for sync1 in blink.sync:
     unit = blink.sync[sync1]
     
@@ -79,6 +79,8 @@ for sync1 in blink.sync:
 
         camera1 = unit.cameras[cam_name]
         print('camera: {}:{} {} {}'.format(cam_name, cameraName,nodeAdr, camera1.product_type))
+'''
+
 '''
 for syncUnit in syncUnitList:
   print('\n {}'.format(syncUnit))

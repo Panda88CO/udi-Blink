@@ -76,21 +76,45 @@ class blink_system(object):
              cam_name = camera['name']
              cam_list.append(cam_name)
         return(cam_list)
-
+ 
+    def get_sync_arm_info(self, sync_name):
+        logging.debug('get_sync_arm_info - {} '.format(sync_name ))
 
     #def get_sync_blink_camera_unit(self, sync_unit, camera_name):
     #    logging.debug('get_sync_blink_camera_unit - {} from {}'.format(camera_name,sync_unit ))
 
 
+    def get_camera_data(self, camera_name):
+        logging.debug('get_camera_data - {} '.format(camera_name ))
+        return(self.blink.cameras[camera_name].attributes)
+
+
+    def get_camera_battery_info(self, camera_name):
+        logging.debug('get_camera_battery_info - {} '.format(camera_name ))
+
+    def get_camera_arm_info(self, camera_name):
+        logging.debug('get_camera_arm_info - {} '.format(camera_name ))
+
+    def get_camera_type_info(self, camera_name):
+        logging.debug('get_camera_type_info - {} '.format(camera_name ))
+
+
+    def get_camera_motion_info(self, camera_name):
+        logging.debug('get_camera_type_info - {} '.format(camera_name ))
+
+    def get_camera_temperatureC_info(self, camera_name):
+        logging.debug('get_camera_type_info - {} '.format(camera_name ))
+
+    def get_camera_recording_info(self, camera_name):
+        logging.debug('get_camera_type_info - {} '.format(camera_name ))
+
     def get_camera_unit(self, camera_name):
         logging.debug('get_camera_unit - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name])
 
-
+    
     def refresh_data(self):
         logging.debug('blink_refresh_data')
         self.blink.refresh()
-
-
-    def get_camera_data(self, camera_name):
-        logging.debug('blink_refresh_data: {}'.format(camera_name))
+        
+    

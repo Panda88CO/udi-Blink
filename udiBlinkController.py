@@ -45,6 +45,10 @@ class BlinkSetup (udi_interface.Node):
         self.handleParamsDone = False
         self.address = address
         self.name = name
+        self.userName = None
+        self.password = None
+        self.authKey = None
+
         self.Parameters = Custom(polyglot, 'customParams')      
         self.Notices = Custom(polyglot, 'notices')
         self.n_queue = []

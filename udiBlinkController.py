@@ -62,12 +62,12 @@ class BlinkSetup (udi_interface.Node):
         logging.debug('self.address : ' + str(self.address))
         logging.debug('self.name :' + str(self.name))   
         self.poly.ready()
-        self.poly.addNode(self)
+        self.poly.addNode(self, conn_status='ST')
         self.wait_for_node_done()
 
         self.node = self.poly.getNode(self.address)
         logging.debug('node: {}'.format(self.node))
-        #self.node.setDriver('ST', 1, True, True)
+
         logging.debug('BlinkSetup init DONE')
         self.nodeDefineDone = True
 
@@ -122,7 +122,7 @@ class BlinkSetup (udi_interface.Node):
             self.poly.Notices['un'] = 'username and password must be provided to start node server'
             exit() 
         else:
-            success = self.blink.blink_auth(self.userName,self.password, self.authKey )
+            success = self.blink.auth(self.userName,self.password, self.authKey )
             if 'AuthKey' == success:
                 logging.error('AuthKey required - please add to config')
                 self.poly.Notices['ak'] = 'username and password must be provided to start node server'
@@ -165,7 +165,6 @@ class BlinkSetup (udi_interface.Node):
         logging.info('Stop Called:')
 
         if 'self.node' in locals():
-            self.node.setDriver('ST', 0, True, True)
             #nodes = self.poly.getNodes()
             #for node in nodes:
             #    if node != 'setup':   # but not the controller node
@@ -198,24 +197,19 @@ class BlinkSetup (udi_interface.Node):
                 #Keep token current
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
                 try:
-
+                    self.blink.refresh()
                     nodes = self.poly.getNodes()
                     for nde in nodes:
-                        if nde != 'setup':   # but not the controller node
-                            pass
-                            #nodes[nde].checkOnline()
+                        if nde != 'controller':   # but not the controller node
+                            nodes[nde].updateISYdrivers()
+                         
                 except Exception as e:
                     logging.debug('Exeption occcured : {}'.format(e))
    
                 
             if 'shortPoll' in polltype:
                 self.heartbeat()
-                nodes = self.poly.getNodes()
-                for nde in nodes:
-                    if nde != 'setup':   # but not the controller node
-                        pass
-                        #nodes[nde].checkDataUpdate()
-    
+  
 
 
     def handleLevelChange(self, level):
@@ -226,14 +220,14 @@ class BlinkSetup (udi_interface.Node):
         if unitS == '':
             self.temp_unit = 0
         elif unitS[0] == 'C' or unitS[0] == 'c':
-            self.temp_unit = 0
+            self.temp_unit = 'C'
         elif unitS[0] == 'F' or unitS[0] == 'f':
-            self.temp_unit = 1
+            self.temp_unit = 'F'
         elif unitS[0] == 'k' or unitS[0] == 'k':
-            self.temp_unit = 2
+            self.temp_unit = 'K'
         else:
-            logging.error('Unknown unit string (first char must be K,C,F: {}'.format(unitS))
-
+            logging.error('Unknown unit string (first char must be C,F,K: {}'.format(unitS))
+        self.blink.set_temp_unit(self.temp_unit)
 
 
     def handleParams (self, userParam ):
@@ -245,16 +239,15 @@ class BlinkSetup (udi_interface.Node):
 
         try:
             if 'TEMP_UNIT' in userParam:
-                self.temp_unit = self.convert_temp_unit(userParam['TEMP_UNIT'])
+                self.temp_unit = userParam['TEMP_UNIT'].upper()
             else:
-                self.temp_unit = 0
+                self.temp_unit = 'c'
 
             if 'USERNAME' in userParam:
                 self.userName = userParam['USERNAME']
             else:
                 self.poly.Notices['userName'] = 'Missing USERNAME parameter'
                 self.userName = ''
-
 
             if 'PASSWORD' in userParam:
                 self.password = userParam['PASSWORD']
@@ -282,7 +275,7 @@ class BlinkSetup (udi_interface.Node):
             logging.debug('Error: {} {}'.format(e, userParam))
 
     def update(self, command = 0):
-        pass
+        self.systemPoll(['longPoll'])
    
     '''
     def set_t_unit(self, command ):
@@ -303,7 +296,6 @@ class BlinkSetup (udi_interface.Node):
 
     drivers = [
             {'driver': 'ST', 'value':1, 'uom':25}, # node
-            {'driver': 'GV0', 'value':0, 'uom':25}, # On-line 
            ]
 
 if __name__ == "__main__":

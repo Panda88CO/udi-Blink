@@ -5,7 +5,6 @@ ST-nlscontroller-ST-NAME = Node Status
 node-0 = Down
 node-1 = Up
 node-99 = Unknown
-ST-nlscontroller-GV2-NAME = On-line
 online-0 = off-line
 online-1 = on-line
 online-99 = Unknown
@@ -27,8 +26,14 @@ do_arm-1 = Arm
 ND-blinkcamera-NAME = Blink Camera
 ND-blinkcamera-ICON = Input
 ST-nlsblinkcamera-ST-NAME = Node Status
-ST-nlsblinkcamera-GV1-NAME = Status
-ST-nlsblinkcamera-GV2-NAME = Online
+ST-nlsblinkcamera-GV1-NAME = Battery Satus
+battery-0 = OK
+battery-1 = Not O - TBD
+battery-2 = TBD
+battery-10 = No Battery
+battery-99 = Unknown
+
+ST-nlsblinkcamera-GV2-NAME = Battery Indicator
 
 ST-nlsblinkcamera-GV3-NAME = CameraType
 cameratype-0 = Mini
@@ -52,12 +57,14 @@ MotionDetc-1 = Motion Detected
 MotionDetc-99 = Unknown
 
 ST-nlsblinkcamera-GV6-NAME = Temperature
-
+error-0 = No Supported
+error-99 = Unknown
 ST-nlsblinkcamera-GV7-NAME = Record
 record-0 = No Record
 record-1 = Record
 record-99 = Unknown
-ST-nlsblinkcamera-GV8-NAME = TBD
-TBD-0 = TBD0
-TBD-1 = TBD1
-TBD-99 = TBD99
+
+ST-nlsblinkcamera-GV8-NAME = Email Snapped Pitcutre
+PicEmail-0 = Email Enabled
+PicEmail-1 = Email Disabled
+PicEmail-99 = Unknown

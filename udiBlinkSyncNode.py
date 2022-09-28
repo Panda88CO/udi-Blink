@@ -47,7 +47,7 @@ class blink_sync_node(udi_interface.Node):
 
         # start processing events and create add our controller node
         polyglot.ready()
-        self.poly.addNode(self)
+        self.poly.addNode(self, conn_status='ST')
         self.wait_for_node_done()
         self.node = self.poly.getNode(address)
         logging.debug('Start {} sync module Node'.format(self.name))  
@@ -61,6 +61,13 @@ class blink_sync_node(udi_interface.Node):
         while len(self.n_queue) == 0:
             time.sleep(0.1)
         self.n_queue.pop()
+
+
+    def bool2isy(self, val):
+        if val:
+            return(1)
+        else:
+            return(0)
 
 
 
@@ -82,8 +89,6 @@ class blink_sync_node(udi_interface.Node):
             time.sleep(2)
             logging.info('Waiting for nodes to be created')
 
-        self.node.setDriver('ST', 1, True, True)   
-
         if self.sync_unit == None: #no sync units used
             camera_list = self.blink.get_camera_list()
         else:
@@ -100,43 +105,31 @@ class blink_sync_node(udi_interface.Node):
             logging.debug('Adding Camera {} {} {}'.format(self.address,nodeAdr, nodeName))
             blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera_unit, self.blink)
         self.nodeDefineDone = True
-
+        self.node.setDriver('GV1', self.bool2isy(self.blink.online(self.sync_unit.name)), True, True)
+        tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
+        self.node.setDriver('GV2', self.bool2isy(tmp['armed']), True, True)
 
     def stop(self):
         logging.debug('stop - Cleaning up')
 
-    
-    def systemPoll (self, polltype):
-        if self.nodeDefineDone:
-            logging.debug('System Poll executing: {}'.format(polltype))
-
-            if 'longPoll' in polltype:
-                #Keep token current
-                #self.node.setDriver('GV0', self.temp_unit, True, True)
-                logging.debug('long poll')            
-   
-                
-            if 'shortPoll' in polltype:
-                self.heartbeat()
-                logging.debug('short poll')    
-                nodes = self.poly.getNodes()
-                for nde in nodes:
-                    if nde != 'setup':   # but not the controller node
-                        pass
-                        #nodes[nde].checkDataUpdate()
 
 
 
-    def updateISYdrivers(self, level):
-        logging.debug('Node updateISYdrivers')
-
-        logging.debug('updateISYdrivers - setupnode DONE')
+    def updateISYdrivers(self):
+        logging.debug('Sync updateISYdrivers - {}'.format(self.sync_unit.name))
+        self.node.setDriver('GV1', self.bool2isy(self.blink.online(self.sync_unit.name)), True, True)
+        tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
+        self.node.setDriver('GV2', self.bool2isy(tmp['armed']))
 
     def ISYupdate(self):
-        pass
+        logging.debug('Sync ISYupdate')
+        self.updateISYdrivers('all')
+        
 
-    def arm_all_cameras (self):
-        pass
+    def arm_all_cameras (self, arm_enable):
+        logging.debug('Sync arm_all_cameras')
+        self.blink.set_sync_arm(self.sync_unit.name,  arm_enable )
+        self.updateISYdrivers()
 
     id = 'blinksync'
 

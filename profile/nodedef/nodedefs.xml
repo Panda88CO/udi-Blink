@@ -3,8 +3,7 @@
       <editors />
       <sts>
          <st id="ST" editor="node" />
-         <st id="GV0" editor="online" />
-      </sts>
+       </sts>
       <cmds>
          <sends>
             <cmd id="DON" /> 
@@ -42,9 +41,8 @@
  <editors />
       <sts>
          <st id="ST" editor= "node" />
-         <st id="GV0" editor="status" />
-         <st id="GV1" editor="online" />
-         <st id="GV2" editor="battery" />
+         <st id="GV1" editor="battery" />        
+         <st id="GV2" editor="battery_v" />
          <st id="GV3" editor="cameratype" />
          <st id="GV4" editor="MotionEn" />
          <st id="GV5" editor="MotionDetc" />

@@ -29,10 +29,11 @@ class blink_system(object):
 
         logging.info('Accessing Blink system')
         self.blink = Blink()
+        self.temp_unit = 'C'
+        self.pic_email_enabled = False
 
 
-
-    def blink_auth (self, userName, password, authenKey = None):
+    def auth (self, userName, password, authenKey = None):
         # Can set no_prompt when initializing auth handler
         auth = Auth({"username":userName, "password":password}, no_prompt=True)
         if auth:
@@ -53,6 +54,15 @@ class blink_system(object):
         else:
             return{'no login'}
 
+    def refresh(self):
+         logging.debug('refresh')
+         return(self.blink.refresh())
+
+    def set_temp_unit(self, temp_unit):
+        self.temp_unit = temp_unit
+
+    def set_pic_email_enabled(self, status):
+        self.pic_email_enabled = status
 
     def get_sync_unit(self, sync_unit_name):
         logging.debug('get_sync_unit - {}'.format(sync_unit_name))
@@ -85,6 +95,10 @@ class blink_system(object):
         logging.debug('set_arm_sync - {}{} '.format(sync_name, armed ))
         self.blink.sync[sync_name].arm = armed
         self.blink.refresh()
+
+    def get_sync_online(self, sync_name):
+        logging.debug('get_sync_online - {} {} '.format(sync_name, self.blink.sync[sync_name].online ))
+        return(self.blink.sync[sync_name].online )
 
     #def get_sync_blink_camera_unit(self, sync_unit, camera_name):
     #    logging.debug('get_sync_blink_camera_unit - {} from {}'.format(camera_name,sync_unit ))

@@ -50,7 +50,7 @@ class blink_camera_node(udi_interface.Node):
 
         # start processing events and create add our controller node
         polyglot.ready()
-        self.poly.addNode(self)
+        self.poly.addNode(self, conn_status='ST')
         self.wait_for_node_done()
         self.node = self.poly.getNode(address)
         
@@ -67,13 +67,23 @@ class blink_camera_node(udi_interface.Node):
         logging.debug('Start {} sync module Node'.format(self.name))  
 
 
-    
+    def bat2isy(self, bat_status):
+        if 'ok'  == bat_status:
+            return (0)
+        elif None == bat_status:
+            return(10)
+        else:
+            return(1)
 
         #self.heartbeat()
-
+    def bool2isy(self, val):
+        if val:
+            return(1)
+        else:
+            return(0)
 
     def start(self):                
-        self.node.setDriver('ST', 1, True, True)
+
         self.nodeDefineDone = True
 
 
@@ -85,9 +95,31 @@ class blink_camera_node(udi_interface.Node):
         logging.debug('Node getCameraData')
 
     def updateISYdrivers(self, level):
-        logging.debug('Node updateISYdrivers')
+        logging.debug('Sync updateISYdrivers - {}'.format(self.sync_unit.name))
+        bat_info = self.blink.get_battery_info(self.camera)
+        logging.debug(bat_info)
+        self.node.setDriver('GV1', self.bat2isy(bat_info['battery']))
+        if None == bat_info['battery_voltage']:
+            self.node.setDriver('GV2', 0)
+        else:
+            self.node.setDriver('GV2', bat_info['battery_voltage'])
+        self.node.setDriver('GV3', self.cameraType[self.blink. get_camera_type_info(self.camera)])
+        mot_info = self.blink.get_camera_motion_info(self.camera)
+        logging.debug(mot_info)
+        self.node.setDriver('GV4', self.bool2isy(mot_info['motion_enabled']))
+        self.node.setDriver('GV5', self.bool2isy(mot_info['motion_detected']))
+        temp_info = self.cameraType[self.blink.get_camera_temperatureC_info(self.camera)]
+        if  None ==  temp_info['temp_c']:
+            self.node.setDriver('GV6', 0, True, True,  25)
+        elif 'k' == self.blink.temp_unit:
+             self.node.setDriver('GV6', temp_info['temp_c'], True, True, 26)
+        elif 'f' == self.blink.temp_unit:
+             self.node.setDriver('GV6', temp_info['temp_c'], True, True, 17)
+        else:
+             self.node.setDriver('GV6', temp_info['temp_c'], True, True, 4)
+        self.node.setDriver('GV7', self.cameraType[self.blink.get_camera_recording_info(self.camera)])
+        self.node.setDriver('GV8', self.bool2isy(self.blink.pic_email_enabled))
 
-     
     
     def ISYupdate (self):
         pass 
@@ -112,9 +144,8 @@ class blink_camera_node(udi_interface.Node):
 
 
     drivers= [  {'driver': 'ST', 'value':0, 'uom':25},
-                {'driver': 'GV0', 'value':0, 'uom':51},
-                {'driver': 'GV1', 'value':0, 'uom':25}, # On line
-                {'driver': 'GV2', 'value':0, 'uom':25}, # Battery
+                {'driver': 'GV1', 'value':99, 'uom':25}, # Battery
+                {'driver': 'GV2', 'value':99, 'uom':25}, # Battery
                 {'driver': 'GV3', 'value':0, 'uom':25}, # Camera Type 
                 {'driver': 'GV4', 'value':0, 'uom':25}, # Motion Detection Enabled
                 {'driver': 'GV5', 'value':0, 'uom':25}, # Motion Detected

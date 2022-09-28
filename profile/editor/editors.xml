@@ -6,7 +6,7 @@
      <range  uom="25" subset="0-1,99" nls="online"  />
 </editor>
   <editor id = "armed" > 
-     <range  uom="25" subset="0-1,99" nls="armed" />
+     <range  uom="25" subset="0-1,10,99" nls="armed" />
 </editor>
   <editor id = "do_arm" > 
      <range  uom="25" subset="0-1" nls="doarm" />
@@ -16,6 +16,10 @@
 </editor>
   <editor id = "battery" > 
      <range  uom="25" subset="0-2,99" nls="battery" />
+</editor>
+  <editor id = "battery_v" > 
+     <range  uom="72" min=" 0" max="500"  prec="0" />
+
 </editor>
   <editor id = "cameraType" > 
      <range  uom="25" subset="0-9,99" nls="cameratype" />
@@ -37,7 +41,7 @@
      <range  uom="25" subset="0-1,99" nls="record" />
 </editor>
 
-<editor id = "TBD" > 
-     <range  uom="25" subset="0-1,99" nls="TBD" />
+<editor id = "PICEMAIL" > 
+     <range  uom="25" subset="0-1,99" nls="PicEmail" />
 </editor>
 </editors> 

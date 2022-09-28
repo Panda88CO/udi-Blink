@@ -26,7 +26,7 @@ userName ='christian@olgaard.com'
 password = 'coe123COE!@#'
 authKey ='844022'
 blink = blink_system()
-success = blink.blink_auth(userName, password, authKey )
+success = blink.auth(userName, password, authKey )
 
 
 syncStr = 'SarATOGA, tAHOE  ,   TEST'
@@ -63,7 +63,8 @@ for sync_name in syncUnits:
         print(temp)
         print(blink.get_camera_temperatureC_info(camera_name))
         print(blink.get_camera_recording_info(camera_name))
-        print(blink.snap_picture(camera_name))
+        #print(blink.snap_picture(camera_name))
+        print(blink.refresh())
 
 '''
 if  blink.key_required:

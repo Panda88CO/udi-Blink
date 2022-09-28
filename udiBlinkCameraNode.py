@@ -32,9 +32,9 @@ class blink_camera_node(udi_interface.Node):
         self.name = name
         self.blink = blinkSys
         self.poly = polyglot
-        self.cameraType= {  'owl' : 1, #mini
-                            'lotus': 2, #doorbell
-                            'catalena':3, #outdoor
+        self.cameraType= {  'mini' : 1, #mini/owl
+                            'doorbell': 2, #doorbell/lotus
+                            'Blink Outdoor':3, #outdoor/catalena
                             'outdoorOld1':4,
                             'outdoorOld2':5,
                             'indoorOld':6,

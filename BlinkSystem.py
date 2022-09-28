@@ -25,7 +25,7 @@ class blink_system(object):
         #self.userName =userName
         #self.password = password
         #self.AUTHKey = AUTHKey
-
+        self.cameraType = {'owl'}
 
         logging.info('Accessing Blink system')
         self.blink = Blink()
@@ -79,6 +79,12 @@ class blink_system(object):
  
     def get_sync_arm_info(self, sync_name):
         logging.debug('get_sync_arm_info - {} '.format(sync_name ))
+        return({'armed': self.blink.sync[sync_name].arm})
+
+    def set_sync_arm (self, sync_name, armed=True):
+        logging.debug('set_arm_sync - {}{} '.format(sync_name, armed ))
+        self.blink.sync[sync_name].arm = armed
+
 
     #def get_sync_blink_camera_unit(self, sync_unit, camera_name):
     #    logging.debug('get_sync_blink_camera_unit - {} from {}'.format(camera_name,sync_unit ))
@@ -91,22 +97,54 @@ class blink_system(object):
 
     def get_camera_battery_info(self, camera_name):
         logging.debug('get_camera_battery_info - {} '.format(camera_name ))
+        return({'battery': self.blink.cameras[camera_name].attributes['battery'],
+                'battery_voltage':self.blink.cameras[camera_name].attributes['battery_voltage']}
+        )
 
     def get_camera_arm_info(self, camera_name):
         logging.debug('get_camera_arm_info - {} '.format(camera_name ))
+        return({'armed':self.blink.cameras[camera_name].arm})
+
+
+    def set_camera_arm(self, camera_name, armed):
+        logging.debug('set_camera_arm - {} {}'.format(camera_name, armed=True ))
+        self.blink.cameras[camera_name].arm = armed
 
     def get_camera_type_info(self, camera_name):
         logging.debug('get_camera_type_info - {} '.format(camera_name ))
+        temp = self.blink.cameras[camera_name].attributes['type']
+        if temp == 'owl':
+            return('mini')
+        elif temp == 'catalina':
+            return('Blink Outdoor')
+        elif 'lotus' == temp:
+            return('doorbell')
+        else:
+            return('default')
 
 
     def get_camera_motion_info(self, camera_name):
         logging.debug('get_camera_type_info - {} '.format(camera_name ))
+        return({'motion_enabled': self.blink.cameras[camera_name].attributes['motion_enabled'],
+                'motion_detected':self.blink.cameras[camera_name].attributes['motion_detected']}
+        )
+
+    def set_camera_motion(self, camera_name, enabled=True ):
+        logging.debug('set_camera_motion - {} {} '.format(camera_name, enabled ))
+        self.blink.cameras[camera_name].attributes['motion_enabled'] = enabled 
 
     def get_camera_temperatureC_info(self, camera_name):
         logging.debug('get_camera_type_info - {} '.format(camera_name ))
+        return({'temp_c':self.blink.cameras[camera_name].attributes['temperature_c']})
+
 
     def get_camera_recording_info(self, camera_name):
         logging.debug('get_camera_type_info - {} '.format(camera_name ))
+        return('TBD')
+
+    def snap_picture(self, camera_name):
+        logging.debug('snap_picture - {} '.format(camera_name ))
+        return(self.blink.cameras[camera_name].snap_picture())
 
     def get_camera_unit(self, camera_name):
         logging.debug('get_camera_unit - {} '.format(camera_name ))

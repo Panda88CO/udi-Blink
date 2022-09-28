@@ -35,6 +35,10 @@ syncUnits = strip_syncUnitStringtoList(syncStr)
 
 for sync_name in syncUnits:
     sync_unit = blink.get_sync_unit(sync_name)
+    sync_arm = blink.get_sync_arm_info(sync_name)
+    print(sync_arm )
+    print(blink.set_sync_arm(sync_name, not sync_arm ))
+    print(blink.set_sync_arm(sync_name,  sync_arm ))
     if sync_unit == None: #no sync units used
         camera_list = blink.get_camera_list()
     elif sync_unit == False:
@@ -47,6 +51,18 @@ for sync_name in syncUnits:
         camera_unit = blink.get_camera_unit(camera_name)  
         print(camera_name)
         print(blink.get_camera_data(camera_name))
+        print(blink.get_camera_battery_info(camera_name))
+        print(blink.get_camera_arm_info(camera_name))
+        print(blink.get_camera_type_info(camera_name))
+        temp = blink.get_camera_motion_info(camera_name)
+        print(temp)
+        print(blink.set_camera_motion(camera_name))
+        print(blink.set_camera_motion(camera_name, False))
+        print(blink.set_camera_motion(camera_name, temp['motion_enabled']))
+
+        print(blink.get_camera_temperatureC_info(camera_name))
+        print(blink.get_camera_recording_info(camera_name))
+        print(blink.snap_picture(camera_name))
 
 '''
 if  blink.key_required:

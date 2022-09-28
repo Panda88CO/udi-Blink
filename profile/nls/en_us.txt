@@ -72,3 +72,5 @@ CMD-nlsblinkcamera-UPDATE-NAME = Update System
 CMD-nlsblinkcamera-QUERY-NAME = Update System
 CMD-nlsblinkcamera-ARM-NAME = Arm Camera
 CMD-nlsblinkcamera-SNAP_PIC-NAME = Take Picture
+enable-0 = Disabled
+enable-1 = Enabled

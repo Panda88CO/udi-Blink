@@ -62,7 +62,9 @@
             </cmd >            
             <cmd id="QUERY" /> 
             <cmd id="SNAP_PIC" /> 
-
+            <cmd id="EMAIL_PIC" > 
+               <p id="" editor="enable" init="0" /> 
+            </cmd>
          </accepts>
       </cmds>
    </nodeDef> 

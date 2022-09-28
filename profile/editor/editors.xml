@@ -11,6 +11,9 @@
   <editor id = "do_arm" > 
      <range  uom="25" subset="0-1" nls="doarm" />
 </editor>
+  <editor id = "enable" > 
+     <range  uom="25" subset="0-1" nls="enable" />
+</editor>
   <editor id = "status" > 
      <range  uom="2" subset="0-1" />
 </editor>

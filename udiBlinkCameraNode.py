@@ -31,6 +31,7 @@ class blink_camera_node(udi_interface.Node):
         self.camera = camera
         self.name = name
         self.blink = blinkSys
+        self.pic_email_enabled = False
         self.poly = polyglot
         self.cameraType= {  'mini' : 1, #mini/owl
                             'doorbell': 2, #doorbell/lotus
@@ -85,6 +86,7 @@ class blink_camera_node(udi_interface.Node):
     def start(self):                
 
         self.nodeDefineDone = True
+        self.updateISYdrivers()
 
 
     def stop(self):
@@ -94,7 +96,7 @@ class blink_camera_node(udi_interface.Node):
         #data is updated 
         logging.debug('Node getCameraData')
 
-    def updateISYdrivers(self, level):
+    def updateISYdrivers(self):
         logging.debug('Sync updateISYdrivers - {}'.format(self.sync_unit.name))
         bat_info = self.blink.get_battery_info(self.camera)
         logging.debug(bat_info)
@@ -118,17 +120,17 @@ class blink_camera_node(udi_interface.Node):
         else:
              self.node.setDriver('GV6', temp_info['temp_c'], True, True, 4)
         self.node.setDriver('GV7', self.cameraType[self.blink.get_camera_recording_info(self.camera)])
-        self.node.setDriver('GV8', self.bool2isy(self.blink.pic_email_enabled))
+        self.node.setDriver('GV8', self.bool2isy(self.pic_email_enabled))
 
     
     def ISYupdate (self):
-        pass 
+        self.updateISYdrivers()
     
     def snap_pitcure (self):
         pass
 
-    def email_picture (self):
-        pass
+    def email_picture (self, status):
+        self.pic_email_enabled = (1 == status)
 
     def arm_camera (self):
         pass
@@ -139,18 +141,18 @@ class blink_camera_node(udi_interface.Node):
                  'ARM' : arm_camera,
                  'SNAP_PIC' : snap_pitcure,
                  'QUERY' : ISYupdate,
-                #,'EMAIL_PIC' : email_picture,
+                 'EMAIL_PIC' : email_picture,
                 }
 
 
     drivers= [  {'driver': 'ST', 'value':0, 'uom':25},
                 {'driver': 'GV1', 'value':99, 'uom':25}, # Battery
                 {'driver': 'GV2', 'value':99, 'uom':25}, # Battery
-                {'driver': 'GV3', 'value':0, 'uom':25}, # Camera Type 
-                {'driver': 'GV4', 'value':0, 'uom':25}, # Motion Detection Enabled
-                {'driver': 'GV5', 'value':0, 'uom':25}, # Motion Detected
+                {'driver': 'GV3', 'value':99, 'uom':25}, # Camera Type 
+                {'driver': 'GV4', 'value':99, 'uom':25}, # Motion Detection Enabled
+                {'driver': 'GV5', 'value':99, 'uom':25}, # Motion Detected
                 {'driver': 'GV6', 'value':0, 'uom':17}, # TempC
-                {'driver': 'GV7', 'value':0, 'uom':25}, # Recording
+                {'driver': 'GV7', 'value':99, 'uom':25}, # Recording
                 {'driver': 'GV8', 'value':0, 'uom':25}, # TBD
                  ] 
 

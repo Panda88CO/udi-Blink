@@ -48,6 +48,8 @@ class BlinkSetup (udi_interface.Node):
         self.Parameters = Custom(polyglot, 'customParams')      
         self.Notices = Custom(polyglot, 'notices')
         self.n_queue = []
+        self.Parameters = Custom(polyglot, 'customParams')      
+        self.Notices = Custom(polyglot, 'notices')
         self.poly.subscribe(self.poly.STOP, self.stop)
         self.poly.subscribe(self.poly.START, self.start, address)
         self.poly.subscribe(self.poly.LOGLEVEL, self.handleLevelChange)
@@ -55,8 +57,7 @@ class BlinkSetup (udi_interface.Node):
         self.poly.subscribe(self.poly.POLL, self.systemPoll)
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
         self.poly.subscribe(self.poly.CONFIGDONE, self.validate_params)
-        self.Parameters = Custom(polyglot, 'customParams')      
-        self.Notices = Custom(polyglot, 'notices')
+
         self.hb = 0
         self.userParam = ['TEMP_UNIT', 'USERNAME','PASSWORD', 'AUTH_KEY', 'SYNC_UNITS' ]
         self.Parameters = Custom(self.poly, 'customparams')
@@ -312,7 +313,7 @@ class BlinkSetup (udi_interface.Node):
 if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
-        polyglot.start('0.1.3')
+        polyglot.start('0.1.5')
         BlinkSetup(polyglot, 'controller', 'controller', 'BlinkSetup')
 
         # Just sit and wait for events

@@ -54,6 +54,7 @@ class blink_camera_node(udi_interface.Node):
         self.poly.addNode(self, conn_status='ST')
         self.wait_for_node_done()
         self.node = self.poly.getNode(address)
+        self.nodeDefineDone = True
         
     
     def node_queue(self, data):
@@ -84,8 +85,10 @@ class blink_camera_node(udi_interface.Node):
             return(0)
 
     def start(self):                
+        while not self.nodeDefineDone:
+            logging.debug('camera - wait to node completed')
+            time.sleep(2)
 
-        self.nodeDefineDone = True
         self.updateISYdrivers()
 
 

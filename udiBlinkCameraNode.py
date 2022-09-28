@@ -98,7 +98,7 @@ class blink_camera_node(udi_interface.Node):
 
     def updateISYdrivers(self):
         logging.debug('Camera updateISYdrivers - {}'.format(self.camera))
-        bat_info = self.blink.get_battery_info(self.camera)
+        bat_info = self.blink.get_camera_battery_info(self.camera)
         logging.debug(bat_info)
         self.node.setDriver('GV1', self.bat2isy(bat_info['battery']))
         if None == bat_info['battery_voltage']:

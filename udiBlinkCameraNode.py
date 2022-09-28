@@ -65,7 +65,7 @@ class blink_camera_node(udi_interface.Node):
         self.n_queue.pop()
 
         self.nodeDefineDone = False
-        logging.debug('Start {} sync module Node'.format(self.name))  
+        logging.debug('Start {} camera module Node'.format(self.name))  
 
 
     def bat2isy(self, bat_status):
@@ -97,7 +97,7 @@ class blink_camera_node(udi_interface.Node):
         logging.debug('Node getCameraData')
 
     def updateISYdrivers(self):
-        logging.debug('Sync updateISYdrivers - {}'.format(self.sync_unit.name))
+        logging.debug('Camera updateISYdrivers - {}'.format(self.camera))
         bat_info = self.blink.get_battery_info(self.camera)
         logging.debug(bat_info)
         self.node.setDriver('GV1', self.bat2isy(bat_info['battery']))

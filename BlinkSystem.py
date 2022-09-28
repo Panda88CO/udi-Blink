@@ -84,7 +84,7 @@ class blink_system(object):
     def set_sync_arm (self, sync_name, armed=True):
         logging.debug('set_arm_sync - {}{} '.format(sync_name, armed ))
         self.blink.sync[sync_name].arm = armed
-
+        self.blink.refresh()
 
     #def get_sync_blink_camera_unit(self, sync_unit, camera_name):
     #    logging.debug('get_sync_blink_camera_unit - {} from {}'.format(camera_name,sync_unit ))
@@ -106,9 +106,10 @@ class blink_system(object):
         return({'armed':self.blink.cameras[camera_name].arm})
 
 
-    def set_camera_arm(self, camera_name, armed):
-        logging.debug('set_camera_arm - {} {}'.format(camera_name, armed=True ))
+    def set_camera_arm(self, camera_name, armed=True):
+        logging.debug('set_camera_arm - {} {}'.format(camera_name, armed ))
         self.blink.cameras[camera_name].arm = armed
+        self.blink.refresh()
 
     def get_camera_type_info(self, camera_name):
         logging.debug('get_camera_type_info - {} '.format(camera_name ))
@@ -129,9 +130,7 @@ class blink_system(object):
                 'motion_detected':self.blink.cameras[camera_name].attributes['motion_detected']}
         )
 
-    def set_camera_motion(self, camera_name, enabled=True ):
-        logging.debug('set_camera_motion - {} {} '.format(camera_name, enabled ))
-        self.blink.cameras[camera_name].attributes['motion_enabled'] = enabled 
+
 
     def get_camera_temperatureC_info(self, camera_name):
         logging.debug('get_camera_type_info - {} '.format(camera_name ))
@@ -144,7 +143,9 @@ class blink_system(object):
 
     def snap_picture(self, camera_name):
         logging.debug('snap_picture - {} '.format(camera_name ))
-        return(self.blink.cameras[camera_name].snap_picture())
+        self.blink.cameras[camera_name].snap_picture()
+        self.blink.refresh()             # Get new information from server
+        self.blink.cameras[camera_name].image_to_file('./image.jpg')
 
     def get_camera_unit(self, camera_name):
         logging.debug('get_camera_unit - {} '.format(camera_name ))

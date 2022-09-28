@@ -68,3 +68,7 @@ ST-nlsblinkcamera-GV8-NAME = Email Snapped Pitcutre
 PicEmail-0 = Email Enabled
 PicEmail-1 = Email Disabled
 PicEmail-99 = Unknown
+CMD-nlsblinkcamera-UPDATE-NAME = Update System
+CMD-nlsblinkcamera-QUERY-NAME = Update System
+CMD-nlsblinkcamera-ARM-NAME = Arm Camera
+CMD-nlsblinkcamera-SNAP_PIC-NAME = Take Picture

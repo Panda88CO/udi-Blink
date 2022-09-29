@@ -124,7 +124,7 @@ class blink_sync_node(udi_interface.Node):
 
     def ISYupdate(self):
         logging.debug('Sync ISYupdate')
-        self.blink.refresh()
+        self.blink.refresh_data()
         self.updateISYdrivers('all')
         
 
@@ -140,7 +140,7 @@ class blink_sync_node(udi_interface.Node):
             for camera in camera_list:
                 self.blink.set_camera_arm(self, camera, arm_enable)
             
-        self.blink.refresh()
+        self.blink.refresh_data()
         nodes = self.poly.getNodes()
         for nde in nodes:
             if nde != 'controller':   # but not the controller node

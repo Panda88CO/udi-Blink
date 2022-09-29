@@ -205,7 +205,7 @@ class BlinkSetup (udi_interface.Node):
                 #Keep token current
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
                 try:
-                    self.blink.refresh()
+                    self.blink.refresh_data()
                     nodes = self.poly.getNodes()
                     for nde in nodes:
                         if nde != 'controller':   # but not the controller node
@@ -317,7 +317,7 @@ class BlinkSetup (udi_interface.Node):
 if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
-        polyglot.start('0.1.19')
+        polyglot.start('0.1.20')
         BlinkSetup(polyglot, 'controller', 'controller', 'BlinkSetup')
 
         # Just sit and wait for events

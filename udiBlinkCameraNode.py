@@ -177,7 +177,7 @@ class blink_camera_node(udi_interface.Node):
                 {'driver': 'GV5', 'value':99, 'uom':25}, # Motion Detected
                 {'driver': 'GV6', 'value':99, 'uom':25}, # TempC
                 #{'driver': 'GV7', 'value':99, 'uom':25}, # Recording
-                {'driver': 'GV8', 'value':0, 'uom':25}, # TBD
+                #{'driver': 'GV8', 'value':0, 'uom':25}, # Email Picture Eanble
                  ] 
 
         

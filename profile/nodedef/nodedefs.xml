@@ -50,7 +50,7 @@
          <st id="GV5" editor="MotionDetc" />
          <st id="GV6" editor="temp" />
          <!--<st id="GV7" editor="record" /> -->                                                
-         <st id="GV8" editor="emailpic" />
+         <!--<st id="GV8" editor="emailpic" /> -->
 
       </sts>
       <cmds>
@@ -65,9 +65,9 @@
             </cmd >            
             <cmd id="QUERY" /> 
             <cmd id="SNAPPIC" /> 
-            <cmd id="EMAILPIC" > 
+            <!--<cmd id="EMAILPIC" > 
                <p id="" editor="emailpic" init="0" /> 
-            </cmd>
+            </cmd> -->
          </accepts>
       </cmds>
    </nodeDef> 

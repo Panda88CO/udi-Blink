@@ -25,7 +25,7 @@ doarm-1 = Arm
 
 ND-blinkcamera-NAME = Blink Camera
 ND-blinkcamera-ICON = Input
-
+ST-nlsblinkcamera-GV0-NAME = Arm Satus
 ST-nlsblinkcamera-GV1-NAME = Battery Satus
 battery-0 = OK
 battery-1 = Not OK - TBD

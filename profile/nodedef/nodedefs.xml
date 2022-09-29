@@ -49,7 +49,7 @@
          <st id="GV4" editor="MotionEn" />
          <st id="GV5" editor="MotionDetc" />
          <st id="GV6" editor="temp" />
-         <st id="GV7" editor="record" />                                                  
+         <!--<st id="GV7" editor="record" /> -->                                                
          <st id="GV8" editor="emailpic" />
 
       </sts>

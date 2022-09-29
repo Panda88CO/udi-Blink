@@ -86,7 +86,7 @@ class blink_camera_node(udi_interface.Node):
 
     def start(self):   
                 
-        logging.debug('Start {} camera module Node'.format(self.name))               
+        logging.info('Start {} camera module Node'.format(self.name))               
         while not self.nodeDefineDone:
             logging.debug('camera - wait to node completed')
             time.sleep(2)
@@ -95,14 +95,14 @@ class blink_camera_node(udi_interface.Node):
 
 
     def stop(self):
-        logging.debug('stop - Cleaning up')
+        logging.info('stop {} - Cleaning up '.format(self.name))
 
     def getCameraData(self):
         #data is updated 
         logging.debug('Node getCameraData')
 
     def updateISYdrivers(self):
-        logging.debug('Camera updateISYdrivers - {}'.format(self.camera.name))
+        logging.info('Camera updateISYdrivers - {}'.format(self.camera.name))
 
         self.node.setDriver('GV0', self.bool2isy(self.blink.get_camera_arm_info(self.camera.name)))
         self.node.setDriver('GV1', self.bat2isy(self.blink.get_camera_battery_info(self.camera.name)))
@@ -122,7 +122,7 @@ class blink_camera_node(udi_interface.Node):
              self.node.setDriver('GV6', temp_info+273.15, True, True, 17)
         else:
              self.node.setDriver('GV6', temp_info, True, True, 4)
-        self.node.setDriver('GV7', self.blink.get_camera_recording_info(self.camera.name))
+        #self.node.setDriver('GV7', self.blink.get_camera_recording_info(self.camera.name))
         self.node.setDriver('GV8', self.bool2isy(self.pic_email_enabled))
 
     
@@ -174,7 +174,7 @@ class blink_camera_node(udi_interface.Node):
                 {'driver': 'GV4', 'value':99, 'uom':25}, # Motion Detection Enabled
                 {'driver': 'GV5', 'value':99, 'uom':25}, # Motion Detected
                 {'driver': 'GV6', 'value':99, 'uom':25}, # TempC
-                {'driver': 'GV7', 'value':99, 'uom':25}, # Recording
+                #{'driver': 'GV7', 'value':99, 'uom':25}, # Recording
                 {'driver': 'GV8', 'value':0, 'uom':25}, # TBD
                  ] 
 

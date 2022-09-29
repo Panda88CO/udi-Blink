@@ -50,7 +50,7 @@ class blink_sync_node(udi_interface.Node):
         self.poly.addNode(self)
         self.wait_for_node_done()
         self.node = self.poly.getNode(address)
-        logging.debug('Start {} sync module Node'.format(self.name))  
+        logging.info('Start {} sync module Node'.format(self.name))  
         self.nodeDefineDone = True
 
 
@@ -102,7 +102,7 @@ class blink_sync_node(udi_interface.Node):
             #cameraName = str(name)#.replace(' ','')
             nodeAdr = self.getValidAddress(str(camera_name))
             #nodeAdr = str(name).replace(' ','')[:14]
-            logging.debug('Adding Camera {} {} {}'.format(self.address,nodeAdr, nodeName))
+            logging.info('Adding Camera {} {} {}'.format(self.address,nodeAdr, nodeName))
             blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera_unit, self.blink)
         self.nodeDefineDone = True
         if self.sync_unit == None:
@@ -114,11 +114,11 @@ class blink_sync_node(udi_interface.Node):
             self.node.setDriver('GV2', self.bool2isy(tmp), True, True)
 
     def stop(self):
-        logging.debug('stop - Cleaning up')
+        logging.info('stop {} - Cleaning up'.format(self.name))
 
 
     def updateISYdrivers(self):
-        logging.debug('Sync updateISYdrivers - {}'.format(self.sync_unit.name))
+        logging.info('Sync updateISYdrivers - {}'.format(self.sync_unit.name))
         if self.sync_unit == None:
             self.node.setDriver('GV1', 99, True, True)
             self.node.setDriver('GV2', 99, True, True)
@@ -126,15 +126,16 @@ class blink_sync_node(udi_interface.Node):
             self.node.setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit.name)), True, True)
             tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
             self.node.setDriver('GV2', self.bool2isy(tmp), True, True)
+  
     def ISYupdate(self):
-        logging.debug('Sync ISYupdate')
+        logging.info('Sync ISYupdate')
         self.blink.refresh_data()
         self.updateISYdrivers('all')
         
 
     def arm_all_cameras (self, command):
         arm_enable = (1 == int(command.get('value')) )
-        logging.debug('Sync arm_all_cameras:{} - {}'.format(self.sync_unit.name, arm_enable ))
+        logging.info('Sync arm_all_cameras:{} - {}'.format(self.sync_unit.name, arm_enable ))
         if self.sync_unit != None:
             self.node.setDriver('GV2', self.bool2isy(arm_enable))
             self.blink.set_sync_arm(self.sync_unit.name,  arm_enable )

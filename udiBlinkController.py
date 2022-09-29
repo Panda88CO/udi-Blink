@@ -117,7 +117,7 @@ class BlinkSetup (udi_interface.Node):
         
         self.poly.updateProfile()
         while not self.paramsProcessed or not self.nodeDefineDone:
-            logging.debug('Waiting for setup to complete param:{} nodes:{}'.format(self.paramsProcessed, self.nodeDefineDone ))
+            logging.info('Waiting for setup to complete param:{} nodes:{}'.format(self.paramsProcessed, self.nodeDefineDone ))
             time.sleep(2)
         logging.setLevel(10)
         #logging.debug('syncUnits / syncString: {} - {}'.format(self.syncUnits, self.syncUnitString))
@@ -148,7 +148,7 @@ class BlinkSetup (udi_interface.Node):
 
 
     def add_sync_nodes (self):
-        logging.debug('Adding sync units: {}'.format(self.syncUnits ))
+        logging.info('Adding sync units: {}'.format(self.syncUnits ))
         if self.syncUnits!= None :
             if not 'NONE' in self.syncUnits:
                 for sync_name in self.syncUnits:                    
@@ -199,7 +199,7 @@ class BlinkSetup (udi_interface.Node):
 
     def systemPoll (self, polltype):
         if self.nodeDefineDone:
-            logging.debug('System Poll executing: {}'.format(polltype))
+            logging.deinfoug('System Poll executing: {}'.format(polltype))
 
             if 'longPoll' in polltype:
                 #Keep token current

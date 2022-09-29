@@ -11,7 +11,7 @@ online-99 = Unknown
 
 ND-blinksync-NAME = Sync Unit
 ND-blinksync-ICON = Input
-ST-nlsblinksync-ST-NAME = Node Status
+
 ST-nlsblinksync-GV1-NAME = On-Line
 ST-nlsblinksync-GV2-NAME = Arm Status
 armed-0 = Disarmed
@@ -25,7 +25,7 @@ do_arm-1 = Arm
 
 ND-blinkcamera-NAME = Blink Camera
 ND-blinkcamera-ICON = Input
-ST-nlsblinkcamera-ST-NAME = Node Status
+
 ST-nlsblinkcamera-GV1-NAME = Battery Satus
 battery-0 = OK
 battery-1 = Not O - TBD
@@ -42,10 +42,6 @@ cameratype-2 = Blink Outdoor
 cameratype-3 = Camera3
 cameratype-4 = Camera4
 cameratype-5 = Camera5
-cameratype-6 = Camera6
-cameratype-7 = Camera7
-cameratype-8 = Camera8
-cameratype-9 = Camera9
 cameratype-99 = Unknown
 ST-nlsblinkcamera-GV4-NAME = Motion Detection
 MotionEn-0 = Disabled
@@ -67,10 +63,9 @@ record-99 = Unknown
 ST-nlsblinkcamera-GV8-NAME = Email Snapped Pitcutre
 PicEmail-0 = Email Enabled
 PicEmail-1 = Email Disabled
-PicEmail-99 = Unknown
+
 CMD-nlsblinkcamera-UPDATE-NAME = Update System
 CMD-nlsblinkcamera-QUERY-NAME = Update System
 CMD-nlsblinkcamera-ARM-NAME = Arm Camera
-CMD-nlsblinkcamera-SNAP_PIC-NAME = Take Picture
-enable-0 = Disabled
-enable-1 = Enabled
+CMD-nlsblinkcamera-SNAPPIC-NAME = Take Picture
+CMD-nlsblinkcamera-EMAILPIC-NAME = Email Picture

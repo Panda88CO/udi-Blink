@@ -19,7 +19,6 @@
    <nodeDef id="blinksync" nls="nlsblinksync">
       <editors />
       <sts>
-         <st id="ST" editor="node" />
          <st id="GV1" editor="online" />
          <st id="GV2" editor="armed" />
       </sts>
@@ -40,7 +39,6 @@
    <nodeDef id="blinkcamera" nls="nlsblinkcamera">
  <editors />
       <sts>
-         <st id="ST" editor= "node" />
          <st id="GV1" editor="battery" />        
          <st id="GV2" editor="battery_v" />
          <st id="GV3" editor="cameratype" />
@@ -48,7 +46,7 @@
          <st id="GV5" editor="MotionDetc" />
          <st id="GV6" editor="temp" />
          <st id="GV7" editor="record" />                                                  
-         <st id="GV8" editor="TBD" />
+         <st id="GV8" editor="picemail" />
 
       </sts>
       <cmds>
@@ -62,8 +60,8 @@
             </cmd >            
             <cmd id="QUERY" /> 
             <cmd id="SNAP_PIC" /> 
-            <cmd id="EMAIL_PIC" > 
-               <p id="" editor="enable" init="0" /> 
+            <cmd id="EMAILPIC" > 
+               <p id="" editor="picemail" init="0" /> 
             </cmd>
          </accepts>
       </cmds>

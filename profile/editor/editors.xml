@@ -24,8 +24,8 @@
      <range  uom="72" min=" 0" max="500"  prec="0" />
 
 </editor>
-  <editor id = "cameraType" > 
-     <range  uom="25" subset="0-9,99" nls="cameratype" />
+  <editor id = "cameratype" > 
+     <range  uom="25" subset="0-5,99" nls="cameratype" />
 </editor>
   <editor id = "MotionEn" > 
      <range  uom="25" subset="0-1,99" nls="MotionEn" />
@@ -43,8 +43,7 @@
   <editor id = "record" > 
      <range  uom="25" subset="0-1,99" nls="record" />
 </editor>
-
-<editor id = "PICEMAIL" > 
-     <range  uom="25" subset="0-1,99" nls="PicEmail" />
+  <editor id = "picemail" > 
+     <range  uom="25" subset="0-1" nls="PicEmail" />
 </editor>
 </editors> 

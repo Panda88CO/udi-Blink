@@ -34,12 +34,12 @@ class blink_camera_node(udi_interface.Node):
         self.pic_email_enabled = False
         self.nodeDefineDone = False
         self.poly = polyglot
-        self.cameraType= {  'mini' : 1, #mini/owl
-                            'doorbell': 2, #doorbell/lotus
-                            'Blink Outdoor':3, #outdoor/catalena
+        self.cameraType= {  'mini' : 0, #mini/owl
+                            'doorbell': 1, #doorbell/lotus
+                            'Blink Outdoor':2, #outdoor/catalena
                             'outdoorOld1':4,
                             'outdoorOld2':5,
-                            'indoorOld':6,
+                            'indoorOld':3,
                             'default':99,
                              }
 
@@ -143,9 +143,9 @@ class blink_camera_node(udi_interface.Node):
 
     commands = { 'UPDATE': ISYupdate,
                  'ARM' : arm_camera,
-                 'SNAP_PIC' : snap_pitcure,
+                 'SNAPPIC' : snap_pitcure,
                  'QUERY' : ISYupdate,
-                 'EMAIL_PIC' : email_picture,
+                 'EMAILPIC' : email_picture,
                 }
 
 

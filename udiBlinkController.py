@@ -199,7 +199,7 @@ class BlinkSetup (udi_interface.Node):
 
     def systemPoll (self, polltype):
         if self.nodeDefineDone:
-            logging.deinfoug('System Poll executing: {}'.format(polltype))
+            logging.info('System Poll executing: {}'.format(polltype))
 
             if 'longPoll' in polltype:
                 #Keep token current

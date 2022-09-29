@@ -123,7 +123,7 @@ class blink_camera_node(udi_interface.Node):
         else:
              self.node.setDriver('GV6', temp_info, True, True, 4)
         #self.node.setDriver('GV7', self.blink.get_camera_recording_info(self.camera.name))
-        self.node.setDriver('GV8', self.bool2isy(self.pic_email_enabled))
+        #self.node.setDriver('GV8', self.bool2isy(self.pic_email_enabled))
 
     
     def ISYupdate (self, command = None):
@@ -164,7 +164,7 @@ class blink_camera_node(udi_interface.Node):
                  'ARM' : arm_camera,
                  'SNAPPIC' : snap_pitcure,
                  'QUERY' : ISYupdate,
-                 'EMAILPIC' : enable_email_picture,
+                 #'EMAILPIC' : enable_email_picture,
                 }
 
 

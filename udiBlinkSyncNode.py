@@ -107,7 +107,7 @@ class blink_sync_node(udi_interface.Node):
         self.nodeDefineDone = True
         self.node.setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit.name)), True, True)
         tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
-        self.node.setDriver('GV2', self.bool2isy(tmp['armed']), True, True)
+        self.node.setDriver('GV2', self.bool2isy(tmp), True, True)
 
     def stop(self):
         logging.debug('stop - Cleaning up')

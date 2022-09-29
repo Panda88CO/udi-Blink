@@ -28,7 +28,7 @@ ND-blinkcamera-ICON = Input
 
 ST-nlsblinkcamera-GV1-NAME = Battery Satus
 battery-0 = OK
-battery-1 = Not O - TBD
+battery-1 = Not OK - TBD
 battery-2 = TBD
 battery-10 = No Battery
 battery-99 = Unknown

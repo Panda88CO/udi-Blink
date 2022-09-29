@@ -106,7 +106,7 @@ class blink_camera_node(udi_interface.Node):
         logging.debug(bat_info)
         self.node.setDriver('GV1', self.bat2isy(bat_info['battery']))
         if None == bat_info['battery_voltage']:
-            self.node.setDriver('GV2', 0)
+            self.node.setDriver('GVn2', 0)
         else:
             self.node.setDriver('GV2', bat_info['battery_voltage'])
         self.node.setDriver('GV3', self.cameraType[self.blink. get_camera_type_info(self.camera.name)])
@@ -133,7 +133,7 @@ class blink_camera_node(udi_interface.Node):
     def snap_pitcure (self):
         pass
 
-    def email_picture (self, status):
+    def enable_email_picture (self, status):
         self.pic_email_enabled = (1 == status)
 
     def arm_camera (self):
@@ -145,7 +145,7 @@ class blink_camera_node(udi_interface.Node):
                  'ARM' : arm_camera,
                  'SNAPPIC' : snap_pitcure,
                  'QUERY' : ISYupdate,
-                 'EMAILPIC' : email_picture,
+                 'EMAILPIC' : enable_email_picture,
                 }
 
 

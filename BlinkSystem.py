@@ -61,8 +61,8 @@ class blink_system(object):
     def set_temp_unit(self, temp_unit):
         self.temp_unit = temp_unit
 
-    def set_pic_email_enabled(self, status):
-        self.pic_email_enabled = status
+    #def set_pic_email_enabled(self, status):
+    #   self.pic_email_enabled = status
 
     def get_sync_unit(self, sync_unit_name):
         logging.debug('get_sync_unit - {}'.format(sync_unit_name))
@@ -111,7 +111,7 @@ class blink_system(object):
 
     def get_camera_battery_info(self, camera_name):
         logging.debug('get_camera_battery_info - {} '.format(camera_name ))
-        
+
         return({'battery':self.blink.cameras[camera_name].battery ,'battery_voltage':self.blink.cameras[camera_name].battery_voltage} )
 
 
@@ -153,7 +153,7 @@ class blink_system(object):
 
     def get_camera_recording_info(self, camera_name):
         logging.debug('get_camera_recording_info - {} '.format(camera_name ))
-        return('TBD')
+        return(0)
 
     def snap_picture(self, camera_name):
         logging.debug('snap_picture - {} '.format(camera_name ))

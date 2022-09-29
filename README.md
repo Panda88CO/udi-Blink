@@ -8,6 +8,8 @@ Furthermore the user must specify the sync unit(s) where the cameras are registe
 
 
 # Still to be done
-Plan is to add ability to send pictures of emails taken - Hopefully using the ISY/IoP email server.
-May look at adding ability to take a video (not only picture)
 I only have 3 camera types - Mini, doorbell and Outdoot (new) - I do not know the older camera's name. If you have those please enable debug and click update camera and provide log file and I can update this 
+
+Plan is to add ability to send pictures of emails taken - Hopefully using the ISY/IoP email server.
+
+May look at adding ability to take a video (not only pictures)

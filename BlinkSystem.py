@@ -18,6 +18,7 @@ except ImportError:
 from blinkpy.blinkpy import Blink
 from blinkpy.auth import Auth
 import re
+import datetime
 
 
 class blink_system(object):
@@ -162,10 +163,12 @@ class blink_system(object):
         return(0)
 
     def snap_picture(self, camera_name):
-        logging.debug('snap_picture - {} '.format(camera_name ))
+        dinfo = datetime.datetime.now()
+        photo_string =  camera_name+dinfo.strftime("_%a_%d_%b-%H_%M_%S")+'.jpg'
+        logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))
         self.blink.cameras[camera_name].snap_picture()
         self.blink.refresh()             # Get new information from server
-        self.blink.cameras[camera_name].image_to_file('./'+camera_name+'_image.jpg')
+        self.blink.cameras[camera_name].image_to_file('./'+photo_string)
 
     def get_camera_unit(self, camera_name):
         logging.debug('get_camera_unit - {} '.format(camera_name ))

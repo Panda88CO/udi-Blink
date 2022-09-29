@@ -148,6 +148,10 @@ class blink_camera_node(udi_interface.Node):
         logging.info(' arm_cameras: {} - {}'.format(self.camera.name, arm_enable ))
 
         self.blink.set_camera_arm(self.camera.name,  arm_enable )
+        if arm_enable:
+            self.node.reportCmd('DON')
+        else:
+            self.node.reportCmd('DOF')
         self.blink.refresh_data()
         self.updateISYdrivers()
         pass

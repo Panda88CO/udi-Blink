@@ -121,7 +121,7 @@ class blink_camera_node(udi_interface.Node):
         elif 'f' == self.blink.temp_unit:
              self.node.setDriver('GV6', temp_info+273.15, True, True, 17)
         else:
-             self.node.setDriver('GV6', temp_info['temp_c'], True, True, 4)
+             self.node.setDriver('GV6', temp_info, True, True, 4)
         self.node.setDriver('GV7', self.blink.get_camera_recording_info(self.camera.name))
         self.node.setDriver('GV8', self.bool2isy(self.pic_email_enabled))
 

@@ -89,10 +89,10 @@ class blink_system(object):
  
     def get_sync_arm_info(self, sync_name):
         logging.debug('get_sync_arm_info - {} '.format(sync_name ))
-        return({'armed': self.blink.sync[sync_name].arm})
+        return(self.blink.sync[sync_name].arm)
 
     def set_sync_arm (self, sync_name, armed=True):
-        logging.debug('set_arm_sync - {}{} '.format(sync_name, armed ))
+        logging.debug('set_arm_sync = {}- {} '.format(sync_name, armed ))
         self.blink.sync[sync_name].arm = armed
         self.blink.refresh()
 
@@ -111,13 +111,17 @@ class blink_system(object):
 
     def get_camera_battery_info(self, camera_name):
         logging.debug('get_camera_battery_info - {} '.format(camera_name ))
+        return(self.blink.cameras[camera_name].battery)
 
-        return({'battery':self.blink.cameras[camera_name].battery ,'battery_voltage':self.blink.cameras[camera_name].battery_voltage} )
+
+    def get_camera_battery_voltage_info(self, camera_name):
+        logging.debug('get_camera_battery_info - {} '.format(camera_name ))
+        return(self.blink.cameras[camera_name].battery_voltage )
 
 
     def get_camera_arm_info(self, camera_name):
         logging.debug('get_camera_arm_info - {} '.format(camera_name ))
-        return({'armed':self.blink.cameras[camera_name].arm})
+        return(self.blink.cameras[camera_name].arm)
 
 
     def set_camera_arm(self, camera_name, armed=True):
@@ -138,17 +142,19 @@ class blink_system(object):
             return('default')
 
 
-    def get_camera_motion_info(self, camera_name):
+    def get_camera_motion_enabled_info(self, camera_name):
         logging.debug('get_camera_motion_info - {} '.format(camera_name ))
-        return({'motion_enabled': self.blink.cameras[camera_name].motion_enabled,
-                'motion_detected':self.blink.cameras[camera_name].motion_detected}
-        )
+        return(self.blink.cameras[camera_name].motion_enabled )
+
+    def get_camera_motion_detected_info(self, camera_name):
+        logging.debug('get_camera_motion_info - {} '.format(camera_name ))
+        return(self.blink.cameras[camera_name].motion_detected )
 
 
 
     def get_camera_temperatureC_info(self, camera_name):
         logging.debug('get_camera_temperatureC_info - {} '.format(camera_name ))
-        return({'temp_c':self.blink.cameras[camera_name].temperature_c})
+        return(self.blink.cameras[camera_name].temperature_c)
 
 
     def get_camera_recording_info(self, camera_name):

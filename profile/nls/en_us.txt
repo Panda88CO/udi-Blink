@@ -20,8 +20,8 @@ armed-99 = Unknown
 CMD-nlsblinksync-UPDATE-NAME = Update System Data
 CMD-nlsblinksync-QUERY-NAME = QUERY
 CMD-nlsblinksync-ARM_ALL-NAME = Arm System
-do_arm-0 = Disarm
-do_arm-1 = Arm
+doarm-0 = Disarm
+doarm-1 = Arm
 
 ND-blinkcamera-NAME = Blink Camera
 ND-blinkcamera-ICON = Input

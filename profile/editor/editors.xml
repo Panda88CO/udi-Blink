@@ -6,9 +6,9 @@
      <range  uom="25" subset="0-1,99" nls="online"  />
 </editor>
   <editor id = "armed" > 
-     <range  uom="25" subset="0-1,10,99" nls="armed" />
+     <range  uom="25" subset="0-1,99" nls="armed" />
 </editor>
-  <editor id = "do_arm" > 
+  <editor id = "doarm" > 
      <range  uom="25" subset="0-1" nls="doarm" />
 </editor>
   <editor id = "enable" > 
@@ -18,7 +18,7 @@
      <range  uom="2" subset="0-1" />
 </editor>
   <editor id = "battery" > 
-     <range  uom="25" subset="0-2,99" nls="battery" />
+     <range  uom="25" subset="0-2,10,99" nls="battery" />
 </editor>
   <editor id = "battery_v" > 
      <range  uom="72" min=" 0" max="500"  prec="0" />

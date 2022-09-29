@@ -60,7 +60,7 @@
                 <p id="" editor="doarm" init="1" /> 
             </cmd >            
             <cmd id="QUERY" /> 
-            <cmd id="SNAP_PIC" /> 
+            <cmd id="SNAPPIC" /> 
             <cmd id="EMAILPIC" > 
                <p id="" editor="emailpic" init="0" /> 
             </cmd>

@@ -127,19 +127,25 @@ class blink_camera_node(udi_interface.Node):
 
     
     def ISYupdate (self, command = None):
+        logging.info(' ISYupdate: {}'.format(self.camera.name ))
         self.blink.refresh_data()
         self.updateISYdrivers()
     
     def snap_pitcure (self, command=None):
-        pass
+        logging.info(' snap_pitcure: {}'.format(self.camera.name))
+        self.blink.snap_picture(self.camera.name)
+     
+        
+        
 
     def enable_email_picture (self, command):
-        status  = (1 == int(command.get('value')) )
+        status  = (1 == int(command.get('value')) )     
+        logging.info(' enable_email_picture: {} - {}'.format(self.camera.name, status ))
         self.pic_email_enabled = (status)
 
     def arm_camera (self, command):
         arm_enable = ('1' == int(command.get('value')) )
-        logging.debug(' arm_cameras: {} - {}'.format(self.camera.name, arm_enable ))
+        logging.info(' arm_cameras: {} - {}'.format(self.camera.name, arm_enable ))
 
         self.blink.set_camera_arm(self.camera.name,  arm_enable )
         self.blink.refresh_data()

@@ -19,13 +19,13 @@ armed-1 = Armed
 armed-99 = Unknown
 CMD-nlsblinksync-UPDATE-NAME = Update System Data
 CMD-nlsblinksync-QUERY-NAME = QUERY
-CMD-nlsblinksync-ARM_ALL-NAME = Arm System
+CMD-nlsblinksync-ARM_ALL-NAME = Set Arm
 doarm-0 = Disarm
 doarm-1 = Arm
 
 ND-blinkcamera-NAME = Blink Camera
 ND-blinkcamera-ICON = Input
-ST-nlsblinkcamera-GV0-NAME = Arm Satus
+ST-nlsblinkcamera-GV0-NAME = Arm Status
 ST-nlsblinkcamera-GV1-NAME = Battery Satus
 battery-0 = OK
 battery-1 = Not OK - TBD
@@ -67,6 +67,6 @@ emailpic-0 = Email Disabled
 
 CMD-nlsblinkcamera-UPDATE-NAME = Update System
 CMD-nlsblinkcamera-QUERY-NAME = Update System
-CMD-nlsblinkcamera-ARM-NAME = Arm Camera
+CMD-nlsblinkcamera-ARM-NAME = Set Arm 
 CMD-nlsblinkcamera-SNAPPIC-NAME = Take Picture
 CMD-nlsblinkcamera-EMAILPIC-NAME = Email Picture Enable

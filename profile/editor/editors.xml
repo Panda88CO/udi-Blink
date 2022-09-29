@@ -43,7 +43,7 @@
   <editor id = "record" > 
      <range  uom="25" subset="0-1,99" nls="record" />
 </editor>
-  <editor id = "picemail" > 
-     <range  uom="25" subset="0-1" nls="PicEmail" />
+  <editor id = "emailpic" > 
+     <range  uom="25" subset="0-1" nls="emailpic" />
 </editor>
 </editors> 

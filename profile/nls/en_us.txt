@@ -61,8 +61,8 @@ record-1 = Record
 record-99 = Unknown
 
 ST-nlsblinkcamera-GV8-NAME = Email Snapped Pitcutre
-PicEmail-1 = Email Enabled
-PicEmail-0 = Email Disabled
+emailpic-1 = Email Enabled
+emailpic-0 = Email Disabled
 
 CMD-nlsblinkcamera-UPDATE-NAME = Update System
 CMD-nlsblinkcamera-QUERY-NAME = Update System

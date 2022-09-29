@@ -128,7 +128,9 @@ class blink_camera_node(udi_interface.Node):
     
     def ISYupdate (self, command = None):
         logging.info(' ISYupdate: {}'.format(self.camera.name ))
+
         self.blink.refresh_data()
+        logging.debug('Camera {} data: {}'.format(self.camera.name,  self.blink.get_camera_data(self.camera.name )))
         self.updateISYdrivers()
     
     def snap_pitcure (self, command=None):

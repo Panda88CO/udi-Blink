@@ -126,8 +126,9 @@ class blink_sync_node(udi_interface.Node):
         self.updateISYdrivers('all')
         
 
-    def arm_all_cameras (self, arm_enable):
-        logging.debug('Sync arm_all_cameras')
+    def arm_all_cameras (self, command):
+        arm_enable = (1 == int(command.get('value')) )
+        logging.debug('Sync arm_all_cameras:{} - {}'.format(self.sync_unit.name, arm_enable ))
         self.blink.set_sync_arm(self.sync_unit.name,  arm_enable )
         self.updateISYdrivers()
 

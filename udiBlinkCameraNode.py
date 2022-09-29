@@ -127,16 +127,21 @@ class blink_camera_node(udi_interface.Node):
         self.node.setDriver('GV8', self.bool2isy(self.pic_email_enabled))
 
     
-    def ISYupdate (self):
+    def ISYupdate (self, command = None):
         self.updateISYdrivers()
     
-    def snap_pitcure (self):
+    def snap_pitcure (self, command=None):
         pass
 
-    def enable_email_picture (self, status):
-        self.pic_email_enabled = (1 == status)
+    def enable_email_picture (self, command):
+        status  = (1 == int(command.get('value')) )
+        self.pic_email_enabled = (status)
 
-    def arm_camera (self):
+    def arm_camera (self, command):
+        arm_enable = (1 == int(command.get('value')) )
+        logging.debug(' arm_cameras: {} - {}'.format(self.camera.name, arm_enable ))
+        self.blink.set_camera_arm(self.camera.name,  arm_enable )
+        self.updateISYdrivers()
         pass
 
     id = 'blinkcamera'

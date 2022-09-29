@@ -54,10 +54,10 @@ class blink_system(object):
         else:
             return{'no login'}
 
-    def refresh(self):
-         logging.debug('refresh')
-         return(self.blink.refresh())
-
+    def refresh_data(self):
+        logging.debug('blink_refresh_data')
+        self.blink.refresh()
+        
     def set_temp_unit(self, temp_unit):
         self.temp_unit = temp_unit
 
@@ -94,7 +94,7 @@ class blink_system(object):
     def set_sync_arm (self, sync_name, armed=True):
         logging.debug('set_arm_sync = {}- {} '.format(sync_name, armed ))
         self.blink.sync[sync_name].arm = armed
-        self.blink.refresh()
+        #self.blink.refresh()
 
     def get_sync_online(self, sync_name):
         logging.debug('get_sync_online - {} {} '.format(sync_name, self.blink.sync[sync_name].online ))
@@ -127,7 +127,7 @@ class blink_system(object):
     def set_camera_arm(self, camera_name, armed=True):
         logging.debug('set_camera_arm - {} {}'.format(camera_name, armed ))
         self.blink.cameras[camera_name].arm = armed
-        self.blink.refresh()
+        #self.blink.refresh()
 
     def get_camera_type_info(self, camera_name):
         logging.debug('get_camera_type_info - {} '.format(camera_name ))
@@ -172,8 +172,5 @@ class blink_system(object):
         return(self.blink.cameras[camera_name])
 
     
-    def refresh_data(self):
-        logging.debug('blink_refresh_data')
-        self.blink.refresh()
-        
+
     

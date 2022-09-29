@@ -124,16 +124,27 @@ class blink_sync_node(udi_interface.Node):
 
     def ISYupdate(self):
         logging.debug('Sync ISYupdate')
+        self.blink.refresh()
         self.updateISYdrivers('all')
         
 
     def arm_all_cameras (self, command):
         arm_enable = (1 == int(command.get('value')) )
         logging.debug('Sync arm_all_cameras:{} - {}'.format(self.sync_unit.name, arm_enable ))
-        self.node.setDriver('GV2', self.bool2isy(arm_enable))
-        self.blink.set_sync_arm(self.sync_unit.name,  arm_enable )
-        self.updateISYdrivers()
-
+        if self.sync_unit != None:
+            self.node.setDriver('GV2', self.bool2isy(arm_enable))
+            self.blink.set_sync_arm(self.sync_unit.name,  arm_enable )
+            self.updateISYdrivers()
+        else:
+            camera_list = self.blink.get_camera_list()
+            for camera in camera_list:
+                self.blink.set_camera_arm(self, camera, arm_enable)
+            
+        self.blink.refresh()
+        nodes = self.poly.getNodes()
+        for nde in nodes:
+            if nde != 'controller':   # but not the controller node
+                nodes[nde].updateISYdrivers()
     id = 'blinksync'
 
     commands = { 'UPDATE'   : ISYupdate,

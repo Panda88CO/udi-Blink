@@ -14,7 +14,7 @@
         {
             "title": "A NodeServer to integrate Blink Camera Systems",
             "author": "Panda88CO",
-            "version": "0.2.0",
+            "version": "0.2.2",
             "date": "Sept 30,  2022",
             "source": "https://github.com/Panda88CO/udi-Blink",
             "license": "https://github.com/Panda88CO/udi-Blink/blob/main/license"

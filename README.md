@@ -12,3 +12,6 @@ ShortPoll is heart beat from controller node, LongPoll updates data.  Do not run
 I only have 3 camera types - Mini, doorbell and Outdoot (new) - I do not know the older camera's name. If you have those please enable debug and click update camera and provide log file and I can update this 
 
 Plan is to add ability to send pictures of emails/videos taken.
+
+# misc
+Based on blink API https://github.com/fronzbot/blinkpy

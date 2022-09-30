@@ -105,7 +105,7 @@ class blink_sync_node(udi_interface.Node):
             #nodeAdr = str(name).replace(' ','')[:14]
             logging.info('Adding Camera {} {} {}'.format(self.address,nodeAdr, nodeName))
             blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera_unit, self.blink)
-            self.sync_node_list.append(nodeAdr)
+            self.sync_node_camera_list.append(nodeAdr)
             
 
         self.nodeDefineDone = True

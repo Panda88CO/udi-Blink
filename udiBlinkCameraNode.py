@@ -147,7 +147,7 @@ class blink_camera_node(udi_interface.Node):
         logging.info(' arm_cameras: {} - {}'.format(self.camera.name, motion_enable ))
 
         self.blink.set_camera_motion_detect(self.camera.name,  motion_enable )
-        self.blink.refresh_data(self.camera.name)
+        self.blink.refresh_data()
         self.updateISYdrivers()
 
     def arm_camera (self, command):
@@ -159,7 +159,7 @@ class blink_camera_node(udi_interface.Node):
             self.node.reportCmd('DON')
         else:
             self.node.reportCmd('DOF')
-        self.blink.refresh_data(self.camera.name)
+        self.blink.refresh_data()
         self.updateISYdrivers()
 
     def enable_email_picture (self, command):

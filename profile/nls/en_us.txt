@@ -19,7 +19,7 @@ armed-1 = Armed
 armed-99 = Unknown
 CMD-nlsblinksync-UPDATE-NAME = Update SyncUnit
 CMD-nlsblinksync-QUERY-NAME = QUERY
-CMD-nlsblinksync-ARM_ALL-NAME = Set Arm
+CMD-nlsblinksync-ARM_ALL-NAME = Set Arming
 doarm-0 = Disarm
 doarm-1 = Arm
 

@@ -19,6 +19,7 @@ from blinkpy.blinkpy import Blink
 from blinkpy.auth import Auth
 import re
 import datetime
+import time
 
 
 class blink_system(object):
@@ -173,10 +174,14 @@ class blink_system(object):
 
     def snap_video(self, camera_name):
         dinfo = datetime.datetime.now()
-        video_string =  camera_name+dinfo.strftime("_%a_%d_%b-%H_%M_%S")+'.jpg'
+        video_string =  camera_name+dinfo.strftime("_%a_%d_%b-%H_%M_%S")+'.mp4'
         logging.debug('snap_video - {} - {}'.format(camera_name, video_string ))
         self.blink.cameras[camera_name].record()
-        self.blink.refresh()             # Get new information from server
+        self.blink.refresh()   
+        while None == self.blink.cameras[camera_name].clip:  # Get new information from server
+            time.sleep(60)
+            self.blink.refresh()   
+            logging.debug('waiting for video clip to appear')
         self.blink.cameras[camera_name].video_to_file('./'+video_string)
 
 

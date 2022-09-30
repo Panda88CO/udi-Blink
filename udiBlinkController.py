@@ -48,7 +48,7 @@ class BlinkSetup (udi_interface.Node):
         self.userName = None
         self.password = None
         self.authKey = None
-
+        
         self.Parameters = Custom(polyglot, 'customParams')      
         self.Notices = Custom(polyglot, 'notices')
         self.n_queue = []
@@ -149,6 +149,7 @@ class BlinkSetup (udi_interface.Node):
 
     def add_sync_nodes (self):
         logging.info('Adding sync units: {}'.format(self.syncUnits ))
+        self.sync_node_list = []
         if self.syncUnits!= None :
             if not 'NONE' in self.syncUnits:
                 for sync_name in self.syncUnits:                    
@@ -166,6 +167,7 @@ class BlinkSetup (udi_interface.Node):
                 logging.info('No sync specified - create dummy node {} for all cameras '.format('nosync')) 
                 if not blink_sync_node(self.poly, 'nosync', 'nosync', 'Blink Cameras', None, self.blink ):
                     logging.error('Failed to create dummy node {}'.format('nosync')) 
+ 
         self.poly.updateProfile()
 
 
@@ -209,6 +211,7 @@ class BlinkSetup (udi_interface.Node):
                     nodes = self.poly.getNodes()
                     for nde in nodes:
                         if nde != 'controller':   # but not the controller node
+                            logging.debug('updating node {} data'.format(nde))
                             nodes[nde].updateISYdrivers()
                          
                 except Exception as e:
@@ -317,7 +320,7 @@ class BlinkSetup (udi_interface.Node):
 if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
-        polyglot.start('0.2.2')
+        polyglot.start('0.2.3')
         BlinkSetup(polyglot, 'controller', 'controller', 'BlinkSetup')
 
         # Just sit and wait for events

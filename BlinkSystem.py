@@ -19,12 +19,10 @@ from blinkpy.blinkpy import Blink
 from blinkpy.auth import Auth
 import re
 import datetime
-<<<<<<< Updated upstream
 
-=======
 import time
 import emailMedia
->>>>>>> Stashed changes
+
 
 class blink_system(object):
     def __init__(self):

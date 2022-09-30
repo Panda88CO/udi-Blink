@@ -124,11 +124,9 @@ class blink_system(object):
         logging.debug('get_camera_arm_info - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name].arm)
 
-
     def set_camera_arm(self, camera_name, armed=True):
         logging.debug('set_camera_arm - {} {}'.format(camera_name, armed ))
         self.blink.cameras[camera_name].arm = armed
-        #self.blink.refresh()
 
     def get_camera_type_info(self, camera_name):
         logging.debug('get_camera_type_info - {} '.format(camera_name ))
@@ -142,16 +140,19 @@ class blink_system(object):
         else:
             return('default')
 
-
     def get_camera_motion_enabled_info(self, camera_name):
         logging.debug('get_camera_motion_info - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name].motion_enabled )
 
+    def set_camera_motion_detect(self, sync_name, enabled=True):
+        logging.debug('set_camera_motion_detect = {}- {} '.format(sync_name, enabled ))
+        self.blink.sync[sync_name].set_motion_detect(enabled)
+
+
+
     def get_camera_motion_detected_info(self, camera_name):
         logging.debug('get_camera_motion_info - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name].motion_detected )
-
-
 
     def get_camera_temperatureC_info(self, camera_name):
         logging.debug('get_camera_temperatureC_info - {} '.format(camera_name ))
@@ -169,6 +170,16 @@ class blink_system(object):
         self.blink.cameras[camera_name].snap_picture()
         self.blink.refresh()             # Get new information from server
         self.blink.cameras[camera_name].image_to_file('./'+photo_string)
+
+    def snap_video(self, camera_name):
+        dinfo = datetime.datetime.now()
+        video_string =  camera_name+dinfo.strftime("_%a_%d_%b-%H_%M_%S")+'.jpg'
+        logging.debug('snap_video - {} - {}'.format(camera_name, video_string ))
+        self.blink.cameras[camera_name].record()
+        self.blink.refresh()             # Get new information from server
+        self.blink.cameras[camera_name].video_to_file('./'+video_string)
+
+
 
     def get_camera_unit(self, camera_name):
         logging.debug('get_camera_unit - {} '.format(camera_name ))

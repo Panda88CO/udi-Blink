@@ -138,37 +138,54 @@ class blink_camera_node(udi_interface.Node):
         self.blink.snap_picture(self.camera.name)
      
         
-        
+    def snap_video (self, command=None):
+        logging.info(' snap_pitcure: {}'.format(self.camera.name))
+        self.blink.snap_video(self.camera.name)
+             
+    def motion_detection (self, command):
+        motion_enable = ('1' == int(command.get('value')) )
+        logging.info(' arm_cameras: {} - {}'.format(self.camera.name, motion_enable ))
 
-    def enable_email_picture (self, command):
-        status  = (1 == int(command.get('value')) )     
-        logging.info(' enable_email_picture: {} - {}'.format(self.camera.name, status ))
-        self.pic_email_enabled = (status)
+        self.blink.set_camera_motion_detect(self.camera.name,  motion_enable )
+        self.blink.refresh_data(self.camera.name)
+        self.updateISYdrivers()
 
     def arm_camera (self, command):
         arm_enable = ('1' == int(command.get('value')) )
-        logging.info(' arm_cameras: {} - {}'.format(self.camera.name, arm_enable ))
+        logging.info(' arm_cameras: {} - {}'.format(self.camera.name, arm_enable))
 
         self.blink.set_camera_arm(self.camera.name,  arm_enable )
         if arm_enable:
             self.node.reportCmd('DON')
         else:
             self.node.reportCmd('DOF')
-        self.blink.refresh_data()
+        self.blink.refresh_data(self.camera.name)
         self.updateISYdrivers()
-        pass
+
+    def enable_email_picture (self, command):
+        status  = (1 == int(command.get('value')) )     
+        logging.info(' enable_email_picture: {} - {}'.format(self.camera.name, status ))
+        self.pic_email_enabled = (status)
+
+    def enable_email_video (self, command):
+        status  = (1 == int(command.get('value')) )     
+        logging.info(' enable_email_video: {} - {}'.format(self.camera.name, status ))
+        self.pic_email_enabled = (status)
+
 
     id = 'blinkcamera'
 
     commands = { 'UPDATE': ISYupdate,
                  'ARM' : arm_camera,
+                 'MOTION' : motion_detection,
                  'SNAPPIC' : snap_pitcure,
+                 'SNAPVIDEO' : snap_video,
                  'QUERY' : ISYupdate,
                  #'EMAILPIC' : enable_email_picture,
                 }
 
 
-    drivers= [  {'driver': 'ST', 'value':0, 'uom':25},
+    drivers= [  {'driver': 'ST' , 'value':0,  'uom':25},
                 {'driver': 'GV0', 'value':99, 'uom':25},  #Arm status
                 {'driver': 'GV1', 'value':99, 'uom':25}, # Battery
                 {'driver': 'GV2', 'value':99, 'uom':25}, # Battery

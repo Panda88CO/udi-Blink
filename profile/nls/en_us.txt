@@ -72,3 +72,5 @@ CMD-nlsblinkcamera-MOTION-NAME = Set Motion Detection
 CMD-nlsblinkcamera-SNAPPIC-NAME = Take Picture
 CMD-nlsblinkcamera-SNAPVIDEO-NAME = Take Video
 CMD-nlsblinkcamera-EMAILPIC-NAME = Email Picture Enable
+enable-0 = Disabled
+enable-1 = Enabled

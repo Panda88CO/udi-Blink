@@ -143,13 +143,14 @@ class blink_sync_node(udi_interface.Node):
                 self.node.reportCmd('DON')
             else:
                 self.node.reportCmd('DOF')
-            self.updateISYdrivers()
+            #self.updateISYdrivers()
         else:
             camera_list = self.blink.get_camera_list()
             for camera in camera_list:
                 self.blink.set_camera_arm(self, camera, arm_enable)     
-
         self.blink.refresh_data()
+        time.sleep(2)
+        self.updateISYdrivers()
         time.sleep(3)
         nodes = self.poly.getNodes()
         for nde in nodes:

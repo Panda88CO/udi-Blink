@@ -148,6 +148,7 @@ class blink_camera_node(udi_interface.Node):
 
         self.blink.set_camera_motion_detect(self.camera.name,  motion_enable )
         self.blink.refresh_data()
+        time.sleep(3)
         self.updateISYdrivers()
 
     def arm_camera (self, command):

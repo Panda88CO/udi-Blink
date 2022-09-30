@@ -165,24 +165,45 @@ class blink_system(object):
         return(0)
 
     def snap_picture(self, camera_name):
-        dinfo = datetime.datetime.now()
-        photo_string =  camera_name+dinfo.strftime("_%a_%d_%b-%H_%M_%S")+'.jpg'
+
         logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))
         self.blink.cameras[camera_name].snap_picture()
+        dinfo = datetime.datetime.now()
+        photo_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.jpg'
         self.blink.refresh()             # Get new information from server
         self.blink.cameras[camera_name].image_to_file('./'+photo_string)
-
+        #emailMedia.sendEmail('./'+photo_string, 'christian.olgaard@gmail.com', dinfo)
+        
     def snap_video(self, camera_name):
+
+        temp = self.blink.cameras[camera_name].record()
+        count = 0
+        if 'created_at' not in temp and count <4:
+            logging.info('Capture did not succeed - trying again in 10 sec')
+            time.sleep(10)
+            temp = self.blink.cameras[camera_name].record()
+            count= count + 1
+        if count >= 4:
+            return(False)
         dinfo = datetime.datetime.now()
-        video_string =  camera_name+dinfo.strftime("_%a_%d_%b-%H_%M_%S")+'.mp4'
+        video_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.mp4'
         logging.debug('snap_video - {} - {}'.format(camera_name, video_string ))
-        self.blink.cameras[camera_name].record()
+        time.sleep(5)
         self.blink.refresh()   
-        while None == self.blink.cameras[camera_name].clip:  # Get new information from server
-            time.sleep(60)
+        count = 0
+        while None == self.blink.cameras[camera_name].clip and count <4:  # Get new information from server
+            time.sleep(10)
             self.blink.refresh()   
-            logging.debug('waiting for video clip to appear')
+            logging.debug('waiting for video clip to appear {}'.format( self.blink.cameras[camera_name].clip))
+            count = count + 1
+        #link = self.blink.cameras[camera_name].request_videos()
         self.blink.cameras[camera_name].video_to_file('./'+video_string)
+        #file = open('./'+video_string, 'rb')
+        #emailMedia.sendEmail('./'+video_string, 'christian.olgaard@gmail.com', dinfo)
+        if count >= 4:
+            return(False)
+        else:
+            return(True)
 
 
 

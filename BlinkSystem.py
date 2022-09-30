@@ -144,9 +144,9 @@ class blink_system(object):
         logging.debug('get_camera_motion_info - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name].motion_enabled )
 
-    def set_camera_motion_detect(self, sync_name, enabled=True):
-        logging.debug('set_camera_motion_detect = {}- {} '.format(sync_name, enabled ))
-        self.blink.sync[sync_name].set_motion_detect(enabled)
+    def set_camera_motion_detect(self, camera_name, enabled=True):
+        logging.debug('set_camera_motion_detect = {}- {} '.format(camera_name, enabled ))
+        self.blink.cameras[camera_name].set_motion_detect(enabled)
 
 
 

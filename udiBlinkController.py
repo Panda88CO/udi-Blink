@@ -7,6 +7,7 @@ import time
 import re
 import os
 
+
 try:
     import udi_interface
     logging = udi_interface.LOGGER
@@ -115,7 +116,7 @@ class BlinkSetup (udi_interface.Node):
 
     def start (self):
         logging.info('Executing start - BlinkSetup')
-        
+
         self.poly.updateProfile()
         while not self.paramsProcessed or not self.nodeDefineDone:
             logging.info('Waiting for setup to complete param:{} nodes:{}'.format(self.paramsProcessed, self.nodeDefineDone ))
@@ -326,7 +327,7 @@ class BlinkSetup (udi_interface.Node):
 if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
-        polyglot.start('0.2.6')
+        polyglot.start('0.2.7')
         BlinkSetup(polyglot, 'controller', 'controller', 'BlinkSetup')
 
         # Just sit and wait for events

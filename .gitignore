@@ -25,3 +25,4 @@ blinkpy/sync_module.py
 *.jpg
 *.mp4
 __pycache__/BlinkSystem.cpython-310.pyc
+*.pyc

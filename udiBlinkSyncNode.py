@@ -35,6 +35,7 @@ class blink_sync_node(udi_interface.Node):
         self.primary = primary
         self.address = address
         self.sync_node_camera_list = []
+        self.n_queue = []  
         self.poly = polyglot
         #self.Parameters = Custom(polyglot, 'customparams')
         # subscribe to the events we want
@@ -44,7 +45,7 @@ class blink_sync_node(udi_interface.Node):
         self.poly.subscribe(self.poly.STOP, self.stop)
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
 
-        self.n_queue = []        
+             
 
         # start processing events and create add our controller node
         polyglot.ready()

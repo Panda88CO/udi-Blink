@@ -44,11 +44,11 @@ class blink_system(object):
             self.blink.start()
             if self.blink.key_required:
                 logging.info('Auth key required')
-                if self.authkey == None or self.authKey == '':
+                if authenKey == None or authenKey == '':
                   
-                    return('AuthKey')
+                    return('AuthKey Empty: {}'.format(authenKey))
                 else:
-                    auth.send_auth_key(self.blink, self.authKey)
+                    auth.send_auth_key(self.blink, authenKey)
             logging.debug('setup_post_verify')
             self.blink.setup_post_verify()
             self.blink.refresh()

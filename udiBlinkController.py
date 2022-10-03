@@ -144,7 +144,8 @@ class BlinkSetup (udi_interface.Node):
 
             self.add_sync_nodes()
 
-
+        #a=os.popen('netstat -a |grep 8003').read()
+        #logging.debug("\n Connections {}".format(a) )
         #self.poly.updateProfile()
 
 

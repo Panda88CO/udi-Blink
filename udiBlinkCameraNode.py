@@ -114,11 +114,12 @@ class blink_camera_node(udi_interface.Node):
         #self.node.setDriver('GV4', self.bool2isy(self.blink.get_camera_motion_enabled_info(self.camera.name)), True, True)
         self.node.setDriver('GV5', self.bool2isy(self.blink.get_camera_motion_detected_info(self.camera.name)), True, True)
         temp_info = self.blink.get_camera_temperatureC_info(self.camera.name)
+
         if  None ==  temp_info:
             self.node.setDriver('GV6', 0, True, True,  25)
-        elif 'k' == self.blink.temp_unit:
+        elif 'K' == self.blink.temp_unit:
              self.node.setDriver('GV6', temp_info*9/5+32, True, True, 26)
-        elif 'f' == self.blink.temp_unit:
+        elif 'F' == self.blink.temp_unit:
              self.node.setDriver('GV6', temp_info+273.15, True, True, 17)
         else:
              self.node.setDriver('GV6', temp_info, True, True, 4)

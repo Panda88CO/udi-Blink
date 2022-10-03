@@ -117,9 +117,9 @@ class blink_camera_node(udi_interface.Node):
 
         if  None ==  temp_info:
             self.node.setDriver('GV6', 0, True, True,  25)
-        elif 'K' == self.blink.temp_unit:
+        elif 'K' == self.blink.temp_unit or 'k' == self.blink.temp_unit:
              self.node.setDriver('GV6', temp_info*9/5+32, True, True, 26)
-        elif 'F' == self.blink.temp_unit:
+        elif 'F' == self.blink.temp_unit or 'f' == self.blink.temp_unit:
              self.node.setDriver('GV6', temp_info+273.15, True, True, 17)
         else:
              self.node.setDriver('GV6', temp_info, True, True, 4)

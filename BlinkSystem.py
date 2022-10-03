@@ -52,6 +52,7 @@ class blink_system(object):
             logging.debug('setup_post_verify')
             self.blink.setup_post_verify()
             self.blink.refresh()
+            time.sleep(3)
             return('ok')
         else:
             return{'no login'}

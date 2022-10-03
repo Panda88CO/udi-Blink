@@ -48,7 +48,8 @@ class BlinkSetup (udi_interface.Node):
         self.userName = None
         self.password = None
         self.authKey = None
-        
+        self.sync_nodes_added = False
+
         self.Parameters = Custom(polyglot, 'customParams')      
         self.Notices = Custom(polyglot, 'notices')
         self.n_queue = []
@@ -131,6 +132,7 @@ class BlinkSetup (udi_interface.Node):
             exit() 
         else:
             success = self.blink.auth(self.userName,self.password, self.authKey )
+            logging.debug('Auth: {}'.format(success))
             if 'AuthKey' == success:
                 logging.error('AuthKey required - please add to config')
                 self.poly.Notices['ak'] = 'username and password must be provided to start node server'
@@ -169,6 +171,7 @@ class BlinkSetup (udi_interface.Node):
                     logging.error('Failed to create dummy node {}'.format('nosync')) 
  
         self.poly.updateProfile()
+        self.sync_nodes_added = True
 
 
     def stop(self):
@@ -200,7 +203,7 @@ class BlinkSetup (udi_interface.Node):
 
 
     def systemPoll (self, polltype):
-        if self.nodeDefineDone:
+        if self.nodeDefineDone and self.sync_nodes_added:
             logging.info('System Poll executing: {}'.format(polltype))
 
             if 'longPoll' in polltype:
@@ -220,6 +223,8 @@ class BlinkSetup (udi_interface.Node):
                 
             if 'shortPoll' in polltype:
                 self.heartbeat()
+        else:
+            logging.info('System Poll - Waiting for all nodes to be added')
   
 
 
@@ -320,7 +325,7 @@ class BlinkSetup (udi_interface.Node):
 if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
-        polyglot.start('0.2.4')
+        polyglot.start('0.2.5')
         BlinkSetup(polyglot, 'controller', 'controller', 'BlinkSetup')
 
         # Just sit and wait for events

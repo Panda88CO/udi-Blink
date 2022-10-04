@@ -4,8 +4,12 @@ The node is targeted primarily at arming and disarming cameras, but allows snapp
 (Furutre will add ability to have the picture emailed automatically to the user account)
 
 # Setup
-User needs provide username and password used for the Blink App.  A one time authndication may also be needed.
-Furthermore the user must specify the sync unit(s) where the cameras are registered - A comman separated list is ok if more than 1 sync unit is being used.  If no sync unit is used specify NONE
+User needs provide username and password used for the Blink App.  A one time/2way authentication may also be needed.  In the case of 2 way autenticantion.  Obtain the code using the Blink app and enter the data under configuration
+
+The user must specify the sync unit(s) where the cameras are registered - A comman separated list is ok if more than 1 sync unit is being used.  If no sync unit is used specify NONE
+
+Note, the API does not handle special characters in the camera and sync names - please remove/rename those before setting upthe node
+
 ShortPoll is heart beat from controller node, LongPoll updates data.  Do not run update too often, as system may get throttled by Blink - Suggested to be more than 60sec between updates
 
 # Still to be done

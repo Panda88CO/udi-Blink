@@ -172,9 +172,7 @@ class blink_system(object):
         self.blink.cameras[camera_name].snap_picture()
         self.blink.refresh()             # Get new information from server
         self.blink.cameras[camera_name].image_to_file('./'+photo_string)
-<<<<<<< Updated upstream
-=======
-        emailMedia.sendEmail('./'+photo_string, 'christian.olgaard@gmail.com', dinfo)
+        #emailMedia.sendEmail('./'+photo_string, camera_name)
         
     def snap_video(self, camera_name):
         dinfo = datetime.datetime.now()
@@ -200,13 +198,12 @@ class blink_system(object):
         #link = self.blink.cameras[camera_name].request_videos()
         self.blink.cameras[camera_name].video_to_file('./'+video_string)
         file = open('./'+video_string, 'rb')
-        emailMedia.sendEmail('./'+video_string, 'christian.olgaard@gmail.com', dinfo)
+        #emailMedia.sendEmail('./'+video_string, camera_name)
         if count >= 4:
             return(False)
         else:
             return(True)
 
->>>>>>> Stashed changes
 
     def get_camera_unit(self, camera_name):
         logging.debug('get_camera_unit - {} '.format(camera_name ))

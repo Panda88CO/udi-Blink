@@ -34,16 +34,36 @@ except ImportError:
 # It goes to say this work takes effort so please use my referral to support my work
 # https://2captcha.com?from=12244449 
 # The link above allows you to create a acount with 2captcha 
+'''
+
+SUBJECT = "Email Data"
+
+msg = MIMEMultipart()
+msg['Subject'] = SUBJECT 
+msg['From'] = self.EMAIL_FROM
+msg['To'] = ', '.join(self.EMAIL_TO)
+
+part = MIMEBase('application', "octet-stream")
+part.set_payload(open("text.txt", "rb").read())
+Encoders.encode_base64(part)
+    
+part.add_header('Content-Disposition', 'attachment; filename="text.txt"')
+
+msg.attach(part)
+
+server = smtplib.SMTP(self.EMAIL_SERVER)
+server.sendmail(self.EMAIL_FROM, self.EMAIL_TO, msg.as_string())
+
+'''
 
 
 
+def sendEmail(mediaFileName, camera_name):
 
-def sendEmail(mediaFileName, email, captureTime):
-
-    subject = 'Captured Media File'
-    body = 'This is an email with captured image from camera'
+    subject = 'Captured Media File from {}'.format(camera_name)
+    #body = '{} was captured on {} at {}'.format(mediaFileName, camera_name, captureTime)
     sender_email = 'isy_powerwall@outlook.com'
-    receiver_email = email
+    receiver_email = 'christian@olgaard.com'
     password = 'isy123ISY!@#'
 
     # Create a multipart message and set headers
@@ -51,19 +71,15 @@ def sendEmail(mediaFileName, email, captureTime):
     message['From'] = sender_email
     message['To'] = receiver_email
     message['Subject'] = subject
-    #message["Bcc"] = receiver_email  # Recommended for mass emails
 
-    # Add body to email
-    message.attach(MIMEText(body, 'plain'))
+    part = MIMEBase('application', "octet-stream")
+    part.set_payload(open("text.txt", "rb").read())
+    encoders.encode_base64(part)
+    part.add_header('Content-Disposition', 'attachment; filename='+'./'+mediaFileName)
+
+    message.attach(part)    
 
     filename = mediaFileName  # In same directory as script
-
-    # Open PDF file in binary mode
-    with open(filename, 'rb') as attachment:
-        # Add file as application/octet-stream
-        # Email client can usually download this automatically as attachment
-        part = MIMEBase('application', 'octet-stream')
-        part.set_payload(attachment.read())
 
     # Encode file in ASCII characters to send by email    
     encoders.encode_base64(part)

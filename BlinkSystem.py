@@ -166,18 +166,21 @@ class blink_system(object):
         return(0)
 
     def snap_picture(self, camera_name):
-        dinfo = datetime.datetime.now()
-        photo_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.jpg'
+
         logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))
         self.blink.cameras[camera_name].snap_picture()
+        dinfo = datetime.datetime.now()
+        photo_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.jpg'
         self.blink.refresh()             # Get new information from server
         self.blink.cameras[camera_name].image_to_file('./'+photo_string)
+<<<<<<< Updated upstream
         #emailMedia.sendEmail('./'+photo_string, camera_name)
+=======
+        #emailMedia.sendEmail('./'+photo_string, 'christian.olgaard@gmail.com', dinfo)
+>>>>>>> Stashed changes
         
     def snap_video(self, camera_name):
-        dinfo = datetime.datetime.now()
-        video_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.mp4'
-        logging.debug('snap_video - {} - {}'.format(camera_name, video_string ))
+
         temp = self.blink.cameras[camera_name].record()
         count = 0
         if 'created_at' not in temp and count <4:
@@ -187,6 +190,9 @@ class blink_system(object):
             count= count + 1
         if count >= 4:
             return(False)
+        dinfo = datetime.datetime.now()
+        video_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.mp4'
+        logging.debug('snap_video - {} - {}'.format(camera_name, video_string ))
         time.sleep(5)
         self.blink.refresh()   
         count = 0
@@ -197,8 +203,13 @@ class blink_system(object):
             count = count + 1
         #link = self.blink.cameras[camera_name].request_videos()
         self.blink.cameras[camera_name].video_to_file('./'+video_string)
+<<<<<<< Updated upstream
         file = open('./'+video_string, 'rb')
         #emailMedia.sendEmail('./'+video_string, camera_name)
+=======
+        #file = open('./'+video_string, 'rb')
+        #emailMedia.sendEmail('./'+video_string, 'christian.olgaard@gmail.com', dinfo)
+>>>>>>> Stashed changes
         if count >= 4:
             return(False)
         else:

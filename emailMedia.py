@@ -1,9 +1,9 @@
 
-import requests
-from time import sleep
+#import requests
+#from time import sleep
 #from svglib.svglib import svg2rlg
 #from reportlab.graphics import renderPM
-import base64
+#import base64
 
 import smtplib
 import ssl
@@ -62,9 +62,9 @@ def sendEmail(mediaFileName, camera_name):
 
     subject = 'Captured Media File from {}'.format(camera_name)
     #body = '{} was captured on {} at {}'.format(mediaFileName, camera_name, captureTime)
-    sender_email = 'isy_powerwall@outlook.com'
-    receiver_email = 'christian@olgaard.com'
-    password = 'isy123ISY!@#'
+    ##sender_email = 'isy_powerwall@outlook.com'
+    #receiver_email = 'christian@olgaard.com'
+    #password = 'isy123ISY!@#'
 
     # Create a multipart message and set headers
     message = MIMEMultipart()

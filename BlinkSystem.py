@@ -21,7 +21,13 @@ import re
 import datetime
 
 import time
-import emailMedia
+import smtplib
+import ssl
+
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 
 class blink_system(object):
@@ -29,6 +35,8 @@ class blink_system(object):
         #self.userName =userName
         #self.password = password
         #self.AUTHKey = AUTHKey
+        import emailMedia
+
         self.cameraType = {'owl'}
 
         logging.info('Accessing Blink system')
@@ -173,7 +181,8 @@ class blink_system(object):
         photo_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.jpg'
         self.blink.refresh()             # Get new information from server
         self.blink.cameras[camera_name].image_to_file('./'+photo_string)
-        #emailMedia.sendEmail('./'+photo_string, camera_name)
+        if self.email_en:
+            self.send_email('./'+photo_string, camera_name)
         
     def snap_video(self, camera_name):
 
@@ -200,7 +209,8 @@ class blink_system(object):
         #link = self.blink.cameras[camera_name].request_videos()
         self.blink.cameras[camera_name].video_to_file('./'+video_string)
         file = open('./'+video_string, 'rb')
-        #emailMedia.sendEmail('./'+video_string, camera_name)
+        if self.email_en:
+            self.send_email('./'+video_string, camera_name)
         if count >= 4:
             return(False)
         else:
@@ -214,3 +224,47 @@ class blink_system(object):
     
 
     
+    def send_email(self, mediaFileName, camera_name):
+
+        subject = 'Captured Media File from {}'.format(camera_name)
+        # Create a multipart message and set headers
+        message = MIMEMultipart()
+        message['From'] = self.email_sender
+        message['To'] = self.email_recepient
+        message['Subject'] = subject
+
+        part = MIMEBase('application', "octet-stream")
+        part.set_payload(open("text.txt", "rb").read())
+        encoders.encode_base64(part)
+        part.add_header('Content-Disposition', 'attachment; filename='+'./'+mediaFileName)
+
+        message.attach(part)    
+
+        filename = mediaFileName  # In same directory as script
+
+        # Encode file in ASCII characters to send by email    
+        encoders.encode_base64(part)
+
+        # Add header as key/value pair to attachment part
+        part.add_header(
+            'Content-Disposition',
+            f'attachment; filename= {filename}',
+        )
+
+        # Add attachment to message and convert message to string
+        message.attach(part)
+        text = message.as_string()
+
+        # Log in to server using secure context and send email
+
+        context = ssl.create_default_context()
+        try:
+            with smtplib.SMTP(self.smtp , self.smpt_port) as smtp:
+                smtp.ehlo()  # Say EHLO to server
+                smtp.starttls(context=context)  # Puts the connection in TLS mode.
+                smtp.ehlo()
+                smtp.login(self.email_sender, self.email_password )
+                smtp.sendmail(self.email_sender, self.email_recepient, text)
+                logging.info('Email sent')
+        except Exception as e:
+            logging.error('Exception send_email: ' + str(e))

@@ -48,6 +48,14 @@ class BlinkSetup (udi_interface.Node):
         self.userName = None
         self.password = None
         self.authKey = None
+        self.email_en = False
+        self.smtp = ''
+        self.smtp_port = 587
+        self.email_sender = ''
+        self.email_password = ''
+        self.email_recepient = ''
+
+
 
         self.Parameters = Custom(polyglot, 'customParams')      
         self.Notices = Custom(polyglot, 'notices')
@@ -279,13 +287,52 @@ class BlinkSetup (udi_interface.Node):
             if 'SYNC_UNITS' in customParams:
                 self.syncUnitString = customParams['SYNC_UNITS']
                 self.syncUnits = self.strip_syncUnitStringtoList(self.syncUnitString)
-
             else:
                 self.poly.Notices['sync_units'] = 'Missing SYNC_UNITS parameter - Add NONE if no sync units'
                 self.syncUnitString = ''
 
-            self.paramsProcessed = True
+            if 'EMAIL_ENABLED' in customParams:
+                self.email_en = customParams['EMAIL_ENABLED']
+                if self.email_en.upper()[0] == 'T':
+                    self.email_en = True
+                else:
+                    self.email_en = False
+            else:
+                self.poly.Notices['email_en'] = 'Missing EMAIL_ENABLED parameter (True/False)'
+    
 
+            if self.email_en:
+                if 'SMTP' in customParams:
+                    self.smtp = customParams['SMTP']
+                else:
+                    self.poly.Notices['email_smpt'] = 'Missing EMAIL_SMPT parameter'
+       
+                if 'SMTP_PORT' in customParams:
+                    self.smtp_port = customParams['SMTP_PORT']
+                else:
+                    self.poly.Notices['email_smpt'] = 'Missing EMAIL_SMPT parameter'
+                    self.smtp_port = 587
+
+                if 'EMAIL_SERVER' in customParams:
+                    self.email_sender = customParams['EMAIL_SERVER']
+                else:
+                    self.poly.Notices['email_sender'] = 'Missing EMAIL_SERVER parameter'
+               
+
+                if 'EMAIL_PASSWORD' in customParams:
+                    self.email_password = customParams['EMAIL_PASSWORD']
+                else:
+                    self.poly.Notices['email_password'] = 'Missing EMAIL_PASSWORD parameter'
+      
+
+                if 'EMAIL_RECEPIENT' in customParams:
+                    self.email_recepient = customParams['EMAIL_RECEPIENT']
+                else:
+                    self.poly.Notices['email_recepient'] = 'Missing EMAIL_RECEPIENT parameter'
+            
+
+
+            self.paramsProcessed = True                
 
         except Exception as e:
             logging.debug('Error: {} {}'.format(e, customParams))

@@ -143,6 +143,12 @@ class BlinkSetup (udi_interface.Node):
             else:
                 logging.info('Accessing Blink completed ')
             self.blink.email_en = self.email_en
+            if self.email_en:
+                self.blink.smtp = self.smtp
+                self.blink.smtp_port = self.smtp_port
+                self.blink.email_sender = self.email_sender
+                self.blink.email_password = self.email_password
+                self.blink.email_recepient = self.email_recepient
             self.add_sync_nodes()
 
         #a=os.popen('netstat -a |grep 8003').read()

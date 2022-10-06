@@ -50,7 +50,13 @@ class BlinkSetup (udi_interface.Node):
         self.password = None
         self.authKey = None
         self.sync_nodes_added = False
-
+        self.email_info = { 'smtp':None,
+                            'smtp_port':587,
+                            'email_sender':None,
+                            'email_password':None,
+                            'email_recepient':None,
+                            'email_en': False
+        }
         self.Parameters = Custom(polyglot, 'customParams')      
         self.Notices = Custom(polyglot, 'notices')
         self.n_queue = []
@@ -142,13 +148,7 @@ class BlinkSetup (udi_interface.Node):
                 self.poly.Notices['un'] = 'please check username and password - do not seem to work '   
             else:
                 logging.info('Accessing Blink completed ')
-            self.blink.email_en = self.email_en
-            if self.email_en:
-                self.blink.smtp = self.smtp
-                self.blink.smtp_port = self.smtp_port
-                self.blink.email_sender = self.email_sender
-                self.blink.email_password = self.email_password
-                self.blink.email_recepient = self.email_recepient
+            
             self.add_sync_nodes()
 
         #a=os.popen('netstat -a |grep 8003').read()
@@ -179,8 +179,13 @@ class BlinkSetup (udi_interface.Node):
                     logging.error('Failed to create dummy node {}'.format('nosync')) 
  
         self.poly.updateProfile()
-        self.sync_nodes_added = True
 
+        
+        self.sync_nodes_added = True
+        while not self.paramsProcessed:
+            time.sleep(5)
+            logging.info('waitng to process all parameters')
+        self.blink.set_email_info(self.email_info)
 
     def stop(self):
         logging.info('Stop Called:')
@@ -371,7 +376,7 @@ class BlinkSetup (udi_interface.Node):
 if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
-        polyglot.start('0.2.13')
+        polyglot.start('0.2.14')
         BlinkSetup(polyglot, 'controller', 'controller', 'BlinkSetup')
 
         # Just sit and wait for events

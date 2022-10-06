@@ -264,7 +264,15 @@ class blink_system(object):
         logging.debug('get_camera_unit - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name])
 
-        
+    def set_email_info(self, email_info):
+        logging.debug('set_email_info:{}'.format(email_info))
+        self.email_en = email_info['email_en']
+        self.smtp = email_info['smtp']
+        self.smtp_port = email_info['smtp_port']
+        self.email_sender = email_info['email_sender']
+        self.email_password = email_info['email_password']
+        self.email_recepient = email_info['email_recepient']
+
     def send_email(self, mediaFileName, camera_name):
 
         subject = 'Captured Media File from {}'.format(camera_name)

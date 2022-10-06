@@ -313,14 +313,14 @@ class BlinkSetup (udi_interface.Node):
                     self.poly.Notices['email_smpt'] = 'Missing EMAIL_SMPT parameter'
                     self.smtp_port = 587
 
-                if 'EMAIL_SERVER' in customParams:
-                    self.email_sender = customParams['EMAIL_SERVER']
+                if 'SMTP_EMAIL' in customParams:
+                    self.email_sender = customParams['SMTP_EMAIL']
                 else:
                     self.poly.Notices['email_sender'] = 'Missing EMAIL_SERVER parameter'
                
 
-                if 'EMAIL_PASSWORD' in customParams:
-                    self.email_password = customParams['EMAIL_PASSWORD']
+                if 'SMTP_PASSWORD' in customParams:
+                    self.email_password = customParams['SMTP_PASSWORD']
                 else:
                     self.poly.Notices['email_password'] = 'Missing EMAIL_PASSWORD parameter'
       

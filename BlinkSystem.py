@@ -164,7 +164,7 @@ class blink_system(object):
     def get_camera_recording_info(self, camera_name):
         logging.debug('get_camera_recording_info - {} '.format(camera_name ))
         return(0)
-
+    '''
     def snap_picture(self, camera_name):
 
         logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))
@@ -205,8 +205,100 @@ class blink_system(object):
             return(False)
         else:
             return(True)
+    '''
 
+    def snap_picture(self, camera_name):
+        self.blink.cameras[camera_name].snap_picture()
+        dinfo = datetime.datetime.now()
+        photo_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.jpg'
+        logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))
+        self.blink.refresh()             # Get new information from server
+        self.blink.cameras[camera_name].image_to_file('./'+photo_string)
+        if self.email_en:
+            self.send_email(photo_string, camera_name)
+        
+    def snap_video(self, camera_name):
+        temp = self.blink.cameras[camera_name].record()
+        count = 0
+        if 'created_at' not in temp and count <4:
+            logging.info('Capture did not succeed - trying again in 10 sec')
+            time.sleep(10)
+            temp = self.blink.cameras[camera_name].record()
+            count= count + 1
+        if count >= 4:
+            return(False)
+        else:
+            return(True)
+        '''
+        dinfo = datetime.datetime.now()
+        video_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.mp4'
+        logging.debug('snap_video - {} - {}'.format(camera_name, video_string ))
+        time.sleep(10)
+        self.blink.refresh()   
+        count = 0
+        while None == self.blink.cameras[camera_name].clip and count <4:  # Get new information from server
+            time.sleep(10)
+            self.blink.refresh()   
+            logging.debug('waiting for video clip to appear {}'.format( self.blink.cameras[camera_name].clip))
+            count = count + 1
+        #link = self.blink.cameras[camera_name].request_videos()
+        self.blink.cameras[camera_name].video_to_file('./'+video_string)
+        
+        if self.email_en:
+            
+            self.send_email(video_string, camera_name)
+        if count >= 4:
+            return(False)
+        else:
+            return(True)
+        '''
 
+    def get_camera_unit(self, camera_name):
+        logging.debug('get_camera_unit - {} '.format(camera_name ))
+        return(self.blink.cameras[camera_name])
+
+        
+    def send_email(self, mediaFileName, camera_name):
+
+        subject = 'Captured Media File from {}'.format(camera_name)
+        # Create a multipart message and set headers
+        message = MIMEMultipart()
+        message['From'] = self.email_sender
+        message['To'] = self.email_recepient
+        message['Subject'] = subject
+        msg_content = MIMEText('File from camera attached', 'plain', 'utf-8')
+        message.attach(msg_content)
+        #part = MIMEBase('application', "octet-stream")
+
+        with open('./'+mediaFileName, 'rb') as f:
+            # set attachment mime and file name, the image type is png
+            if mediaFileName.__contains__('jpg'):
+                mime = MIMEBase('image', 'jpg', filename=mediaFileName)
+            else:
+                mime = MIMEBase('video/mp4', 'mp4', filename=mediaFileName)
+            mime.add_header('Content-Disposition', 'attachment', filename=mediaFileName)
+            mime.add_header('X-Attachment-Id', '0')
+            mime.add_header('Content-ID', '<0>')
+            # read attachment file content into the MIMEBase object
+            mime.set_payload(f.read())
+            # encode with base64
+            encoders.encode_base64(mime)
+            message.attach(mime)    
+            context = ssl.create_default_context()
+        try:
+            with smtplib.SMTP(self.smtp , self.smpt_port) as smtp:
+                smtp.ehlo()  # Say EHLO to server
+                smtp.starttls(context=context)  # Puts the connection in TLS mode.
+                smtp.ehlo()
+                smtp.login(self.email_sender, self.email_password )
+                #smtp.set_debuglevel(1)
+                smtp.sendmail(self.email_sender, self.email_recepient, message.as_string())
+                smtp.quit()
+                logging.info('Email sent')
+        except Exception as e:
+            logging.error('Exception send_email: ' + str(e))
+
+       
 
     def get_camera_unit(self, camera_name):
         logging.debug('get_camera_unit - {} '.format(camera_name ))

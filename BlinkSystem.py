@@ -223,6 +223,9 @@ class blink_system(object):
         self.blink.cameras[camera_name].image_to_file('./'+photo_string)
         if self.email_en:
             self.send_email(photo_string, camera_name)
+
+        #need to erase file 
+        
         
     def snap_video(self, camera_name):
         temp = self.blink.cameras[camera_name].record()
@@ -274,33 +277,34 @@ class blink_system(object):
         self.email_recepient = email_info['email_recepient']
 
     def send_email(self, mediaFileName, camera_name):
-
-        subject = 'Captured Media File from {}'.format(camera_name)
-        # Create a multipart message and set headers
-        message = MIMEMultipart()
-        message['From'] = self.email_sender
-        message['To'] = self.email_recepient
-        message['Subject'] = subject
-        msg_content = MIMEText('File from camera attached', 'plain', 'utf-8')
-        message.attach(msg_content)
-        #part = MIMEBase('application', "octet-stream")
-
-        with open('./'+mediaFileName, 'rb') as f:
-            # set attachment mime and file name, the image type is png
-            if mediaFileName.__contains__('jpg'):
-                mime = MIMEBase('image', 'jpg', filename=mediaFileName)
-            else:
-                mime = MIMEBase('video/mp4', 'mp4', filename=mediaFileName)
-            mime.add_header('Content-Disposition', 'attachment', filename=mediaFileName)
-            mime.add_header('X-Attachment-Id', '0')
-            mime.add_header('Content-ID', '<0>')
-            # read attachment file content into the MIMEBase object
-            mime.set_payload(f.read())
-            # encode with base64
-            encoders.encode_base64(mime)
-            message.attach(mime)    
-            context = ssl.create_default_context()
         try:
+            logging.debug('send_email: {} {}'.format(mediaFileName,camera_name ))
+            subject = 'Captured Media File from {}'.format(camera_name)
+            # Create a multipart message and set headers
+            message = MIMEMultipart()
+            message['From'] = self.email_sender
+            message['To'] = self.email_recepient
+            message['Subject'] = subject
+            msg_content = MIMEText('File from camera attached', 'plain', 'utf-8')
+            message.attach(msg_content)
+            #part = MIMEBase('application', "octet-stream")
+
+            with open('./'+mediaFileName, 'rb') as f:
+                # set attachment mime and file name, the image type is png
+                if mediaFileName.__contains__('jpg'):
+                    mime = MIMEBase('image', 'jpg', filename=mediaFileName)
+                else:
+                    mime = MIMEBase('video/mp4', 'mp4', filename=mediaFileName)
+                mime.add_header('Content-Disposition', 'attachment', filename=mediaFileName)
+                mime.add_header('X-Attachment-Id', '0')
+                mime.add_header('Content-ID', '<0>')
+                # read attachment file content into the MIMEBase object
+                mime.set_payload(f.read())
+                # encode with base64
+                encoders.encode_base64(mime)
+                message.attach(mime)    
+                context = ssl.create_default_context()
+        
             with smtplib.SMTP(self.smtp , self.smpt_port) as smtp:
                 smtp.ehlo()  # Say EHLO to server
                 smtp.starttls(context=context)  # Puts the connection in TLS mode.
@@ -310,6 +314,7 @@ class blink_system(object):
                 smtp.sendmail(self.email_sender, self.email_recepient, message.as_string())
                 smtp.quit()
                 logging.info('Email sent')
+
         except Exception as e:
             logging.error('Exception send_email: ' + str(e))
 

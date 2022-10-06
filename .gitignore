@@ -9,3 +9,5 @@ blinkTestV2.py
 __pycache__/BlinkSystem.cpython-310.pyc
 __pycache__/BlinkSystem.cpython-310.pyc
 emailMedia.py
+*.pyc
+*.jpg

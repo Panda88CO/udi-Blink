@@ -40,7 +40,7 @@ class blink_system(object):
         logging.info('Accessing Blink system')
         self.blink = Blink()
         self.temp_unit = 'C'
-        self.pic_email_enabled = False
+        self.email_en = False
 
 
     def auth (self, userName, password, authenKey = None):
@@ -72,8 +72,7 @@ class blink_system(object):
     def set_temp_unit(self, temp_unit):
         self.temp_unit = temp_unit
 
-    #def set_pic_email_enabled(self, status):
-    #   self.pic_email_enabled = status
+
 
     def get_sync_unit(self, sync_unit_name):
         logging.debug('get_sync_unit - {}'.format(sync_unit_name))

@@ -142,7 +142,7 @@ class BlinkSetup (udi_interface.Node):
                 self.poly.Notices['un'] = 'please check username and password - do not seem to work '   
             else:
                 logging.info('Accessing Blink completed ')
-
+            self.blink.email_en = self.email_en
             self.add_sync_nodes()
 
         #a=os.popen('netstat -a |grep 8003').read()
@@ -301,7 +301,7 @@ class BlinkSetup (udi_interface.Node):
                     self.email_en = False
             else:
                 self.poly.Notices['email_en'] = 'Missing EMAIL_ENABLED parameter (True/False)'
-    
+
             if self.email_en:
                 if 'SMTP' in customParams:
                     self.smtp = customParams['SMTP']

@@ -20,7 +20,7 @@ from blinkpy.auth import Auth
 import re
 import datetime
 import time
-
+import os
 import smtplib
 import ssl
 
@@ -223,8 +223,8 @@ class blink_system(object):
         self.blink.cameras[camera_name].image_to_file('./'+photo_string)
         if self.email_en:
             self.send_email(photo_string, camera_name)
-
-        #need to erase file 
+        os.remove(photo_string)
+        
         
         
     def snap_video(self, camera_name):
@@ -305,7 +305,7 @@ class blink_system(object):
                 message.attach(mime)    
                 context = ssl.create_default_context()
         
-            with smtplib.SMTP(self.smtp , self.smpt_port) as smtp:
+            with smtplib.SMTP(self.smtp , self.smtp_port) as smtp:
                 smtp.ehlo()  # Say EHLO to server
                 smtp.starttls(context=context)  # Puts the connection in TLS mode.
                 smtp.ehlo()

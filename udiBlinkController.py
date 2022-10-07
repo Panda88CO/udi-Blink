@@ -75,14 +75,14 @@ class BlinkSetup (udi_interface.Node):
         self.Parameters = Custom(self.poly, 'customparams')
         self.Notices = Custom(self.poly, 'notices')
         logging.debug('BlinkSetup init')
-        logging.debug('self.address : ' + str(self.address))
-        logging.debug('self.name :' + str(self.name))   
+        #logging.debug('self.address : ' + str(self.address))
+        #logging.debug('self.name :' + str(self.name))   
         self.poly.ready()
         self.poly.addNode(self, conn_status='ST')
         self.wait_for_node_done()
 
         self.node = self.poly.getNode(self.address)
-        logging.debug('node: {}'.format(self.node))
+        #logging.debug('node: {}'.format(self.node))
 
         logging.debug('BlinkSetup init DONE')
         self.nodeDefineDone = True
@@ -139,7 +139,7 @@ class BlinkSetup (udi_interface.Node):
             exit() 
         else:
             success = self.blink.auth(self.userName,self.password, self.authKey )
-            logging.debug('Auth: {}'.format(success))
+            #logging.debug('Auth: {}'.format(success))
             if 'AuthKey' == success:
                 logging.error('AuthKey required - please add to config')
                 self.poly.Notices['ak'] = 'username and password must be provided to start node server'
@@ -177,14 +177,12 @@ class BlinkSetup (udi_interface.Node):
                 logging.info('No sync specified - create dummy node {} for all cameras '.format('nosync')) 
                 if not blink_sync_node(self.poly, 'nosync', 'nosync', 'Blink Cameras', None, self.blink ):
                     logging.error('Failed to create dummy node {}'.format('nosync')) 
- 
         self.poly.updateProfile()
-
-        
         self.sync_nodes_added = True
         while not self.paramsProcessed:
             time.sleep(5)
             logging.info('waitng to process all parameters')
+        #logging.debug('email_info  : {}'.format(self.email_info))
         self.blink.set_email_info(self.email_info)
 
     def stop(self):
@@ -284,7 +282,7 @@ class BlinkSetup (udi_interface.Node):
             else:
                 self.poly.Notices['userName'] = 'Missing USERNAME parameter'
                 self.userName = ''
-
+            
             if 'PASSWORD' in customParams:
                 self.password = customParams['PASSWORD']
             else:
@@ -312,37 +310,41 @@ class BlinkSetup (udi_interface.Node):
                     self.email_en = False
             else:
                 self.poly.Notices['email_en'] = 'Missing EMAIL_ENABLED parameter (True/False)'
+            self.email_info['email_en'] = self.email_en
 
             if self.email_en:
                 if 'SMTP' in customParams:
                     self.smtp = customParams['SMTP']
                 else:
                     self.poly.Notices['email_smpt'] = 'Missing EMAIL_SMPT parameter'
-       
+                self.email_info['smtp'] = self.smtp
+
                 if 'SMTP_PORT' in customParams:
                     self.smtp_port = customParams['SMTP_PORT']
                 else:
                     self.poly.Notices['email_smpt'] = 'Missing EMAIL_SMPT parameter'
                     self.smtp_port = 587
+                    self.email_info['smtp_port'] = self.smtp_port
 
                 if 'SMTP_EMAIL' in customParams:
                     self.email_sender = customParams['SMTP_EMAIL']
                 else:
                     self.poly.Notices['email_sender'] = 'Missing EMAIL_SERVER parameter'
-               
+                self.email_info['email_sender'] = self.email_sender
 
                 if 'SMTP_PASSWORD' in customParams:
                     self.email_password = customParams['SMTP_PASSWORD']
                 else:
                     self.poly.Notices['email_password'] = 'Missing EMAIL_PASSWORD parameter'
-      
+                self.email_info['email_password'] = self.email_password
 
                 if 'EMAIL_RECEPIENT' in customParams:
                     self.email_recepient = customParams['EMAIL_RECEPIENT']
                 else:
                     self.poly.Notices['email_recepient'] = 'Missing EMAIL_RECEPIENT parameter'
+                self.email_info['email_recepient'] = self.email_recepient
 
- 
+            #logging.debug('email_info : {}'.format(self.email_info))
             self.paramsProcessed = True
 
 
@@ -376,7 +378,7 @@ class BlinkSetup (udi_interface.Node):
 if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
-        polyglot.start('0.2.14')
+        polyglot.start('0.3.0')
         BlinkSetup(polyglot, 'controller', 'controller', 'BlinkSetup')
 
         # Just sit and wait for events

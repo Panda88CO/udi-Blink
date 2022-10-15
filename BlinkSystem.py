@@ -75,7 +75,7 @@ class blink_system(object):
 
 
     def get_sync_unit(self, sync_unit_name):
-        logging.debug('get_sync_unit - {}'.format(sync_unit_name))
+        logging.debug('get_sync_unit - {}: {}'.format(sync_unit_name, self.blink.sync))
         for sync_name in self.blink.sync:
             tmp = re.sub(r"[^A-Za-z0-9_,]", "", sync_name)
             if tmp.upper() == sync_unit_name:
@@ -146,6 +146,8 @@ class blink_system(object):
             return('Blink Outdoor')
         elif temp == 'lotus':
             return('doorbell')
+        elif temp == 'xt2':
+            return('XT-2')
         else:
             return('default')
 

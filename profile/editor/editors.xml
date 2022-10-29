@@ -20,18 +20,18 @@
   <editor id = "battery" > 
      <range  uom="25" subset="0-2,10,99" nls="battery" />
 </editor>
-  <editor id = "battery_v" > 
+  <editor id = "batteryv" > 
      <range  uom="72" min=" 0" max="500"  prec="0" />
 
 </editor>
   <editor id = "cameratype" > 
      <range  uom="25" subset="0-5,99" nls="cameratype" />
 </editor>
-  <editor id = "MotionEn" > 
-     <range  uom="25" subset="0-1,99" nls="MotionEn" />
+  <editor id = "motionen" > 
+     <range  uom="25" subset="0-1,99" nls="motionen" />
 </editor>
-  <editor id = "MotionDetc" > 
-     <range  uom="25" subset="0-1,99" nls="MotionDetc" />
+  <editor id = "motioneetc" > 
+     <range  uom="25" subset="0-1,99" nls="motiondetc" />
 </editor>
   <editor id = "temp" > 
         <range uom="4" min="-40" max="105"  prec="1"/>

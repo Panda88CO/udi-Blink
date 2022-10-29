@@ -223,7 +223,9 @@ class blink_system(object):
         logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))
         self.blink.refresh()             # Get new information from server
         self.blink.cameras[camera_name].image_to_file('./'+photo_string)
+        
         if self.email_en:
+
             self.send_email(photo_string, camera_name)
         os.remove(photo_string)
         

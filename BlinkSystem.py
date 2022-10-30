@@ -226,9 +226,12 @@ class blink_system(object):
         logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))
         self.blink.refresh()  
         thumbnailStr = str(self.blink.cameras[camera_name].thumbnail)
-        timeIndex = thumbnailStr.find('ts=')
-        timeStr = thumbnailStr[timeIndex+3:10]
-        logging.debug(thumbnailStr,timeIndex, timeStr ) 
+        logging.debug(thumbnailStr)
+        tsIndex = int(thumbnailStr.find('ts='))
+        logging.debug(tsIndex)
+        timeStr = thumbnailStr[tsIndex+3:tsIndex+13]
+        logging.debug(timeStr)
+        logging.debug(thumbnailStr,tsIndex, timeStr ) 
         logging.debug('after refesh {} -{}'.format(timeInf, self.blink.cameras[camera_name].thumbnail))           # Get new information from server
         time.sleep(15)
         timeInf = time.time()

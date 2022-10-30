@@ -218,13 +218,33 @@ class blink_system(object):
 
     def snap_picture(self, camera_name):
         self.blink.cameras[camera_name].snap_picture()
+        time.sleep(1)
+        #self.blink.cameras[camera_name].snap_picture()
         dinfo = datetime.datetime.now()
+        timeInf = int(time.time())
         photo_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.jpg'
         logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))
-        self.blink.refresh()             # Get new information from server
-        self.blink.cameras[camera_name].image_to_file('./'+photo_string)
-        if self.email_en:
-            self.send_email(photo_string, camera_name)
+        self.blink.refresh()  
+        thumbnailStr = self.blink.cameras[camera_name].thumbnail
+        logging.debug('humbnailStr: {} {}'.format(type(thumbnailStr), thumbnailStr))
+        tsIndex = int(thumbnailStr.find('ts='))
+        pic_ts = int( thumbnailStr[tsIndex+3:tsIndex+13])
+        iter = 0
+        while pic_ts < timeInf - 5 and iter < 10: # allow 5 sec diff
+            logging.debug('Waiting for pic to update last image  time {} vs  capture time{}'.format(pic_ts, timeInf))
+            time.sleep(15)
+            self.blink.refresh()  
+            thumbnailStr = self.blink.cameras[camera_name].thumbnail
+            tsIndex = int(thumbnailStr.find('ts='))
+            pic_ts = int( thumbnailStr[tsIndex+3:tsIndex+13])
+            iter = iter + 1
+            #logging.debug('Waiting for pic to update {} vs  {}'.format(pic_ts, timeInf))
+        if iter >= 10:
+            logging.error('picture not updated')
+        else:
+            self.blink.cameras[camera_name].image_to_file('./'+photo_string)
+            if self.email_en:
+                self.send_email(photo_string, camera_name)
         os.remove(photo_string)
         
         

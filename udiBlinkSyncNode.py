@@ -167,7 +167,7 @@ class blink_sync_node(udi_interface.Node):
 
     commands = { 'UPDATE'   : ISYupdate,
                  'QUERY'    : ISYupdate,
-                 'ARM_ALL'  : arm_all_cameras
+                 'ARMALL'   : arm_all_cameras
             
 
                 }

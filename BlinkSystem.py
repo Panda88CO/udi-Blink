@@ -224,8 +224,9 @@ class blink_system(object):
         logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))
         self.blink.refresh()  
         logging.debug('after refesh {}'.format(self.blink.cameras[camera_name].attributes))           # Get new information from server
-        time.sleep(30)
-        logging.debug('after 30 sec sleep {}'.format(self.blink.cameras[camera_name].attributes))           # Get new information from server
+        time.sleep(15)
+        self.blink.refresh()  
+        logging.debug('after 15 sec sleep {}'.format(self.blink.cameras[camera_name].attributes))           # Get new information from server
 
         self.blink.cameras[camera_name].image_to_file('./'+photo_string)
         

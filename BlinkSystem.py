@@ -219,7 +219,7 @@ class blink_system(object):
     def snap_picture(self, camera_name):
         self.blink.cameras[camera_name].snap_picture()
         time.sleep(1)
-        self.blink.cameras[camera_name].snap_picture()
+        #self.blink.cameras[camera_name].snap_picture()
         dinfo = datetime.datetime.now()
         photo_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.jpg'
         logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))
@@ -230,7 +230,9 @@ class blink_system(object):
         logging.debug('after 15 sec sleep {}'.format(self.blink.cameras[camera_name].attributes))           # Get new information from server
 
         self.blink.cameras[camera_name].image_to_file('./'+photo_string)
-        
+        if self.email_en:
+            self.send_email(photo_string, camera_name)
+        self.blink.cameras[camera_name].image_to_file('./'+photo_string)
         if self.email_en:
             self.send_email(photo_string, camera_name)
         os.remove(photo_string)

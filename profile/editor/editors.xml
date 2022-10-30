@@ -30,7 +30,7 @@
   <editor id = "motionen" > 
      <range  uom="25" subset="0-1,99" nls="motionen" />
 </editor>
-  <editor id = "motioneetc" > 
+  <editor id = "motiondetc" > 
      <range  uom="25" subset="0-1,99" nls="motiondetc" />
 </editor>
   <editor id = "temp" > 

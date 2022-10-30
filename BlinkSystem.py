@@ -231,7 +231,7 @@ class blink_system(object):
         pic_ts = int( thumbnailStr[tsIndex+3:tsIndex+13])
         iter = 0
         while pic_ts < timeInf - 5 and iter < 10: # allow 5 sec diff
-            logging.debug('Waiting for pic to update {} vs  {}'.format(pic_ts, timeInf))
+            logging.debug('Waiting for pic to update last image  time {} vs  capture time{}'.format(pic_ts, timeInf))
             time.sleep(15)
             self.blink.refresh()  
             thumbnailStr = self.blink.cameras[camera_name].thumbnail

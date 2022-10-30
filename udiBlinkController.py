@@ -378,7 +378,7 @@ class BlinkSetup (udi_interface.Node):
 if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
-        polyglot.start('0.3.7')
+        polyglot.start('0.3.8')
         BlinkSetup(polyglot, 'controller', 'controller', 'BlinkSetup')
 
         # Just sit and wait for events

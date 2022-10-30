@@ -225,8 +225,8 @@ class blink_system(object):
         photo_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.jpg'
         logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))
         self.blink.refresh()  
-        thumbnailStr = str(self.blink.cameras[camera_name].thumbnail)
-        logging.debug(thumbnailStr)
+        thumbnailStr = self.blink.cameras[camera_name].thumbnail
+        logging.debug('humbnailStr: {} {}'.format(type(thumbnailStr), thumbnailStr))
         tsIndex = int(thumbnailStr.find('ts='))
         logging.debug(tsIndex)
         timeStr = thumbnailStr[tsIndex+3:tsIndex+13]

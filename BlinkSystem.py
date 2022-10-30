@@ -221,11 +221,12 @@ class blink_system(object):
         time.sleep(1)
         #self.blink.cameras[camera_name].snap_picture()
         dinfo = datetime.datetime.now()
-        timeInf = time.time()
+        timeInf = int(time.time())
         photo_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.jpg'
         logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))
         self.blink.refresh()  
-        logging.debug('after refesh {} -{}'.format(timeInf, self.blink.cameras[camera_name].attributes))           # Get new information from server
+
+        logging.debug('after refesh {} -{}'.format(timeInf, self.blink.cameras[camera_name].thumbnail))           # Get new information from server
         time.sleep(15)
         timeInf = time.time()
         self.blink.refresh()  

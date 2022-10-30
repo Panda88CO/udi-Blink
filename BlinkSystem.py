@@ -225,16 +225,16 @@ class blink_system(object):
         photo_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.jpg'
         logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))
         self.blink.refresh()  
-
+        thumbnailStr = self.blink.cameras[camera_name].thumbnail
+        timeIndex = thumbnailStr.find('ts=')
+        timeStr = thumbnailStr[timeIndex+3:10]
+        logging.debug(thumbnailStr,timeIndex, timeStr ) 
         logging.debug('after refesh {} -{}'.format(timeInf, self.blink.cameras[camera_name].thumbnail))           # Get new information from server
         time.sleep(15)
         timeInf = time.time()
         self.blink.refresh()  
         logging.debug('after 15 sec sleep {} -  {}'.format(timeInf, self.blink.cameras[camera_name].attributes))           # Get new information from server
 
-        self.blink.cameras[camera_name].image_to_file('./'+photo_string)
-        if self.email_en:
-            self.send_email(photo_string, camera_name)
         self.blink.cameras[camera_name].image_to_file('./'+photo_string)
         if self.email_en:
             self.send_email(photo_string, camera_name)

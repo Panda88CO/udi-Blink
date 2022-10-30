@@ -218,7 +218,8 @@ class blink_system(object):
 
     def snap_picture(self, camera_name):
         self.blink.cameras[camera_name].snap_picture()
-        time.sleep(2)
+        time.sleep(1)
+        self.blink.cameras[camera_name].snap_picture()
         dinfo = datetime.datetime.now()
         photo_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.jpg'
         logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))

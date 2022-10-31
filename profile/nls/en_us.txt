@@ -1,7 +1,7 @@
-ND-controller-NAME = Blink Camera Info
-ND-controller-ICON = Input
-CMD-nlscontroller-UPDATE-NAME = Update System Data
-ST-nlscontroller-ST-NAME = Node Status
+ND-setup-NAME = Blink Camera Info
+ND-contsetuproller-ICON = Input
+CMD-nlssetup-UPDATE-NAME = Update System Data
+ST-nlssetup-ST-NAME = Node Status
 node-0 = Down
 node-1 = Up
 node-99 = Unknown

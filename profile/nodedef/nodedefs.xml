@@ -1,5 +1,5 @@
 <nodeDefs> 
-   <nodeDef id="controller" nls="nlscontroller">
+   <nodeDef id="setup" nls="nlssetup">
       <editors />
       <sts>
          <st id="ST" editor="node" />

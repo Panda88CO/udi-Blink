@@ -189,10 +189,6 @@ class BlinkSetup (udi_interface.Node):
         logging.info('Stop Called:')
 
         if 'self.node' in locals():
-            #nodes = self.poly.getNodes()
-            #for node in nodes:
-            #    if node != 'setup':   # but not the controller node
-            #        nodes[node].setDriver('ST', 0, True, True)
             time.sleep(2)
 
         self.poly.stop()
@@ -224,7 +220,7 @@ class BlinkSetup (udi_interface.Node):
                     self.blink.refresh_data()
                     nodes = self.poly.getNodes()
                     for nde in nodes:
-                        if nde != 'controller':   # but not the controller node
+                        if nde != 'setup':   # but not the setup node
                             logging.debug('updating node {} data'.format(nde))
                             nodes[nde].updateISYdrivers()
                          
@@ -363,7 +359,7 @@ class BlinkSetup (udi_interface.Node):
             #self.node.setDriver('GV0', self.temp_unit, True, True)
     '''
 
-    id = 'controller'
+    id = 'setup'
     commands = {
                 'UPDATE': update,
                 }
@@ -378,8 +374,8 @@ class BlinkSetup (udi_interface.Node):
 if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
-        polyglot.start('0.3.14')
-        BlinkSetup(polyglot, 'controller', 'controller', 'BlinkSetup')
+        polyglot.start('0.3.15')
+        BlinkSetup(polyglot, 'setup', 'setup', 'BlinkSetup')
 
         # Just sit and wait for events
         polyglot.runForever()

@@ -177,13 +177,13 @@ class BlinkSetup (udi_interface.Node):
                 logging.info('No sync specified - create dummy node {} for all cameras '.format('nosync')) 
                 if not blink_sync_node(self.poly, 'nosync', 'nosync', 'Blink Cameras', None, self.blink ):
                     logging.error('Failed to create dummy node {}'.format('nosync')) 
-        self.poly.updateProfile()
         self.sync_nodes_added = True
         while not self.paramsProcessed:
             time.sleep(5)
             logging.info('waitng to process all parameters')
         #logging.debug('email_info  : {}'.format(self.email_info))
         self.blink.set_email_info(self.email_info)
+        self.poly.updateProfile()
 
     def stop(self):
         logging.info('Stop Called:')
@@ -374,7 +374,7 @@ class BlinkSetup (udi_interface.Node):
 if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
-        polyglot.start('0.3.15')
+        polyglot.start('0.3.16')
         BlinkSetup(polyglot, 'setup', 'setup', 'BlinkSetup')
 
         # Just sit and wait for events

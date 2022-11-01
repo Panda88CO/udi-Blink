@@ -153,9 +153,7 @@ class BlinkSetup (udi_interface.Node):
 
         except Exception as e:
             logging.error('Blink Start Exception: {}'.format(e))
-        #a=os.popen('netstat -a |grep 8003').read()
-        #logging.debug("\n Connections {}".format(a) )
-        #self.poly.updateProfile()
+
 
 
 

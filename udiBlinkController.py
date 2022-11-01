@@ -122,35 +122,37 @@ class BlinkSetup (udi_interface.Node):
 
     def start (self):
         logging.info('Executing start - BlinkSetup')
+        try:
+            self.poly.updateProfile()
+            while not self.paramsProcessed or not self.nodeDefineDone:
+                logging.info('Waiting for setup to complete param:{} nodes:{}'.format(self.paramsProcessed, self.nodeDefineDone ))
+                time.sleep(2)
+            logging.setLevel(10)
+            #logging.debug('syncUnits / syncString: {} - {}'.format(self.syncUnits, self.syncUnitString))
+            #self.node.setDriver('ST', 1, True, True)
+            #time.sleep(5)
 
-        self.poly.updateProfile()
-        while not self.paramsProcessed or not self.nodeDefineDone:
-            logging.info('Waiting for setup to complete param:{} nodes:{}'.format(self.paramsProcessed, self.nodeDefineDone ))
-            time.sleep(2)
-        logging.setLevel(10)
-        #logging.debug('syncUnits / syncString: {} - {}'.format(self.syncUnits, self.syncUnitString))
-        #self.node.setDriver('ST', 1, True, True)
-        #time.sleep(5)
-
-        logging.debug('nodeDefineDone {}'.format(self.nodeDefineDone))
-        if self.userName == None or self.userName == '' or self.password==None or self.password=='':
-            logging.error('username and password must be provided to start node server')
-            self.poly.Notices['un'] = 'username and password must be provided to start node server'
-            exit() 
-        else:
-            success = self.blink.auth(self.userName,self.password, self.authKey )
-            #logging.debug('Auth: {}'.format(success))
-            if 'AuthKey' == success:
-                logging.error('AuthKey required - please add to config')
-                self.poly.Notices['ak'] = 'username and password must be provided to start node server'
-            elif 'no login' == success:
-                logging.error('Login Failed')
-                self.poly.Notices['un'] = 'please check username and password - do not seem to work '   
+            logging.debug('nodeDefineDone {}'.format(self.nodeDefineDone))
+            if self.userName == None or self.userName == '' or self.password==None or self.password=='':
+                logging.error('username and password must be provided to start node server')
+                self.poly.Notices['un'] = 'username and password must be provided to start node server'
+                exit() 
             else:
-                logging.info('Accessing Blink completed ')
-            
-            self.add_sync_nodes()
+                success = self.blink.auth(self.userName,self.password, self.authKey )
+                #logging.debug('Auth: {}'.format(success))
+                if 'AuthKey' == success:
+                    logging.error('AuthKey required - please add to config')
+                    self.poly.Notices['ak'] = 'username and password must be provided to start node server'
+                elif 'no login' == success:
+                    logging.error('Login Failed')
+                    self.poly.Notices['un'] = 'please check username and password - do not seem to work '   
+                else:
+                    logging.info('Accessing Blink completed ')
+                
+                self.add_sync_nodes()
 
+        except Exception as e:
+            logging.error('Blink Start Exception: {}'.format(e))
         #a=os.popen('netstat -a |grep 8003').read()
         #logging.debug("\n Connections {}".format(a) )
         #self.poly.updateProfile()

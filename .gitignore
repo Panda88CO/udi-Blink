@@ -26,3 +26,6 @@ blinkpy/sync_module.py
 *.mp4
 __pycache__/BlinkSystem.cpython-310.pyc
 *.pyc
+__pycache__/BlinkSystem.cpython-310.pyc
+*.pyc
+*.pyc

@@ -38,8 +38,8 @@ class blink_camera_node(udi_interface.Node):
                             'doorbell': 1, #doorbell/lotus
                             'Blink Outdoor':2, #outdoor/catalena
                             'outdoorOld1':4,
-                            'outdoorOld2':5,
-                            'indoorOld':3,
+                            'XT-2':3,
+                            'indoorOld':5,
                             'default':99,
                              }
 
@@ -110,7 +110,7 @@ class blink_camera_node(udi_interface.Node):
             self.node.setDriver('GV2', 0)
         else:
             self.node.setDriver('GV2', self.blink.get_camera_battery_voltage_info(self.camera.name), True, True)
-        self.node.setDriver('GV3', self.cameraType[self.blink. get_camera_type_info(self.camera.name)])
+        self.node.setDriver('GV3', self.cameraType[self.blink.get_camera_type_info(self.camera.name)])
         #self.node.setDriver('GV4', self.bool2isy(self.blink.get_camera_motion_enabled_info(self.camera.name)), True, True)
         self.node.setDriver('GV5', self.bool2isy(self.blink.get_camera_motion_detected_info(self.camera.name)), True, True)
         temp_info = self.blink.get_camera_temperatureC_info(self.camera.name)

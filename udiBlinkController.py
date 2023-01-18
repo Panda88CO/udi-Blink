@@ -159,8 +159,8 @@ class BlinkSetup (udi_interface.Node):
     def add_sync_nodes (self):
         logging.info('Adding sync units: {}'.format(self.syncUnits ))
         self.sync_node_list = []
-        if self.syncUnits!= None :
-            if not 'NONE' in self.syncUnits:
+        if self.syncUnits != None :
+            if not ('NONE'  in self.syncUnits or '' in self.syncUnits ):
                 for sync_name in self.syncUnits:                    
                     sync_unit = self.blink.get_sync_unit(sync_name)
                     address = self.getValidAddress(str(sync_name))
@@ -172,7 +172,7 @@ class BlinkSetup (udi_interface.Node):
                     logging.info('Adding sync unit {} as {} , {}'.format(sync_unit, address, nodename))
                     if not blink_sync_node(self.poly, address, address, nodename, sync_unit, self.blink ):
                         logging.error('Failed to create Sync_node {}'.format(sync_name))
-            elif self.syncUnits != [] or 'NONE' in self.syncUnits:
+            elif self.syncUnits != [] or 'NONE' in self.syncUnits or '' in self.syncUnits  :
                 logging.info('No sync specified - create dummy node {} for all cameras '.format('nosync')) 
                 if not blink_sync_node(self.poly, 'nosync', 'nosync', 'Blink Cameras', None, self.blink ):
                     logging.error('Failed to create dummy node {}'.format('nosync')) 

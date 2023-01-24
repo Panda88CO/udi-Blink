@@ -58,7 +58,9 @@ class blink_system(object):
                 else:
                     auth.send_auth_key(self.blink, authenKey)
             logging.debug('setup_post_verify')
+            time.sleep(10)
             self.blink.setup_post_verify()
+            time.sleep(1)
             self.blink.refresh()
             time.sleep(3)
             return('ok')

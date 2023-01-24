@@ -58,6 +58,11 @@ class blink_system(object):
                 else:
                     auth.send_auth_key(self.blink, authenKey)
             logging.debug('setup_post_verify')
+            self.blink.setup_networks()
+            networks = self.blink.setup_network_ids()
+            cameras = self.blink.setup_camera_list()
+            logging.debug('{}'.format(cameras))
+            logging.debug('{}'.format(networks.items()))
             self.blink.setup_post_verify()
             self.blink.refresh()
             time.sleep(3)

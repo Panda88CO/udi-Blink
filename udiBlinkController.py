@@ -38,7 +38,7 @@ class BlinkSetup (udi_interface.Node):
         super().__init__( polyglot, primary, address, name)  
         
         logging.setLevel(10)
-        self.blink = blink_system()
+        self.blink_sys= blink_system()
         self.nodeDefineDone = False
         self.handleParamsDone = False
         self.paramsProcessed = False
@@ -137,7 +137,7 @@ class BlinkSetup (udi_interface.Node):
                 self.poly.Notices['un'] = 'username and password must be provided to start node server'
                 exit() 
             else:
-                success = self.blink.auth(self.userName,self.password, self.authKey )
+                success = self.blink_sys.auth(self.userName,self.password, self.authKey )
                 #logging.debug('Auth: {}'.format(success))
                 if 'AuthKey' == success:
                     logging.error('AuthKey required - please add to config')
@@ -162,7 +162,7 @@ class BlinkSetup (udi_interface.Node):
         if self.syncUnits != None :
             if not ('NONE'  in self.syncUnits or '' in self.syncUnits ):
                 for sync_name in self.syncUnits:                    
-                    sync_unit = self.blink.get_sync_unit(sync_name)
+                    sync_unit = self.blink_sys.get_sync_unit(sync_name)
                     address = self.getValidAddress(str(sync_name))
                         #address = str(sync).replace(' ','')[:14]
                     name = 'Blink_' + str(sync_name)
@@ -170,18 +170,18 @@ class BlinkSetup (udi_interface.Node):
                     #name = str(sync).replace(' ','')
                     #nodename = 'BlinkSync ' + str(sync)
                     logging.info('Adding sync unit {} as {} , {}'.format(sync_unit, address, nodename))
-                    if not blink_sync_node(self.poly, address, address, nodename, sync_unit, self.blink ):
+                    if not blink_sync_node(self.poly, address, address, nodename, sync_unit, self.blink_sys):
                         logging.error('Failed to create Sync_node {}'.format(sync_name))
             elif self.syncUnits != [] or 'NONE' in self.syncUnits or '' in self.syncUnits  :
                 logging.info('No sync specified - create dummy node {} for all cameras '.format('nosync')) 
-                if not blink_sync_node(self.poly, 'nosync', 'nosync', 'Blink Cameras', None, self.blink ):
+                if not blink_sync_node(self.poly, 'nosync', 'nosync', 'Blink Cameras', None, self.blink_sys):
                     logging.error('Failed to create dummy node {}'.format('nosync')) 
         self.sync_nodes_added = True
         while not self.paramsProcessed:
             time.sleep(5)
             logging.info('waitng to process all parameters')
         #logging.debug('email_info  : {}'.format(self.email_info))
-        self.blink.set_email_info(self.email_info)
+        self.blink_sys.set_email_info(self.email_info)
         self.poly.updateProfile()
 
     def stop(self):
@@ -216,7 +216,7 @@ class BlinkSetup (udi_interface.Node):
                 #Keep token current
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
                 try:
-                    self.blink.refresh_data()
+                    self.blink_sys.refresh_data()
                     nodes = self.poly.getNodes()
                     for nde in nodes:
                         if nde != 'setup':   # but not the setup node
@@ -249,7 +249,7 @@ class BlinkSetup (udi_interface.Node):
             self.temp_unit = 'K'
         else:
             logging.error('Unknown unit string (first char must be C,F,K: {}'.format(unitS))
-        self.blink.set_temp_unit(self.temp_unit)
+        self.blink_sys.set_temp_unit(self.temp_unit)
 
 
     def handleParams (self, customParams ):
@@ -264,11 +264,11 @@ class BlinkSetup (udi_interface.Node):
                     self.poly.Notices['TEMP_UNIT'] = 'Missing temp unit (C,F,K)'                    
                 else:
                     if temp[0] == 'C':
-                        self.blink.set_temp_unit('C') 
+                        self.blink_sys.set_temp_unit('C') 
                     elif temp[0] == 'F' :
-                        self.blink.set_temp_unit('F') 
+                        self.blink_sys.set_temp_unit('F') 
                     elif temp[0] == 'K' :
-                        self.blink.set_temp_unit('K') 
+                        self.blink_sys.set_temp_unit('K') 
                     if 'TEMP_UNIT' in self.poly.Notices:
                             self.poly.Notices.delete('TEMP_UNIT')
 
@@ -373,7 +373,7 @@ class BlinkSetup (udi_interface.Node):
 if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
-        polyglot.start('0.3.18')
+        polyglot.start('0.3.19')
         BlinkSetup(polyglot, 'setup', 'setup', 'BlinkSetup')
 
         # Just sit and wait for events

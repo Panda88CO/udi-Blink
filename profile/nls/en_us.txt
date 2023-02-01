@@ -53,11 +53,11 @@ motiondetc-1 = Motion Detected
 motiondetc-99 = Unknown
 
 ST-nlsblinkcamera-GV6-NAME = Temperature
-error-0 = No Supported
+error-0 = No Support
 error-99 = Unknown
 
 ST-nlsblinkcamera-GV7-NAME = Record
-record-0 = No Record
+record-0 = No Recording
 record-1 = Record
 record-99 = Unknown
 

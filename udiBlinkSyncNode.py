@@ -53,6 +53,7 @@ class blink_sync_node(udi_interface.Node):
         self.wait_for_node_done()
         self.node = self.poly.getNode(address)
         logging.info('Start {} sync module Node'.format(self.name))  
+        time.sleep(1)
         self.nodeDefineDone = True
 
 
@@ -87,7 +88,8 @@ class blink_sync_node(udi_interface.Node):
 
     def start(self):        
         logging.debug('Sync module Start {}'.format(self.name))
-        while not self.nodeDefineDone:
+        time.sleep(2)
+        while not self.nodeDefineDone or self.node == None or self.drivers == None:
             time.sleep(2)
             logging.info('Waiting for nodes to be created')
 

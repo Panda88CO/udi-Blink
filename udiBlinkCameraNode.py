@@ -86,7 +86,7 @@ class blink_camera_node(udi_interface.Node):
             return(0)
 
     def start(self):   
-        time.sleep(1)
+        time.sleep(2)
         logging.info('Start {} camera module Node'.format(self.name))               
         while not self.nodeDefineDone or self.node == None or self.drivers == None:
             logging.debug('camera - wait to node completed')

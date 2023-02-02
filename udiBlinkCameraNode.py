@@ -108,9 +108,9 @@ class blink_camera_node(udi_interface.Node):
         self.node.setDriver('GV0', self.bool2isy(self.blink.get_camera_arm_info(self.camera.name)), True, True)
         self.node.setDriver('GV1', self.bat2isy(self.blink.get_camera_battery_info(self.camera.name)), True, True)
         if None == self.blink.get_camera_battery_voltage_info(self.camera.name):
-            self.node.setDriver('GV2', 0)
+            self.node.setDriver('GV2', 99, True, True, 25)
         else:
-            self.node.setDriver('GV2', self.blink.get_camera_battery_voltage_info(self.camera.name), True, True)
+            self.node.setDriver('GV2', self.blink.get_camera_battery_voltage_info(self.camera.name), True, True, 72)
         self.node.setDriver('GV3', self.cameraType[self.blink.get_camera_type_info(self.camera.name)])
         #self.node.setDriver('GV4', self.bool2isy(self.blink.get_camera_motion_enabled_info(self.camera.name)), True, True)
         self.node.setDriver('GV5', self.bool2isy(self.blink.get_camera_motion_detected_info(self.camera.name)), True, True)

@@ -22,6 +22,7 @@
 </editor>
   <editor id = "batteryv" > 
      <range  uom="72" min=" 0" max="500"  prec="0" />
+     <range  uom="25" subset="99" nls="batteryv" />
 
 </editor>
   <editor id = "cameratype" > 

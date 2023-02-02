@@ -32,8 +32,8 @@ battery-1 = Not OK - TBD
 battery-2 = TBD
 battery-10 = No Battery
 battery-99 = Unknown
-
-ST-nlsblinkcamera-GV2-NAME = Battery Indicator
+ST-nlsblinkcamera-GV2-NAME = Battery Level Indicator
+batteryv-99 = Powered
 
 ST-nlsblinkcamera-GV3-NAME = CameraType
 cameratype-0 = Mini

@@ -17,6 +17,9 @@ except ImportError:
 
 from blinkpy.blinkpy import Blink
 from blinkpy.auth import Auth
+import asyncio
+from aiohttp import ClientSession
+
 import re
 import datetime
 import time
@@ -38,18 +41,19 @@ class blink_system(object):
         self.cameraType = {'owl'}
 
         logging.info('Accessing Blink system')
-        self.blink = Blink()
+        
         self.temp_unit = 'C'
         self.email_en = False
 
 
-    def auth (self, userName, password, authenKey = None):
-        # Can set no_prompt when initializing auth handler
+
+    async def start (self, userName, password, authenKey):
+        self.blink = Blink()
         auth = Auth({"username":userName, "password":password}, no_prompt=True)
         if auth:
             self.blink.auth = auth
             logging.info('Auth: {}'.format(auth))
-            self.blink.start()
+            await self.blink.start()
             if self.blink.key_required:
                 logging.info('Auth key required')
                 if authenKey == None or authenKey == '':
@@ -66,6 +70,33 @@ class blink_system(object):
             return('ok')
         else:
             return{'no login'}
+        
+    '''
+    def auth (self, userName, password, authenKey = None):
+        # Can set no_prompt when initializing auth handler
+        auth = Auth({"username":userName, "password":password}, no_prompt=True)
+        if auth:
+            self.blink.auth = auth
+            logging.info('Auth: {}'.format(auth))
+            await self.blink.start()
+            if self.blink.key_required:
+                logging.info('Auth key required')
+                if authenKey == None or authenKey == '':
+                  
+                    return('AuthKey Empty: {}'.format(authenKey))
+                else:
+                    auth.send_auth_key(self.blink, authenKey)
+            logging.debug('setup_post_verify')
+            time.sleep(10)
+            self.blink.setup_post_verify()
+            time.sleep(1)
+            self.blink.refresh()
+            time.sleep(3)
+            return('ok')
+        else:
+            return{'no login'}
+    '''
+
 
     def refresh_data(self):
         logging.debug('blink_refresh_data')

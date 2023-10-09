@@ -137,7 +137,7 @@ class BlinkSetup (udi_interface.Node):
                 self.poly.Notices['un'] = 'username and password must be provided to start node server'
                 exit()
             else:
-                success = self.blink.auth(self.userName,self.password, self.authKey )
+                success = self.blink.start(self.userName,self.password, self.authKey )
                 #logging.debug('Auth: {}'.format(success))
                 if 'AuthKey' == success:
                     logging.error('AuthKey required - please add to config')

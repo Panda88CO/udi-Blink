@@ -135,7 +135,7 @@ class BlinkSetup (udi_interface.Node):
             if self.userName == None or self.userName == '' or self.password==None or self.password=='':
                 logging.error('username and password must be provided to start node server')
                 self.poly.Notices['un'] = 'username and password must be provided to start node server'
-                exit() 
+                exit()
             else:
                 success = self.blink.auth(self.userName,self.password, self.authKey )
                 #logging.debug('Auth: {}'.format(success))

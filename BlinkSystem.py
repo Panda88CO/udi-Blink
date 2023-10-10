@@ -34,7 +34,7 @@ from email.mime.text import MIMEText
 
 
 class blink_system(object):
-    def __init__(self):
+    async def __init__(self):
         #self.userName =userName
         #self.password = password
         #self.AUTHKey = AUTHKey
@@ -60,19 +60,19 @@ class blink_system(object):
                   
                     return('AuthKey Empty: {}'.format(authenKey))
                 else:
-                    auth.send_auth_key(self.blink, authenKey)
+                    await auth.send_auth_key(self.blink, authenKey)
             logging.debug('setup_post_verify')
-            time.sleep(10)
-            self.blink.setup_post_verify()
-            time.sleep(1)
-            self.blink.refresh()
-            time.sleep(3)
+            await time.sleep(10)
+            await self.blink.setup_post_verify()
+            await time.sleep(1)
+            await self.blink.refresh()
+            await time.sleep(3)
             return('ok')
         else:
             return{'no login'}
         
     '''
-    def auth (self, userName, password, authenKey = None):
+    async def auth (self, userName, password, authenKey = None):
         # Can set no_prompt when initializing auth handler
         auth = Auth({"username":userName, "password":password}, no_prompt=True)
         if auth:
@@ -90,7 +90,7 @@ class blink_system(object):
             time.sleep(10)
             self.blink.setup_post_verify()
             time.sleep(1)
-            self.blink.refresh()
+            await self.blink.refresh()
             time.sleep(3)
             return('ok')
         else:
@@ -98,16 +98,16 @@ class blink_system(object):
     '''
 
 
-    def refresh_data(self):
+    async def refresh_data(self):
         logging.debug('blink_refresh_data')
-        self.blink.refresh()
+        await self.blink.refresh()
         
-    def set_temp_unit(self, temp_unit):
+    async def set_temp_unit(self, temp_unit):
         self.temp_unit = temp_unit
 
 
 
-    def get_sync_unit(self, sync_unit_name):
+    async def get_sync_unit(self, sync_unit_name):
         logging.debug('get_sync_unit - {}: {}'.format(sync_unit_name, self.blink.sync))
         for sync_name in self.blink.sync:
             tmp = re.sub(r"[^A-Za-z0-9_,]", "", sync_name)
@@ -115,14 +115,14 @@ class blink_system(object):
                  return(self.blink.sync[sync_name])
         return(False)
         
-    def get_camera_list(self):
+    async def get_camera_list(self):
         logging.debug('get_camera_list')
         cam_list = []
         for cam_name in self.blink.cameras:
             cam_list.append(cam_name)
         return(cam_list)
         
-    def get_sync_camera_list(self, sync_unit):
+    async def get_sync_camera_list(self, sync_unit):
         logging.debug('get_sync_camera_list')
         cam_list = []
         for camera in sync_unit.camera_list:
@@ -130,47 +130,47 @@ class blink_system(object):
              cam_list.append(cam_name)
         return(cam_list)
  
-    def get_sync_arm_info(self, sync_name):
+    async def get_sync_arm_info(self, sync_name):
         logging.debug('get_sync_arm_info - {} '.format(sync_name ))
         return(self.blink.sync[sync_name].arm)
 
-    def set_sync_arm (self, sync_name, armed=True):
+    async def set_sync_arm (self, sync_name, armed=True):
         logging.debug('set_arm_sync = {}- {} '.format(sync_name, armed ))
         self.blink.sync[sync_name].arm = armed
-        #self.blink.refresh()
+        #await self.blink.refresh()
 
-    def get_sync_online(self, sync_name):
+    async def get_sync_online(self, sync_name):
         logging.debug('get_sync_online - {} {} '.format(sync_name, self.blink.sync[sync_name].online ))
         return(self.blink.sync[sync_name].online )
 
-    #def get_sync_blink_camera_unit(self, sync_unit, camera_name):
+    #async def get_sync_blink_camera_unit(self, sync_unit, camera_name):
     #    logging.debug('get_sync_blink_camera_unit - {} from {}'.format(camera_name,sync_unit ))
 
 
-    def get_camera_data(self, camera_name):
+    async def get_camera_data(self, camera_name):
         logging.debug('get_camera_data - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name].attributes)
 
 
-    def get_camera_battery_info(self, camera_name):
+    async def get_camera_battery_info(self, camera_name):
         logging.debug('get_camera_battery_info - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name].battery)
 
 
-    def get_camera_battery_voltage_info(self, camera_name):
+    async def get_camera_battery_voltage_info(self, camera_name):
         logging.debug('get_camera_battery_info - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name].battery_voltage )
 
 
-    def get_camera_arm_info(self, camera_name):
+    async def get_camera_arm_info(self, camera_name):
         logging.debug('get_camera_arm_info - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name].arm)
 
-    def set_camera_arm(self, camera_name, armed=True):
+    async def set_camera_arm(self, camera_name, armed=True):
         logging.debug('set_camera_arm - {} {}'.format(camera_name, armed ))
-        self.blink.cameras[camera_name].arm = armed
+        await self.blink.cameras[camera_name].async_arm(armed)
 
-    def get_camera_type_info(self, camera_name):
+    async def get_camera_type_info(self, camera_name):
         logging.debug('get_camera_type_info - {} '.format(camera_name ))
         temp = self.blink.cameras[camera_name].product_type
         if temp == 'owl':
@@ -184,40 +184,40 @@ class blink_system(object):
         else:
             return('default')
 
-    def get_camera_motion_enabled_info(self, camera_name):
+    async def get_camera_motion_enabled_info(self, camera_name):
         logging.debug('get_camera_motion_info - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name].motion_enabled )
 
-    def set_camera_motion_detect(self, camera_name, enabled=True):
+    async def set_camera_motion_detect(self, camera_name, enabled=True):
         logging.debug('set_camera_motion_detect = {}- {} '.format(camera_name, enabled ))
         self.blink.cameras[camera_name].set_motion_detect(enabled)
 
 
 
-    def get_camera_motion_detected_info(self, camera_name):
+    async def get_camera_motion_detected_info(self, camera_name):
         logging.debug('get_camera_motion_info - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name].motion_detected )
 
-    def get_camera_temperatureC_info(self, camera_name):
+    async def get_camera_temperatureC_info(self, camera_name):
         logging.debug('get_camera_temperatureC_info - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name].temperature_c)
 
 
-    def get_camera_recording_info(self, camera_name):
+    async def get_camera_recording_info(self, camera_name):
         logging.debug('get_camera_recording_info - {} '.format(camera_name ))
         return(0)
     '''
-    def snap_picture(self, camera_name):
+    async def snap_picture(self, camera_name):
 
         logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))
         self.blink.cameras[camera_name].snap_picture()
         dinfo = datetime.datetime.now()
         photo_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.jpg'
-        self.blink.refresh()             # Get new information from server
+        await self.blink.refresh()             # Get new information from server
         self.blink.cameras[camera_name].image_to_file('./'+photo_string)
         #emailMedia.sendEmail('./'+photo_string, 'christian.olgaard@gmail.com', dinfo)
         
-    def snap_video(self, camera_name):
+    async def snap_video(self, camera_name):
 
         temp = self.blink.cameras[camera_name].record()
         count = 0
@@ -232,11 +232,11 @@ class blink_system(object):
         video_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.mp4'
         logging.debug('snap_video - {} - {}'.format(camera_name, video_string ))
         time.sleep(5)
-        self.blink.refresh()   
+        await self.blink.refresh()   
         count = 0
         while None == self.blink.cameras[camera_name].clip and count <4:  # Get new information from server
             time.sleep(10)
-            self.blink.refresh()   
+            await self.blink.refresh()   
             logging.debug('waiting for video clip to appear {}'.format( self.blink.cameras[camera_name].clip))
             count = count + 1
         #link = self.blink.cameras[camera_name].request_videos()
@@ -249,7 +249,7 @@ class blink_system(object):
             return(True)
     '''
 
-    def snap_picture(self, camera_name):
+    async def snap_picture(self, camera_name):
         self.blink.cameras[camera_name].snap_picture()
         time.sleep(1)
         #self.blink.cameras[camera_name].snap_picture()
@@ -257,7 +257,7 @@ class blink_system(object):
         timeInf = int(time.time())
         photo_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.jpg'
         logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))
-        self.blink.refresh()  
+        await self.blink.refresh()  
         thumbnailStr = self.blink.cameras[camera_name].thumbnail
         logging.debug('humbnailStr: {} {}'.format(type(thumbnailStr), thumbnailStr))
         tsIndex = int(thumbnailStr.find('ts='))
@@ -266,7 +266,7 @@ class blink_system(object):
         while pic_ts < timeInf - 5 and iter < 10: # allow 5 sec diff
             logging.debug('Waiting for pic to update last image  time {} vs  capture time{}'.format(pic_ts, timeInf))
             time.sleep(15)
-            self.blink.refresh()  
+            await self.blink.refresh()  
             thumbnailStr = self.blink.cameras[camera_name].thumbnail
             tsIndex = int(thumbnailStr.find('ts='))
             pic_ts = int( thumbnailStr[tsIndex+3:tsIndex+13])
@@ -282,7 +282,7 @@ class blink_system(object):
         
         
         
-    def snap_video(self, camera_name):
+    async def snap_video(self, camera_name):
         temp = self.blink.cameras[camera_name].record()
         count = 0
         if 'created_at' not in temp and count <4:
@@ -299,11 +299,11 @@ class blink_system(object):
         video_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.mp4'
         logging.debug('snap_video - {} - {}'.format(camera_name, video_string ))
         time.sleep(10)
-        self.blink.refresh()   
+        await self.blink.refresh()   
         count = 0
         while None == self.blink.cameras[camera_name].clip and count <4:  # Get new information from server
             time.sleep(10)
-            self.blink.refresh()   
+            await self.blink.refresh()   
             logging.debug('waiting for video clip to appear {}'.format( self.blink.cameras[camera_name].clip))
             count = count + 1
         #link = self.blink.cameras[camera_name].request_videos()
@@ -318,11 +318,11 @@ class blink_system(object):
             return(True)
         '''
 
-    def get_camera_unit(self, camera_name):
+    async def get_camera_unit(self, camera_name):
         logging.debug('get_camera_unit - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name])
 
-    def set_email_info(self, email_info):
+    async def set_email_info(self, email_info):
         logging.debug('set_email_info:{}'.format(email_info))
         self.email_en = email_info['email_en']
         self.smtp = email_info['smtp']
@@ -331,7 +331,7 @@ class blink_system(object):
         self.email_password = email_info['email_password']
         self.email_recepient = email_info['email_recepient']
 
-    def send_email(self, mediaFileName, camera_name):
+    async def send_email(self, mediaFileName, camera_name):
         try:
             logging.debug('send_email: {} {}'.format(mediaFileName,camera_name ))
             subject = 'Captured Media File from {}'.format(camera_name)
@@ -375,7 +375,7 @@ class blink_system(object):
 
        
 
-    def get_camera_unit(self, camera_name):
+    async def get_camera_unit(self, camera_name):
         logging.debug('get_camera_unit - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name])
 

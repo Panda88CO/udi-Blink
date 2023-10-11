@@ -62,11 +62,11 @@ class blink_system(object):
                 else:
                     await auth.send_auth_key(self.blink, authenKey)
             logging.debug('setup_post_verify')
-            await time.sleep(10)
+            await asyncio.sleep(10)
             await self.blink.setup_post_verify()
-            await time.sleep(1)
+            await asyncio.sleep(1)
             await self.blink.refresh()
-            await time.sleep(3)
+            await asyncio.sleep(3)
             return('ok')
         else:
             return{'no login'}
@@ -87,11 +87,11 @@ class blink_system(object):
                 else:
                     auth.send_auth_key(self.blink, authenKey)
             logging.debug('setup_post_verify')
-            time.sleep(10)
+            asyncio.sleep(10)
             self.blink.setup_post_verify()
-            time.sleep(1)
+            asyncio.sleep(1)
             await self.blink.refresh()
-            time.sleep(3)
+            asyncio.sleep(3)
             return('ok')
         else:
             return{'no login'}
@@ -223,7 +223,7 @@ class blink_system(object):
         count = 0
         if 'created_at' not in temp and count <4:
             logging.info('Capture did not succeed - trying again in 10 sec')
-            time.sleep(10)
+            asyncio.sleep(10)
             temp = self.blink.cameras[camera_name].record()
             count= count + 1
         if count >= 4:
@@ -231,11 +231,11 @@ class blink_system(object):
         dinfo = datetime.datetime.now()
         video_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.mp4'
         logging.debug('snap_video - {} - {}'.format(camera_name, video_string ))
-        time.sleep(5)
+        asyncio.sleep(5)
         await self.blink.refresh()   
         count = 0
         while None == self.blink.cameras[camera_name].clip and count <4:  # Get new information from server
-            time.sleep(10)
+            asyncio.sleep(10)
             await self.blink.refresh()   
             logging.debug('waiting for video clip to appear {}'.format( self.blink.cameras[camera_name].clip))
             count = count + 1
@@ -251,7 +251,7 @@ class blink_system(object):
 
     async def snap_picture(self, camera_name):
         self.blink.cameras[camera_name].snap_picture()
-        time.sleep(1)
+        asyncio.sleep(1)
         #self.blink.cameras[camera_name].snap_picture()
         dinfo = datetime.datetime.now()
         timeInf = int(time.time())
@@ -265,11 +265,12 @@ class blink_system(object):
         iter = 0
         while pic_ts < timeInf - 5 and iter < 10: # allow 5 sec diff
             logging.debug('Waiting for pic to update last image  time {} vs  capture time{}'.format(pic_ts, timeInf))
-            time.sleep(15)
+            
             await self.blink.refresh()  
             thumbnailStr = self.blink.cameras[camera_name].thumbnail
             tsIndex = int(thumbnailStr.find('ts='))
             pic_ts = int( thumbnailStr[tsIndex+3:tsIndex+13])
+
             iter = iter + 1
             #logging.debug('Waiting for pic to update {} vs  {}'.format(pic_ts, timeInf))
         if iter >= 10:
@@ -277,7 +278,7 @@ class blink_system(object):
         else:
             self.blink.cameras[camera_name].image_to_file('./'+photo_string)
             if self.email_en:
-                self.send_email(photo_string, camera_name)
+                await self.send_email(photo_string, camera_name)
         os.remove(photo_string)
         
         
@@ -287,8 +288,8 @@ class blink_system(object):
         count = 0
         if 'created_at' not in temp and count <4:
             logging.info('Capture did not succeed - trying again in 10 sec')
-            time.sleep(10)
-            temp = self.blink.cameras[camera_name].record()
+            asyncio.sleep(10)
+            await self.blink.cameras[camera_name].record()
             count= count + 1
         if count >= 4:
             return(False)
@@ -298,11 +299,11 @@ class blink_system(object):
         dinfo = datetime.datetime.now()
         video_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.mp4'
         logging.debug('snap_video - {} - {}'.format(camera_name, video_string ))
-        time.sleep(10)
+        asyncio.sleep(10)
         await self.blink.refresh()   
         count = 0
         while None == self.blink.cameras[camera_name].clip and count <4:  # Get new information from server
-            time.sleep(10)
+            asyncio.sleep(10)
             await self.blink.refresh()   
             logging.debug('waiting for video clip to appear {}'.format( self.blink.cameras[camera_name].clip))
             count = count + 1

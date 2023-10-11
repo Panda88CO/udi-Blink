@@ -19,6 +19,8 @@ from blinkpy.blinkpy import Blink
 from blinkpy.auth import Auth
 import asyncio
 from aiohttp import ClientSession
+import aiofiles
+from aiofiles import ospath
 
 import re
 import datetime

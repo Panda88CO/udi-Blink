@@ -36,36 +36,39 @@ from email.mime.text import MIMEText
 
 
 class blink_system(object):
-    async def __init__(self):
-        #self.userName =userName
-        #self.password = password
-        #self.AUTHKey = AUTHKey
+    
+    def __init__(self, userName, password, authenKey):
+        self.userName =userName
+        self.password = password
+        self.AUTHKey = authenKey
         self.cameraType = {'owl'}
-
+        session = ClientSession()
         logging.info('Accessing Blink system')
-        
+        self.blink = Blink(None)
         self.temp_unit = 'C'
         self.email_en = False
 
+    # Use the __await__ method to make the class awaitable
+    #def __await__(self):
+    #    # Call ls the constructor and returns the instance
+    #    return self.create().__await__()
 
-
-    async def start (self, userName, password, authenKey):
-        self.blink = Blink()
-        auth = Auth({"username":userName, "password":password}, no_prompt=True)
+    async def start (self):
+       
+        auth = Auth({"username":self.userName, "password":self.password}, no_prompt=True)
         if auth:
             self.blink.auth = auth
             logging.info('Auth: {}'.format(auth))
             await self.blink.start()
             if self.blink.key_required:
                 logging.info('Auth key required')
-                if authenKey == None or authenKey == '':
+                if self.AUTHKey  == None or self.AUTHKey  == '':
                   
-                    return('AuthKey Empty: {}'.format(authenKey))
+                    return('AuthKey Empty: {}'.format(self.AUTHKey ))
                 else:
-                    await auth.send_auth_key(self.blink, authenKey)
+                    await auth.send_auth_key(self.blink, self.AUTHKey )            
+                    await self.blink.setup_post_verify()
             logging.debug('setup_post_verify')
-            await asyncio.sleep(10)
-            await self.blink.setup_post_verify()
             await asyncio.sleep(1)
             await self.blink.refresh()
             await asyncio.sleep(3)
@@ -378,9 +381,9 @@ class blink_system(object):
 
        
 
-    async def get_camera_unit(self, camera_name):
-        logging.debug('get_camera_unit - {} '.format(camera_name ))
-        return(self.blink.cameras[camera_name])
+    #async def get_camera_unit(self, camera_name):
+    #    logging.debug('get_camera_unit - {} '.format(camera_name ))
+    #    return(self.blink.cameras[camera_name])
 
     
 

@@ -7,6 +7,7 @@ async def start():
     userName ='christian@olgaard.com'
     password = 'coe123COE!@#*'
     blink = Blink(session=ClientSession())
+    #blink = Blink()
     # Can set no_prompt when initializing auth handler
     auth = Auth({"username": userName, "password": password}, no_prompt=True)
     blink.auth = auth
@@ -16,3 +17,4 @@ async def start():
 blink = asyncio.run(start())
 blink.refresh()
 print(blink)
+session.close()

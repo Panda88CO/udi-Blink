@@ -42,9 +42,7 @@ class blink_system(object):
         self.password = password
         self.AUTHKey = authenKey
         self.cameraType = {'owl'}
-        session = ClientSession()
-        logging.info('Accessing Blink system')
-        self.blink = Blink(None)
+
         self.temp_unit = 'C'
         self.email_en = False
 
@@ -54,7 +52,9 @@ class blink_system(object):
     #    return self.create().__await__()
 
     async def start (self):
-       
+        session = ClientSession()
+        logging.info('Accessing Blink system')
+        self.blink = Blink(session=ClientSession())
         auth = Auth({"username":self.userName, "password":self.password}, no_prompt=True)
         if auth:
             self.blink.auth = auth
@@ -69,7 +69,7 @@ class blink_system(object):
                     await auth.send_auth_key(self.blink, self.AUTHKey )            
                     await self.blink.setup_post_verify()
             logging.debug('setup_post_verify')
-            await asyncio.sleep(1)
+            await asyncio.sleep(10)
             await self.blink.refresh()
             await asyncio.sleep(3)
             return('ok')
@@ -107,12 +107,12 @@ class blink_system(object):
         logging.debug('blink_refresh_data')
         await self.blink.refresh()
         
-    async def set_temp_unit(self, temp_unit):
+    def set_temp_unit(self, temp_unit):
         self.temp_unit = temp_unit
 
 
 
-    async def get_sync_unit(self, sync_unit_name):
+    def get_sync_unit(self, sync_unit_name):
         logging.debug('get_sync_unit - {}: {}'.format(sync_unit_name, self.blink.sync))
         for sync_name in self.blink.sync:
             tmp = re.sub(r"[^A-Za-z0-9_,]", "", sync_name)
@@ -120,14 +120,14 @@ class blink_system(object):
                  return(self.blink.sync[sync_name])
         return(False)
         
-    async def get_camera_list(self):
+    def get_camera_list(self):
         logging.debug('get_camera_list')
         cam_list = []
         for cam_name in self.blink.cameras:
             cam_list.append(cam_name)
         return(cam_list)
         
-    async def get_sync_camera_list(self, sync_unit):
+    def get_sync_camera_list(self, sync_unit):
         logging.debug('get_sync_camera_list')
         cam_list = []
         for camera in sync_unit.camera_list:
@@ -135,13 +135,13 @@ class blink_system(object):
              cam_list.append(cam_name)
         return(cam_list)
  
-    async def get_sync_arm_info(self, sync_name):
+    def get_sync_arm_info(self, sync_name):
         logging.debug('get_sync_arm_info - {} '.format(sync_name ))
-        return(self.blink.sync[sync_name].arm)
+        return(await self.blink.sync[sync_name].arm)
 
     async def set_sync_arm (self, sync_name, armed=True):
         logging.debug('set_arm_sync = {}- {} '.format(sync_name, armed ))
-        self.blink.sync[sync_name].arm = armed
+        await self.blink.sync[sync_name].async_arm(armed)
         #await self.blink.refresh()
 
     async def get_sync_online(self, sync_name):
@@ -195,7 +195,7 @@ class blink_system(object):
 
     async def set_camera_motion_detect(self, camera_name, enabled=True):
         logging.debug('set_camera_motion_detect = {}- {} '.format(camera_name, enabled ))
-        self.blink.cameras[camera_name].set_motion_detect(enabled)
+        await self.blink.cameras[camera_name].set_motion_detect(enabled)
 
 
 

@@ -38,7 +38,7 @@ class BlinkSetup (udi_interface.Node):
         super().__init__( polyglot, primary, address, name)  
         
         logging.setLevel(10)
-        self.blink = blink_system()
+        #self.blink = blink_system()
         self.nodeDefineDone = False
         self.handleParamsDone = False
         self.paramsProcessed = False
@@ -137,7 +137,9 @@ class BlinkSetup (udi_interface.Node):
                 self.poly.Notices['un'] = 'username and password must be provided to start node server'
                 exit()
             else:
-                success = self.blink.start(self.userName,self.password, self.authKey )
+                self.blink = blink_system( self.userName,self.password, self.authKey )
+               
+                success = self.blink.start( )
                 #logging.debug('Auth: {}'.format(success))
                 if 'AuthKey' == success:
                     logging.error('AuthKey required - please add to config')

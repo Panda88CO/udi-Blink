@@ -36,7 +36,21 @@ from email.mime.text import MIMEText
 
 
 class blink_system(object):
-    
+    def __init__(self, userName, password, authenKey):
+        self.userName =userName
+        self.password = password
+        self.AUTHKey = authenKey
+        self.temp_unit = 'C'
+        self.email_en = False
+
+    def start(self, userName, password, authenKey = None):
+        session = ClientSession()
+        self.blink = Blink(session=ClientSession())
+        success = self.blink.start(userName, password, authenKey)
+        await success
+
+
+class blink_access(object):
     def __init__(self, userName, password, authenKey):
         self.userName =userName
         self.password = password
@@ -45,6 +59,7 @@ class blink_system(object):
 
         self.temp_unit = 'C'
         self.email_en = False
+
 
     # Use the __await__ method to make the class awaitable
     #def __await__(self):

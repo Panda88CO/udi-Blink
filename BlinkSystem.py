@@ -40,26 +40,36 @@ class blink_system(object):
         self.userName =userName
         self.password = password
         self.AUTHKey = authenKey
-        self.temp_unit = 'C'
-        self.email_en = False
-
-    def start(self):
-        session = ClientSession()
-        self.blink = asyncio.run(Blink(session=ClientSession()))
-        success = self.blink.start(userName, password, authenKey)
-        return (success)
-
-
-class blink_access(object):
-    def __init__(self, userName, password, authenKey):
-        self.userName =userName
-        self.password = password
-        self.AUTHKey = authenKey
         self.cameraType = {'owl'}
-
         self.temp_unit = 'C'
         self.email_en = False
+        
+    #def start(self):
+    #    session = ClientSession()
+    #    self.blink  = Blink(session=ClientSession())
+    #    success = self.blink.start(self.userName, self.password, self.AUTHKey)
+    #    return (success)
 
+
+
+    def sys_start(self):
+        self.blink = Blink(session=ClientSession())
+        asyncio.run(self.start())
+        if self.auth_ok:
+            return('ok')
+        else:
+            return('no login')
+    '''
+    class blink_access(object):
+        def __init__(self, userName, password, authenKey):
+            self.userName =userName
+            self.password = password
+            self.AUTHKey = authenKey
+            self.cameraType = {'owl'}
+
+            self.temp_unit = 'C'
+            self.email_en = False
+    '''
 
     # Use the __await__ method to make the class awaitable
     #def __await__(self):
@@ -67,13 +77,14 @@ class blink_access(object):
     #    return self.create().__await__()
 
     async def start (self):
-        session = ClientSession()
+        #session = ClientSession()
         logging.info('Accessing Blink system')
-        self.blink = Blink(session=ClientSession())
+        
         auth = Auth({"username":self.userName, "password":self.password}, no_prompt=True)
+        self.blink.auth = auth
         if auth:
             self.blink.auth = auth
-            logging.info('Auth: {}'.format(auth))
+            logging.info('Auth: {}'.format(self.blink.auth))
             await self.blink.start()
             if self.blink.key_required:
                 logging.info('Auth key required')
@@ -81,41 +92,15 @@ class blink_access(object):
                   
                     return('AuthKey Empty: {}'.format(self.AUTHKey ))
                 else:
-                    await auth.send_auth_key(self.blink, self.AUTHKey )            
+                    await auth.send_auth_key(self.blink, self.AUTHKey )
                     await self.blink.setup_post_verify()
             logging.debug('setup_post_verify')
             await asyncio.sleep(10)
             await self.blink.refresh()
             await asyncio.sleep(3)
-            return('ok')
+            self.auth_ok = True 
         else:
-            return{'no login'}
-        
-    '''
-    async def auth (self, userName, password, authenKey = None):
-        # Can set no_prompt when initializing auth handler
-        auth = Auth({"username":userName, "password":password}, no_prompt=True)
-        if auth:
-            self.blink.auth = auth
-            logging.info('Auth: {}'.format(auth))
-            await self.blink.start()
-            if self.blink.key_required:
-                logging.info('Auth key required')
-                if authenKey == None or authenKey == '':
-                  
-                    return('AuthKey Empty: {}'.format(authenKey))
-                else:
-                    auth.send_auth_key(self.blink, authenKey)
-            logging.debug('setup_post_verify')
-            asyncio.sleep(10)
-            self.blink.setup_post_verify()
-            asyncio.sleep(1)
-            await self.blink.refresh()
-            asyncio.sleep(3)
-            return('ok')
-        else:
-            return{'no login'}
-    '''
+            self.auth_ok = False 
 
 
     async def refresh_data(self):

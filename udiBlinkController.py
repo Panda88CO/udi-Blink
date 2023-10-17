@@ -139,7 +139,7 @@ class BlinkSetup (udi_interface.Node):
             else:
                 self.blink = blink_system( self.userName,self.password, self.authKey )
                
-                success = self.blink.start( )
+                success = self.blink.sys_start( )
                 #logging.debug('Auth: {}'.format(success))
                 if 'AuthKey' == success:
                     logging.error('AuthKey required - please add to config')

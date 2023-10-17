@@ -36,18 +36,18 @@ from email.mime.text import MIMEText
 
 
 class blink_system(object):
-    def __init__(self, userName, password, authenKey):
+    def __init__(self, userName, password, authenKey=None):
         self.userName =userName
         self.password = password
         self.AUTHKey = authenKey
         self.temp_unit = 'C'
         self.email_en = False
 
-    def start(self, userName, password, authenKey = None):
+    def start(self):
         session = ClientSession()
-        self.blink = Blink(session=ClientSession())
+        self.blink = asyncio.run(Blink(session=ClientSession()))
         success = self.blink.start(userName, password, authenKey)
-        await success
+        return (success)
 
 
 class blink_access(object):
@@ -152,7 +152,7 @@ class blink_access(object):
  
     def get_sync_arm_info(self, sync_name):
         logging.debug('get_sync_arm_info - {} '.format(sync_name ))
-        return(await self.blink.sync[sync_name].arm)
+        return(self.blink.sync[sync_name].arm)
 
     async def set_sync_arm (self, sync_name, armed=True):
         logging.debug('set_arm_sync = {}- {} '.format(sync_name, armed ))

@@ -136,7 +136,7 @@ class BlinkSetup (udi_interface.Node):
             time.sleep(5)
             self.validate_params()
             logging.debug('Username {} password {}'.format(self.userName, self.password ))
-            
+
             if self.userName == None or self.userName == '' or self.password==None or self.password=='':
                 logging.error('username and password must be provided to start node server')
                 self.poly.Notices['un'] = 'username and password must be provided to start node server'
@@ -145,6 +145,8 @@ class BlinkSetup (udi_interface.Node):
 
                 blinktmp = blink_system( self.userName,self.password, self.authKey )               
                 self.blink = blinktmp
+                
+                self.blink.set_temp_unit(self.temp_unit)
                 success = self.blink.sys_start( )
                 logging.debug('Auth: {}'.format(success))
                 if 'AuthKey' == success:
@@ -271,12 +273,9 @@ class BlinkSetup (udi_interface.Node):
                 if '' == temp or None == temp:
                     self.poly.Notices['TEMP_UNIT'] = 'Missing temp unit (C,F,K)'                    
                 else:
-                    if temp[0] == 'C':
-                        self.blink.set_temp_unit('C') 
-                    elif temp[0] == 'F' :
-                        self.blink.set_temp_unit('F') 
-                    elif temp[0] == 'K' :
-                        self.blink.set_temp_unit('K') 
+                    if temp[0] == ['C', 'F', 'K']:
+                       self.temp_unit = temp[0]
+
                     if 'TEMP_UNIT' in self.poly.Notices:
                             self.poly.Notices.delete('TEMP_UNIT')
 

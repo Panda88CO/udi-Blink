@@ -273,7 +273,7 @@ class BlinkSetup (udi_interface.Node):
                 if '' == temp or None == temp:
                     self.poly.Notices['TEMP_UNIT'] = 'Missing temp unit (C,F,K)'                    
                 else:
-                    if temp[0] == ['C', 'F', 'K']:
+                    if temp[0] in ['C', 'F', 'K']:
                        self.temp_unit = temp[0]
 
                     if 'TEMP_UNIT' in self.poly.Notices:

@@ -35,7 +35,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 
-class blink_system(object):
+class blink_system2(object):
     def __init__(self, userName, password, authenKey=None):
         self.userName =userName
         self.password = password
@@ -44,11 +44,12 @@ class blink_system(object):
         self.temp_unit = 'C'
         self.email_en = False
         self.loop = asyncio.get_event_loop()
+        logging.debug('blink_system init complete')
     
     # Use the __await__ method to make the class awaitable
-    def __await__(self):
-        # Call ls the constructor and returns the instance
-        return self.create().__await__()  
+    #def __await__(self):
+    #    # Call ls the constructor and returns the instance
+    #    return self.create().__await__()  
 
         
         

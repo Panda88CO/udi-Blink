@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from udiBlinkSyncNode import blink_sync_node
-from BlinkSystemV2 import blink_system
+from BlinkSystemV2 import blink_system2
 import sys
 import time 
 import re
@@ -143,8 +143,7 @@ class BlinkSetup (udi_interface.Node):
                 #exit()
             else:
 
-                blinktmp = blink_system( self.userName,self.password, self.authKey )               
-                self.blink = blinktmp                
+                self.blink = blink_system2( self.userName,self.password, self.authKey )               
                 self.blink.set_temp_unit(self.temp_unit)
 
                 success = self.blink.sys_start( )

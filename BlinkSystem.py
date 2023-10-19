@@ -45,9 +45,9 @@ class blink_system(object):
         self.email_en = False
     
     # Use the __await__ method to make the class awaitable
-    def __await__(self):
-        # Call ls the constructor and returns the instance
-        return self.create().__await__()  
+    #def __await__(self):
+    #    # Call ls the constructor and returns the instance
+    #   return self.create().__await__()  
 
         
         

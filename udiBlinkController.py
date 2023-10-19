@@ -2,6 +2,7 @@
 
 from udiBlinkSyncNode import blink_sync_node
 from BlinkSystem import blink_system
+import asyncio
 import sys
 import time 
 import re
@@ -144,9 +145,9 @@ class BlinkSetup (udi_interface.Node):
             else:
 
                 blinktmp = blink_system( self.userName,self.password, self.authKey )               
-                self.blink = blinktmp
-                
+                self.blink = blinktmp                
                 self.blink.set_temp_unit(self.temp_unit)
+
                 success = self.blink.sys_start( )
                 logging.debug('Auth: {}'.format(success))
                 if 'AuthKey' == success:

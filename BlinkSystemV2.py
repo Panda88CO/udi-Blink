@@ -43,7 +43,7 @@ class blink_system2(object):
         self.cameraType = {'owl'}
         self.temp_unit = 'C'
         self.email_en = False
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.new_event_loop()
         logging.debug('blink_system init complete')
     
     # Use the __await__ method to make the class awaitable

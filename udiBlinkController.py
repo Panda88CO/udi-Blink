@@ -143,7 +143,7 @@ class BlinkSetup (udi_interface.Node):
                 #exit()
             else:
 
-                self.blink = blink_system2( self.userName,self.password, self.authKey )               
+                self.blink =await blink_system2( self.userName,self.password, self.authKey )               
                 self.blink.set_temp_unit(self.temp_unit)
 
                 success = self.blink.sys_start( )

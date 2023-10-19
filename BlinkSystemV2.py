@@ -65,8 +65,8 @@ class blink_system2(object):
     def sys_start(self):
         logging.debug('sys_start')
         #self.blink = Blink(session=ClientSession())
-        return( asyncio.run (self.async_start))
-
+        res = self.async_start
+        return(res)
         #asyncio.run(self.start())
         #if self.auth_ok:
         #    return('ok')

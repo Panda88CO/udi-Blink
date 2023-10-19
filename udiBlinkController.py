@@ -2,7 +2,6 @@
 
 from udiBlinkSyncNode import blink_sync_node
 from BlinkSystemV2 import blink_system
-import asyncio
 import sys
 import time 
 import re

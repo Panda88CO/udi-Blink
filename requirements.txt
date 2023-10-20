@@ -1,2 +1,2 @@
 
-blinkpy = 0.21.0
+blinkpy == 0.21.0

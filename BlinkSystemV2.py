@@ -43,7 +43,7 @@ class blink_system2(object):
         self.cameraType = {'owl'}
         self.temp_unit = 'C'
         self.email_en = False
-        self.loop = asyncio.new_event_loop()
+        #self.loop = asyncio.new_event_loop()
         logging.debug('blink_system init complete')
     
     # Use the __await__ method to make the class awaitable
@@ -65,8 +65,9 @@ class blink_system2(object):
     def sys_start(self):
         logging.debug('sys_start')
         #self.blink = Blink(session=ClientSession())
-        res = self.async_start
-        return(res)
+        #loop = asyncio.get_event_loop()
+        #loop.start (res = self.async_start())
+
         #asyncio.run(self.start())
         #if self.auth_ok:
         #    return('ok')

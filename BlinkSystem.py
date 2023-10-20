@@ -28,6 +28,7 @@ import time
 import os
 import smtplib
 import ssl
+from threading import Thread
 
 from email import encoders
 from email.mime.base import MIMEBase
@@ -43,7 +44,7 @@ class blink_system(object):
         self.cameraType = {'owl'}
         self.temp_unit = 'C'
         self.email_en = False
-    
+        self.blink_thread = None
     # Use the __await__ method to make the class awaitable
     #def __await__(self):
     #    # Call ls the constructor and returns the instance
@@ -52,12 +53,9 @@ class blink_system(object):
         
         
 
-    #def start(self):
-    #    session = ClientSession()
-    #    self.blink  = Blink(session=ClientSession())
-    #    success = self.blink.start(self.userName, self.password, self.AUTHKey)
-    #    return (success)
-
+    #def blink_start(self):
+    #    self.blink_thread = Thread(name="BLINK-" + str(os.getpid()), target=self.sys_start))
+    #    self.blink_thread.start()
 
 
     def sys_start(self):
@@ -83,8 +81,8 @@ class blink_system(object):
 
     # Use the __await__ method to make the class awaitable
     #def __await__(self):
-    #    # Call ls the constructor and returns the instance
-    #    return self.create().__await__()
+        # Call ls the constructor and returns the instance
+        #return self.create().__await__()
 
     async def start (self):
         #session = ClientSession()

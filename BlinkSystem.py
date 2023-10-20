@@ -344,9 +344,7 @@ class blink_system(object):
 
        
 
-    def get_camera_unit(self, camera_name):
-        logging.debug('get_camera_unit - {} '.format(camera_name ))
-        return(self.blink.cameras[camera_name])
+
 
     
 

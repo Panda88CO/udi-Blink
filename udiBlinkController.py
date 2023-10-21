@@ -146,8 +146,7 @@ class BlinkSetup (udi_interface.Node):
                 #self.blink =blink_system2(  )               
                 self.blink.set_temp_unit(self.temp_unit)
 
-                success = asyncio.run_coroutine_threadsafe( self.blink.async_start(self.userName,self.password, self.authKey ))
-
+                success = self.blink.sys_start(self.userName,self.password, self.authKey )
                 logging.debug('Auth: {}'.format(success))
                 if 'AuthKey' == success:
                     logging.error('AuthKey required - please add to config')

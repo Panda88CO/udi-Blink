@@ -69,6 +69,7 @@ class blink_system2(object):
         self.userName =userName
         self.password = password
         self.AUTHKey = authenKey
+        asuccess = await async_start ()
 
         #self.blink = Blink(session=ClientSession())
         #loop = asyncio.get_event_loop()
@@ -96,11 +97,9 @@ class blink_system2(object):
     #    # Call ls the constructor and returns the instance
     #    return self.create().__await__()
 
-    async def async_start (self, userName, password, authenKey=None):
+    async def async_start (self):
         #session = ClientSession()
-        self.userName =userName
-        self.password = password
-        self.AUTHKey = authenKey
+ 
 
         logging.info('Accessing Blink system')
         self.blink = Blink(session=ClientSession())
@@ -113,8 +112,8 @@ class blink_system2(object):
             if self.blink.key_required:
                 logging.info('Auth key required')
                 if self.AUTHKey  == None or self.AUTHKey  == '':
-                  
-                    return('AuthKey Empty: {}'.format(self.AUTHKey ))
+                    logging.debug (' Auth key Empty: {}'.format(self.AUTHKey ))
+                    return('AuthKey')
                 else:
                     await auth.send_auth_key(self.blink, self.AUTHKey )
                     await self.blink.setup_post_verify()
@@ -123,8 +122,10 @@ class blink_system2(object):
             await self.blink.refresh()
             await asyncio.sleep(3)
             self.auth_ok = True 
+            return ('ok')
         else:
             self.auth_ok = False 
+            return('no login')
 
 
     async def refresh_data(self):

@@ -36,10 +36,8 @@ from email.mime.text import MIMEText
 
 
 class blink_system2(object):
-    def __init__(self, userName, password, authenKey=None):
-        self.userName =userName
-        self.password = password
-        self.AUTHKey = authenKey
+    def __init__(self):
+
         self.cameraType = {'owl'}
         self.temp_unit = 'C'
         self.email_en = False
@@ -62,8 +60,13 @@ class blink_system2(object):
 
 
 
-    def sys_start(self):
+    def sys_start(self, userName, password, authenKey=None):
+
         logging.debug('sys_start')
+        self.userName =userName
+        self.password = password
+        self.AUTHKey = authenKey
+
         #self.blink = Blink(session=ClientSession())
         #loop = asyncio.get_event_loop()
         #loop.start (res = self.async_start())

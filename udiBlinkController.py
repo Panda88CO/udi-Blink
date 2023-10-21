@@ -6,7 +6,7 @@ import sys
 import time 
 import re
 import os
-import thre
+import asyncio
 
 try:
     import udi_interface
@@ -34,11 +34,11 @@ except ImportError:
 
 class BlinkSetup (udi_interface.Node):
     #import udiFunctions
-    def  __init__(self, polyglot, primary, address, name):
-        super().__init__( polyglot, primary, address, name)  
+    def  __init__(self, polyglot, primary, address, name, blink):
+        super().__init__( polyglot, primary, address, name, blink)  
         
-        logging.setLevel(10)
-        #self.blink = blink_system()
+        logging.setLevel(10)    
+        self.blink = blink
         self.nodeDefineDone = False
         self.handleParamsDone = False
         self.paramsProcessed = False
@@ -143,10 +143,10 @@ class BlinkSetup (udi_interface.Node):
                 #exit()
             else:
 
-                self.blink =blink_system2( self.userName,self.password, self.authKey )               
+                #self.blink =blink_system2(  )               
                 self.blink.set_temp_unit(self.temp_unit)
 
-                success = self.blink.sys_start( )
+                success = self.blink.sys_start(self.userName,self.password, self.authKey )
                 logging.debug('Auth: {}'.format(success))
                 if 'AuthKey' == success:
                     logging.error('AuthKey required - please add to config')
@@ -380,7 +380,9 @@ if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
         polyglot.start('0.3.22')
-        BlinkSetup(polyglot, 'setup', 'setup', 'BlinkSetup')
+
+        asyncio.run(blink =link_system2() )
+        BlinkSetup(polyglot, 'setup', 'setup', 'BlinkSetup', blink)
 
         # Just sit and wait for events
         polyglot.runForever()

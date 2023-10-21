@@ -69,7 +69,7 @@ class blink_system2(object):
         self.userName =userName
         self.password = password
         self.AUTHKey = authenKey
-        asuccess = await async_start ()
+        success = self.async_start ()
 
         #self.blink = Blink(session=ClientSession())
         #loop = asyncio.get_event_loop()

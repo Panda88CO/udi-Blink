@@ -96,8 +96,12 @@ class blink_system2(object):
     #    # Call ls the constructor and returns the instance
     #    return self.create().__await__()
 
-    async def async_start (self):
+    async def async_start (self, userName, password, authenKey=None):
         #session = ClientSession()
+        self.userName =userName
+        self.password = password
+        self.AUTHKey = authenKey
+
         logging.info('Accessing Blink system')
         self.blink = Blink(session=ClientSession())
         auth = Auth({"username":self.userName, "password":self.password}, no_prompt=True)

@@ -382,6 +382,7 @@ if __name__ == "__main__":
         polyglot.start('0.3.22')
 
         blink = asyncio.run(blink_start())
+        logging.debug('blink = {}'.format(blink))
         BlinkSetup(polyglot, 'setup', 'setup', 'BlinkSetup', blink)
 
         # Just sit and wait for events

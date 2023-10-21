@@ -35,7 +35,7 @@ except ImportError:
 class BlinkSetup (udi_interface.Node):
     #import udiFunctions
     def  __init__(self, polyglot, primary, address, name, blink):
-        super().__init__( polyglot, primary, address, name, blink)  
+        super().__init__( polyglot, primary, address, name)  
         
         logging.setLevel(10)    
         self.blink = blink

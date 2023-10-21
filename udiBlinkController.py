@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from udiBlinkSyncNode import blink_sync_node
-from BlinkSystemV2 import blink_system2
+from BlinkSystemV2 import blink_system2, blink_start
 import sys
 import time 
 import re

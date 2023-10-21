@@ -381,7 +381,7 @@ if __name__ == "__main__":
         polyglot = udi_interface.Interface([])
         polyglot.start('0.3.22')
 
-        asyncio.run(blink =link_system2() )
+        blink = asyncio.run(blink_start())
         BlinkSetup(polyglot, 'setup', 'setup', 'BlinkSetup', blink)
 
         # Just sit and wait for events

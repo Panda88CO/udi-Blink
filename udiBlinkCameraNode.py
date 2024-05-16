@@ -59,6 +59,7 @@ class blink_camera_node(udi_interface.Node):
         self.nodeDefineDone = True
         
     
+    
     def node_queue(self, data):
         self.n_queue.append(data['address'])
 

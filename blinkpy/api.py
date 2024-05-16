@@ -34,7 +34,7 @@ def request_login(
             "password": login_data["password"],
             "unique_id": login_data["uid"],
             "device_identifier": login_data["device_id"],
-            "client_name": "Computer",
+            "client_name": "POLISY",
             "reauth": True,
         }
     )

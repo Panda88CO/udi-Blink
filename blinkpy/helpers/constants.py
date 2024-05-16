@@ -59,7 +59,12 @@ ONLINE = {"online": True, "offline": False}
 """
 OTHER
 """
-DEFAULT_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36"
+DEFAULT_USER_AGENT = "30.0ANDROID_28506099"
+
+"""
+Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36"
+"""
+
 DEVICE_ID = "Blinkpy"
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 DEFAULT_MOTION_INTERVAL = 1

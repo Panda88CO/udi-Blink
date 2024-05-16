@@ -59,7 +59,7 @@ class blink_camera_node(udi_interface.Node):
         self.nodeDefineDone = True
         
     
-    
+
     def node_queue(self, data):
         self.n_queue.append(data['address'])
 
@@ -147,7 +147,7 @@ class blink_camera_node(udi_interface.Node):
     def motion_detection (self, command):
         motion_enable = ('1' == int(command.get('value')) )
         logging.info(' arm_cameras: {} - {}'.format(self.camera.name, motion_enable ))
-        logging.debug('temp = {}'.format(temp))
+        #logging.debug('temp = {}'.format(temp))
         temp = self.blink.set_camera_motion_detect(self.camera.name,  motion_enable )
         logging.debug('blink.set_camera_motion_detect({}, {}):{}'.format(self.camera.name,  motion_enable, self.blink.get_camera_data(self.camera.name ) ))
         self.blink.refresh_data()

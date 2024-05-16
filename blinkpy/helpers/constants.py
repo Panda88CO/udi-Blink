@@ -65,7 +65,7 @@ DEFAULT_USER_AGENT = "30.0ANDROID_28506099"
 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36"
 """
 
-DEVICE_ID = "Blinkpy"
+DEVICE_ID = "PolisyBlink"
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 DEFAULT_MOTION_INTERVAL = 1
 DEFAULT_REFRESH = 30

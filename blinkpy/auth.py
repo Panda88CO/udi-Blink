@@ -155,9 +155,13 @@ class Auth:
             self.refresh_token()
 
     def validate_response(self, response, json_resp):
+        ##CO
+        _LOGGER.debug('validate_response:'.format(response))
+
         """Check for valid response."""
         if not json_resp:
             self.is_errored = False
+            _LOGGER.debug(response)
             return response
         self.is_errored = True
         try:

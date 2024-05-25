@@ -7,8 +7,10 @@ from requests.compat import urljoin
 from blinkpy import api
 from blinkpy.helpers.constants import TIMEOUT_MEDIA
 
-_LOGGER = logging.getLogger(__name__)
-
+#_LOGGER = logging.getLogger(__name__)
+import udi_interface
+_LOGGER = udi_interface.LOGGER
+Custom = udi_interface.Custom
 
 class BlinkCamera:
     """Class to initialize individual camera."""

@@ -31,7 +31,7 @@ except ImportError:
 
 
  
-VERSION = '0.4.0'
+VERSION = '0.4.1'
 
 class BlinkSetup (udi_interface.Node):
     #import udiFunctions

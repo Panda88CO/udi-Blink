@@ -217,9 +217,12 @@ class Blink:
     def setup_camera_list(self):
         """Create camera list for onboarded networks."""
         all_cameras = {}
+        mini_cameras = {}
+        lotus_cameras = {}
         response = api.request_camera_usage(self)
         try:
             for network in response["networks"]:
+                _LOGGER.debug('FOR LOOP : {}'.format(network))
                 camera_network = str(network["network_id"])
                 if camera_network not in all_cameras:
                     all_cameras[camera_network] = []
@@ -227,8 +230,11 @@ class Blink:
                     all_cameras[camera_network].append(
                         {"name": camera["name"], "id": camera["id"], "type": "default"}
                     )
+            _LOGGER.debug('ALL CAMERAS: {}'.format(all_cameras))
             mini_cameras = self.setup_owls()
+            _LOGGER.debug('mini_cameras CAMERAS: {}'.format(mini_cameras))
             lotus_cameras = self.setup_lotus()
+            _LOGGER.debug('lotus_cameras CAMERAS: {}'.format(lotus_cameras))
             for camera in mini_cameras:
                 for network, camera_info in camera.items():
                     all_cameras[network].append(camera_info)

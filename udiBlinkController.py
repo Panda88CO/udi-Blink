@@ -69,6 +69,8 @@ class BlinkSetup (udi_interface.Node):
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
         self.poly.subscribe(self.poly.CONFIGDONE, self.validate_params)
 
+        self.auth_key_updated = False
+
         self.hb = 0
         self.userParam = ['TEMP_UNIT', 'USERNAME','PASSWORD', 'AUTH_KEY', 'SYNC_UNITS' ]
         self.Parameters = Custom(self.poly, 'customparams')
@@ -137,8 +139,19 @@ class BlinkSetup (udi_interface.Node):
                 self.poly.Notices['un'] = 'username and password must be provided to start node server'
                 exit()
             else:
-                success = self.blink.auth(self.userName,self.password, self.authKey )
-                logging.debug('Auth: {}'.format(success))
+                auth_ok = self.blink.auth(self.userName,self.password )
+                logging.debug('Auth setp 1: auth finished {}'.format(auth_ok))
+                if not auth_ok:
+                    logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 
+                    self.poly.Notice['PIN'] = 'Enter 2FA PIN (message) in AUTH_KEY field and save'
+                    self.auth_key_updated = False
+                    while not self.auth_key_updated:                      
+                        logging.debug('Waiting for new pin')
+                        time.sleep(5)
+                        self.blink.auth_key(self.authKey )
+                self.blink.finalize_auth()
+
+                '''
                 if 'AuthKey' == success:
                     logging.error('AuthKey required - please add to config')
                     self.poly.Notices['ak'] = 'username and password must be provided to start node server'
@@ -147,7 +160,7 @@ class BlinkSetup (udi_interface.Node):
                     self.poly.Notices['un'] = 'please check username and password - do not seem to work '   
                 else:
                     logging.info('Accessing Blink completed ')
-                
+                '''
                 self.add_sync_nodes()
 
         except Exception as e:
@@ -286,6 +299,7 @@ class BlinkSetup (udi_interface.Node):
 
             if 'AUTH_KEY' in customParams:
                 self.authKey = customParams['AUTH_KEY']
+                self.auth_key_updated = True
             else:
                 self.poly.Notices['auth_key'] = 'Missing AUTH_KEY parameter'
                 self.authKey = ''

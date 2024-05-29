@@ -43,14 +43,14 @@ class blink_system(object):
         self.email_en = False
 
 
-    def auth (self, userName, password, authenKey = None):
+    def auth1 (self, userName, password):
         # Can set no_prompt when initializing auth handler
         auth_OK = Auth({"username":userName, "password":password}, no_prompt=True)
         if auth_OK:
             self.blink.auth = auth_OK
             logging.info('Auth: {}'.format(auth_OK))
             self.blink.start()
-            return( not self.blink.key_required)
+            return(not self.blink.key_required)
                 #logging.info('Auth key required')
                 #return(True)
             #else:

@@ -139,7 +139,7 @@ class BlinkSetup (udi_interface.Node):
                 self.poly.Notices['un'] = 'username and password must be provided to start node server'
                 exit()
             else:
-                auth_ok = self.blink.auth(self.userName,self.password )
+                auth_ok = self.blink.auth1(self.userName,self.password )
                 logging.debug('Auth setp 1: auth finished {}'.format(auth_ok))
                 if not auth_ok:
                     logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 

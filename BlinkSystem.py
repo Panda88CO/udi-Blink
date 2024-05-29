@@ -82,7 +82,7 @@ class blink_system(object):
                 
                 return('AuthKey Empty: {}'.format(authenKey))
             else:
-                self.auth.send_auth_key(self.blink, authenKey)
+                self.blink.auth.send_auth_key(self.blink, authenKey)
         '''
         logging.debug('setup_post_verify')
         time.sleep(10)

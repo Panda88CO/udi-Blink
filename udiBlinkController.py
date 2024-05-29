@@ -31,7 +31,7 @@ except ImportError:
 
 
  
-
+VERSION = 0.4.0
 class BlinkSetup (udi_interface.Node):
     #import udiFunctions
     def  __init__(self, polyglot, primary, address, name):
@@ -387,7 +387,7 @@ class BlinkSetup (udi_interface.Node):
 if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
-        polyglot.start('0.3.22')
+        polyglot.start(VERSION)
         BlinkSetup(polyglot, 'setup', 'setup', 'BlinkSetup')
 
         # Just sit and wait for events

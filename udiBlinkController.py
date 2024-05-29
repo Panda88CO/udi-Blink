@@ -31,7 +31,8 @@ except ImportError:
 
 
  
-VERSION = 0.4.0
+VERSION = '0.4.0'
+
 class BlinkSetup (udi_interface.Node):
     #import udiFunctions
     def  __init__(self, polyglot, primary, address, name):

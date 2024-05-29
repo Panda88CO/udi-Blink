@@ -130,7 +130,9 @@ class Blink:
         try:
             self.setup_networks()
             networks = self.setup_network_ids()
+            _LOGGER.debug('Networks : '.format(networks))
             cameras = self.setup_camera_list()
+            _LOGGER.debug('Cameras : '.format(cameras))            
         except BlinkSetupError:
             self.available = False
             return False

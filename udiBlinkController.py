@@ -143,7 +143,7 @@ class BlinkSetup (udi_interface.Node):
                 logging.debug('Auth setp 1: auth finished {}'.format(auth_ok))
                 if not auth_ok:
                     logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 
-                    self.poly.Notice['PIN'] = 'Enter 2FA PIN (message) in AUTH_KEY field and save'
+                    self.poly.Notices['PIN'] = 'Enter 2FA PIN (message) in AUTH_KEY field and save'
                     self.auth_key_updated = False
                     while not self.auth_key_updated:                      
                         logging.debug('Waiting for new pin')

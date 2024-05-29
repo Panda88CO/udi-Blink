@@ -15,8 +15,8 @@ except ImportError:
         logging.StreamHandler(sys.stdout) ]
     )
 
-from blinkpy.blinkpy import Blink
-from blinkpy.auth import Auth
+from blinkpy.blinkpy_tst import Blink
+from blinkpy.auth_tst import Auth
 import re
 import datetime
 import time

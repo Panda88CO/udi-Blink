@@ -32,7 +32,7 @@ from blinkpy.helpers.constants import (
     TIMEOUT_MEDIA,
 )
 from blinkpy.helpers.constants import __version__
-from blinkpy.auth import Auth, TokenRefreshFailed, LoginError
+from blinkpy.auth_tst import Auth, TokenRefreshFailed, LoginError
 
 #_LOGGER = logging.getLogger(__name__)
 import udi_interface
@@ -159,6 +159,7 @@ class Blink:
             self.homescreen = {}
             return
         self.homescreen = api.request_homescreen(self)
+        _LOGGER.debug('homescreen : {}'.format(self.homescreen))
 
     def setup_owls(self):
         """Check for mini cameras."""

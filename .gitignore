@@ -8,7 +8,6 @@ image.jpg
 blinkTestV2.py
 __pycache__/BlinkSystem.cpython-310.pyc
 __pycache__/BlinkSystem.cpython-310.pyc
-blinkpy/__init__.py
 blinkpy/__pycache__/__init__.cpython-310.pyc
 *.jpg
 *.mp4

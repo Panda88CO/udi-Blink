@@ -149,7 +149,7 @@ class BlinkSetup (udi_interface.Node):
                     while not self.auth_key_updated:                      
                         logging.debug('Waiting for new pin')
                         time.sleep(5)
-                        self.blink.auth_key(self.authKey )
+                       
                 self.blink.finalize_auth()
 
                 '''

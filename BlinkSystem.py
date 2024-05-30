@@ -82,7 +82,8 @@ class blink_system(object):
                 
                 return('AuthKey Empty: {}'.format(authenKey))
             else:
-                self.blink.auth.send_auth_key(self.blink, authenKey)
+                result = self.blink.auth.send_auth_key(self.blink, authenKey)
+                self.key_required = not result
         '''
         logging.debug('setup_post_verify')
         time.sleep(10)
@@ -94,12 +95,13 @@ class blink_system(object):
         '''
     def finalize_auth(self):
         logging.debug('finalize_auth')
-        time.sleep(10)
+        time.sleep(2)
         self.blink.setup_post_verify()
-        time.sleep(1)
+        time.sleep(5)
         self.blink.refresh()
         time.sleep(3)
         return('ok')
+    
     def auth_old (self, userName, password, authenKey = None):
         # Can set no_prompt when initializing auth handler
         auth = Auth({"username":userName, "password":password}, no_prompt=True)

@@ -13,11 +13,11 @@ from blinkpy.helpers.constants import (
     TIMEOUT,
 )
 
-import udi_interface
-_LOGGER = udi_interface.LOGGER
-Custom = udi_interface.Custom
+#import udi_interface
+#_LOGGER = udi_interface.LOGGER
+#Custom = udi_interface.Custom
 
-#_LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
 
 class Auth:

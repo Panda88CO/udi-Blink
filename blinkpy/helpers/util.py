@@ -11,10 +11,10 @@ import dateutil.parser
 from blinkpy.helpers import constants as const
 
 
-#_LOGGER = logging.getLogger(__name__)
-import udi_interface
-_LOGGER = udi_interface.LOGGER
-Custom = udi_interface.Custom
+_LOGGER = logging.getLogger(__name__)
+#import udi_interface
+#_LOGGER = udi_interface.LOGGER
+#Custom = udi_interface.Custom
 
 def json_load(file_name):
     """Load json credentials from file."""

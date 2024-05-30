@@ -8,10 +8,10 @@ from blinkpy.camera import BlinkCamera, BlinkCameraMini, BlinkDoorbell
 from blinkpy.helpers.util import time_to_seconds
 from blinkpy.helpers.constants import ONLINE
 
-#_LOGGER = logging.getLogger(__name__)
-import udi_interface
-_LOGGER = udi_interface.LOGGER
-Custom = udi_interface.Custom
+_LOGGER = logging.getLogger(__name__)
+#import udi_interface
+#_LOGGER = udi_interface.LOGGER
+#Custom = udi_interface.Custom
 
 class BlinkSyncModule:
     """Class to initialize sync module."""

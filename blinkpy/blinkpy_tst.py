@@ -34,10 +34,10 @@ from blinkpy.helpers.constants import (
 from blinkpy.helpers.constants import __version__
 from blinkpy.auth_tst import Auth, TokenRefreshFailed, LoginError
 
-#_LOGGER = logging.getLogger(__name__)
-import udi_interface
-_LOGGER = udi_interface.LOGGER
-Custom = udi_interface.Custom
+_LOGGER = logging.getLogger(__name__)
+#import udi_interface
+#_LOGGER = udi_interface.LOGGER
+#Custom = udi_interface.Custom
 
 class Blink:
     """Class to initialize communication."""
@@ -105,7 +105,7 @@ class Blink:
             self.auth.startup()
             self.setup_login_ids()
             self.setup_urls()
-            self.get_homescreen()
+            #self.get_homescreen()
         except (LoginError, TokenRefreshFailed, BlinkSetupError):
             _LOGGER.error("Cannot setup Blink platform.")
             self.available = False
@@ -116,6 +116,7 @@ class Blink:
             if self.auth.no_prompt:
                 return True
             self.setup_prompt_2fa()
+        
         return self.setup_post_verify()
 
     def setup_prompt_2fa(self):
@@ -128,11 +129,12 @@ class Blink:
     def setup_post_verify(self):
         """Initialize blink system after verification."""
         try:
+            self.get_homescreen()
             self.setup_networks()
             networks = self.setup_network_ids()
-            _LOGGER.debug('Networks : '.format(networks))
+            _LOGGER.debug('Networks : {}'.format(networks))
             cameras = self.setup_camera_list()
-            _LOGGER.debug('Cameras : '.format(cameras))            
+            _LOGGER.debug('Cameras : {}'.format(cameras))            
         except BlinkSetupError:
             self.available = False
             return False

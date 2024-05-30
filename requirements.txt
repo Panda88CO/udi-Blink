@@ -1,2 +1,2 @@
 
-blinkpy >= 0.19.2
+blinkpy == 0.19.2

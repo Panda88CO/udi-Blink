@@ -26,14 +26,15 @@ doarm-1 = Arm
 ND-blinkcamera-NAME = Blink Camera
 ND-blinkcamera-ICON = Input
 ST-nlsblinkcamera-GV0-NAME = Arm Status
-ST-nlsblinkcamera-GV1-NAME = Battery Satus
+ST-nlsblinkcamera-GV1-NAME = Battery Status
 battery-0 = OK
 battery-1 = Not OK - TBD
 battery-2 = TBD
 battery-10 = No Battery
 battery-99 = Unknown
 ST-nlsblinkcamera-GV2-NAME = Battery Level Indicator
-batteryv-99 = Powered
+batteryv-98 = Powered
+batteryv-99 = Unknown
 
 ST-nlsblinkcamera-GV3-NAME = CameraType
 cameratype-0 = Mini

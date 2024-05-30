@@ -60,6 +60,7 @@ class blink_camera_node(udi_interface.Node):
         self.nodeDefineDone = True
         
     
+
     def node_queue(self, data):
         self.n_queue.append(data['address'])
 
@@ -87,7 +88,7 @@ class blink_camera_node(udi_interface.Node):
             return(0)
 
     def start(self):   
-        time.sleep(1)
+        time.sleep(2)
         logging.info('Start {} camera module Node'.format(self.name))               
         while not self.nodeDefineDone or self.node == None or self.drivers == None:
             logging.debug('camera - wait to node completed')
@@ -119,7 +120,7 @@ class blink_camera_node(udi_interface.Node):
             temp = self.blink.get_camera_battery_voltage_info(self.camera.name)
             logging.debug('GV2 : {}'.format(temp))
             if None == temp:
-                self.node.setDriver('GV2', 99, True, True, 25)
+                self.node.setDriver('GV2', 98, True, True, 25)
             else:
 
                 self.node.setDriver('GV2', temp, True, True, 72)
@@ -169,7 +170,7 @@ class blink_camera_node(udi_interface.Node):
     def motion_detection (self, command):
         motion_enable = ('1' == int(command.get('value')) )
         logging.info(' arm_cameras: {} - {}'.format(self.camera.name, motion_enable ))
-        logging.debug('temp = {}'.format(temp))
+        #logging.debug('temp = {}'.format(temp))
         temp = self.blink.set_camera_motion_detect(self.camera.name,  motion_enable )
         logging.debug('blink.set_camera_motion_detect({}, {}):{}'.format(self.camera.name,  motion_enable, self.blink.get_camera_data(self.camera.name ) ))
         self.blink.refresh_data()

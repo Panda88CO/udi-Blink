@@ -214,6 +214,9 @@ class blink_system(object):
         else:
             return('default')
 
+    def refresh(self):
+        return(self.blink.refresh())
+
     def get_camera_motion_enabled_info(self, camera_name):
         logging.debug('get_camera_motion_info - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name].motion_enabled )
@@ -241,7 +244,7 @@ class blink_system(object):
         logging.debug('get_camera_temperatureC_info - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name].request_camera_info())
     
-    def get_system_notifications(self)
+    def get_system_notifications(self):
         return(self.blink.request_system_notifications())
     '''
     def snap_picture(self, camera_name):

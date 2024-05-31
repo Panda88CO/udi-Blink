@@ -293,6 +293,7 @@ class Blink:
         self.network_ids = all_networks
         return network_dict
     
+    
 
     def request_system_notifications(self):
         """

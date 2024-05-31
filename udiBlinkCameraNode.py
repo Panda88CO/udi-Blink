@@ -95,7 +95,7 @@ class blink_camera_node(udi_interface.Node):
             logging.debug('camera - wait to node completed')
             time.sleep(2)
         
-        #self.updateISYdrivers()
+        self.updateISYdrivers()
 
 
     def stop(self):
@@ -111,16 +111,15 @@ class blink_camera_node(udi_interface.Node):
             temp = self.blink.get_camera_status(self.camera.name)
             logging.debug('get_camera_info: {}'.format(temp))
             state = 99
-            if 'status' in temp:
-                if temp['status'] == 'online':
-                    state = 1
-                elif temp['status'] == 'offline':
-                    state = 0
-                elif temp['status'] == 'done': # Not sure how to detect state for older cameras
-                    state = 98
-                else:
-                    logging.error('Unknown status returned : {}'.format(temp['status'] ))
-                                 
+            if temp == 'online':
+                state = 1
+            elif temp == 'offline':
+                state = 0
+            elif temp == 'done': # Not sure how to detect state for older cameras
+                state = 98
+            else:
+                logging.error('Unknown status returned : {}'.format(temp['status'] ))
+                state = 99     
             self.node.setDriver('ST', state)
             temp = self.blink.get_camera_arm_info(self.camera.name)
             logging.debug('GV0 : {}'.format(temp))

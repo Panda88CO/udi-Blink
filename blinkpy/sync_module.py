@@ -10,7 +10,7 @@ from blinkpy.helpers.constants import ONLINE
 
 try:
     import udi_interface
-    logging = udi_interface.LOGGER
+    _LOGGER = udi_interface.LOGGER
     Custom = udi_interface.Custom
 except ImportError:
     _LOGGER = logging.getLogger(__name__)
@@ -167,7 +167,7 @@ class BlinkSyncModule:
     def get_events(self, **kwargs):
         """Retrieve events from server."""
         force = kwargs.pop("force", False)
-        response = api.request_sync_events(self.blink, self.network_id, force=force)
+        response = api.request_sync_events(self.blink, self.network_id)
         try:
             return response["event"]
         except (TypeError, KeyError):

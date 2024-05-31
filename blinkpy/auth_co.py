@@ -14,8 +14,7 @@ from blinkpy.helpers.constants import (
 )
 try:
     import udi_interface
-    logging = udi_interface.LOGGER
-    Custom = udi_interface.Custom
+    _LOGGER = udi_interface.LOGGER
 except ImportError:
     _LOGGER = logging.getLogger(__name__)
 

@@ -236,6 +236,13 @@ class blink_system(object):
     def get_camera_recording_info(self, camera_name):
         logging.debug('get_camera_recording_info - {} '.format(camera_name ))
         return(0)
+    
+    def get_camera_info(self, camera_name):
+        logging.debug('get_camera_temperatureC_info - {} '.format(camera_name ))
+        return(self.blink.cameras[camera_name].request_camera_info())
+    
+    def get_system_notifications(self)
+        return(self.blink.request_system_notifications())
     '''
     def snap_picture(self, camera_name):
 

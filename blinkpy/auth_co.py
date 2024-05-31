@@ -12,12 +12,13 @@ from blinkpy.helpers.constants import (
     LOGIN_ENDPOINT,
     TIMEOUT,
 )
+try:
+    import udi_interface
+    logging = udi_interface.LOGGER
+    Custom = udi_interface.Custom
+except ImportError:
+    _LOGGER = logging.getLogger(__name__)
 
-import udi_interface
-_LOGGER = udi_interface.LOGGER
-Custom = udi_interface.Custom
-
-#_LOGGER = logging.getLogger(__name__)
 
 
 class Auth:

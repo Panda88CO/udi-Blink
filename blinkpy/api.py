@@ -5,10 +5,14 @@ from json import dumps
 from blinkpy.helpers.util import get_time, Throttle
 from blinkpy.helpers.constants import DEFAULT_URL, TIMEOUT, DEFAULT_USER_AGENT, DEFAULT_APP_BUILD
 
-#_LOGGER = logging.getLogger(__name__)
-import udi_interface
-_LOGGER = udi_interface.LOGGER
-Custom = udi_interface.Custom
+
+try:
+    import udi_interface
+    logging = udi_interface.LOGGER
+    Custom = udi_interface.Custom
+except ImportError:
+    _LOGGER = logging.getLogger(__name__)
+
 MIN_THROTTLE_TIME = 5
 
 
@@ -156,6 +160,12 @@ def request_command_status(blink, network, command_id):
 def request_homescreen(blink):
     """Request homescreen info."""
     url = f"{blink.urls.base_url}/api/v3/accounts/{blink.account_id}/homescreen"
+    return http_get(blink, url)
+
+@Throttle(seconds=MIN_THROTTLE_TIME)
+def request_system_notifications(blink):
+    """Request system_notifications info."""
+    url = f"{blink.urls.base_url}/api/v1/accounts/{blink.account_id}/notifications/configuration"
     return http_get(blink, url)
 
 

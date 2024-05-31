@@ -7,10 +7,13 @@ from requests.compat import urljoin
 from blinkpy import api
 from blinkpy.helpers.constants import TIMEOUT_MEDIA
 
-#_LOGGER = logging.getLogger(__name__)
-import udi_interface
-_LOGGER = udi_interface.LOGGER
-Custom = udi_interface.Custom
+try:
+    import udi_interface
+    logging = udi_interface.LOGGER
+    Custom = udi_interface.Custom
+except ImportError:
+    _LOGGER = logging.getLogger(__name__)
+
 
 class BlinkCamera:
     """Class to initialize individual camera."""
@@ -265,6 +268,11 @@ class BlinkCamera:
         with open(path, "wb") as vidfile:
             copyfileobj(response.raw, vidfile)
 
+    def request_camera_info(self):
+        """
+        Get camera status info
+        """
+        return api.request_camera_info( self.sync.blink, self.network_id, self.camera_id)
 
 class BlinkCameraMini(BlinkCamera):
     """Define a class for a Blink Mini camera."""
@@ -303,6 +311,8 @@ class BlinkCameraMini(BlinkCamera):
         server_split[0] = "rtsps:"
         link = "".join(server_split)
         return link
+    
+
 
 
 class BlinkDoorbell(BlinkCamera):

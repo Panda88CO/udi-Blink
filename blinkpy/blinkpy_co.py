@@ -34,10 +34,12 @@ from blinkpy.helpers.constants import (
 from blinkpy.helpers.constants import __version__
 from blinkpy.auth_co import Auth, TokenRefreshFailed, LoginError
 
-#_LOGGER = logging.getLogger(__name__)
-import udi_interface
-_LOGGER = udi_interface.LOGGER
-Custom = udi_interface.Custom
+try:
+    import udi_interface
+    logging = udi_interface.LOGGER
+    Custom = udi_interface.Custom
+except ImportError:
+    _LOGGER = logging.getLogger(__name__)
 
 class Blink:
     """Class to initialize communication."""
@@ -290,6 +292,13 @@ class Blink:
 
         self.network_ids = all_networks
         return network_dict
+    
+
+    def request_system_notifications(self):
+        """
+        Retrieve system notification settings    
+        """
+        return(api.request_system_notifications(self))
 
     def check_if_ok_to_update(self):
         """Check if it is ok to perform an http request."""

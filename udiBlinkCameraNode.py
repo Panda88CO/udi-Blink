@@ -108,9 +108,9 @@ class blink_camera_node(udi_interface.Node):
     def updateISYdrivers(self):
         if self.drivers != []:
             logging.info('Camera updateISYdrivers - {}'.format(self.camera.name))
-            temp = self.blink.get_camera_status(self.camera.name)
+            temp = str(self.blink.get_camera_status(self.camera.name))
             logging.debug('get_camera_info: {}'.format(temp))
-            state = 99
+   
             if temp == 'online':
                 state = 1
             elif temp == 'offline':
@@ -119,7 +119,8 @@ class blink_camera_node(udi_interface.Node):
                 state = 98
             else:
                 logging.error('Unknown status returned : {}'.format(temp['status'] ))
-                state = 99     
+                state = 99
+
             self.node.setDriver('ST', state)
             temp = self.blink.get_camera_arm_info(self.camera.name)
             logging.debug('GV0 : {}'.format(temp))

@@ -5,8 +5,8 @@ ST-nlssetup-ST-NAME = Node Status
 node-0 = Down
 node-1 = Up
 node-99 = Unknown
-online-0 = off-line
-online-1 = on-line
+online-0 = offline
+online-1 = online
 online-98 = No support
 online-99 = Unknown
 
@@ -34,6 +34,7 @@ battery-1 = Not OK - TBD
 battery-2 = TBD
 battery-10 = No Battery
 battery-99 = Unknown
+
 ST-nlsblinkcamera-GV2-NAME = Battery Level Indicator
 batteryv-98 = Powered
 batteryv-99 = Unknown

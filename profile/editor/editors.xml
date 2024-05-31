@@ -21,9 +21,8 @@
      <range  uom="25" subset="0-2,10,99" nls="battery" />
 </editor>
   <editor id = "batteryv" > 
-     <range  uom="72" min=" 0" max="500"  prec="0" />
-     <range  uom="25" subset="98-99" nls="batteryv" />
-
+    <range  uom="25" subset="98-99" nls="batteryv" />
+    <range  uom="72" min=" 0" max="500"  prec="0" />
 </editor>
   <editor id = "cameratype" > 
      <range  uom="25" subset="0-5,99" nls="cameratype" />

@@ -38,6 +38,7 @@ class BlinkCamera:
         self._cached_video = None
         self.camera_type = ""
         self.product_type = None
+        self.online_status = None
 
     @property
     def attributes(self):

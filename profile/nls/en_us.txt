@@ -7,6 +7,7 @@ node-1 = Up
 node-99 = Unknown
 online-0 = off-line
 online-1 = on-line
+online-98 = No support
 online-99 = Unknown
 
 ND-blinksync-NAME = Sync Unit
@@ -25,6 +26,7 @@ doarm-1 = Arm
 
 ND-blinkcamera-NAME = Blink Camera
 ND-blinkcamera-ICON = Input
+ST-nlsblinkcamera-ST-NAME = Connected
 ST-nlsblinkcamera-GV0-NAME = Arm Status
 ST-nlsblinkcamera-GV1-NAME = Battery Status
 battery-0 = OK

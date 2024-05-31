@@ -42,6 +42,7 @@
    <nodeDef id="blinkcamera" nls="nlsblinkcamera">
  <editors />
       <sts>
+         <st id="ST" editor="online" /> 
          <st id="GV0" editor="armed" /> 
          <st id="GV1" editor="battery" />        
          <st id="GV2" editor="batteryv" />

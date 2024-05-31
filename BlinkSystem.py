@@ -171,7 +171,7 @@ class blink_system(object):
 
     def get_sync_online(self, sync_name):
         logging.debug('get_sync_online - {} {} '.format(sync_name, self.blink.sync[sync_name].online ))
-        return(self.blink.sync[sync_name].online )
+        return(self.blink.sync[sync_name].online_status )
 
     #def get_sync_blink_camera_unit(self, sync_unit, camera_name):
     #    logging.debug('get_sync_blink_camera_unit - {} from {}'.format(camera_name,sync_unit ))
@@ -240,6 +240,9 @@ class blink_system(object):
         logging.debug('get_camera_recording_info - {} '.format(camera_name ))
         return(0)
     
+    def get_camera_status(self, camera_name):
+        logging.debug('get_camera_staus - {} '.format(camera_name ))
+        return(self.blink.cameras[camera_name].online_status)
     def get_camera_info(self, camera_name):
         logging.debug('get_camera_temperatureC_info - {} '.format(camera_name ))
         return(self.blink.cameras[camera_name].request_camera_info())

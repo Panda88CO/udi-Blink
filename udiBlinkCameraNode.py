@@ -122,7 +122,6 @@ class blink_camera_node(udi_interface.Node):
             if None == temp:
                 self.node.setDriver('GV2', 98, True, True, 25)
             else:
-
                 self.node.setDriver('GV2', temp, True, True, 72)
 
             temp = self.cameraType[self.blink.get_camera_type_info(self.camera.name)]

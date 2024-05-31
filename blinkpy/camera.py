@@ -58,6 +58,7 @@ class BlinkCamera:
             "sync_module": self.sync.name,
             "last_record": self.last_record,
             "type": self.product_type,
+            "status": self.online_status,
         }
         return attributes
 
@@ -158,6 +159,7 @@ class BlinkCamera:
         self.temperature = config.get("temperature", None)
         self.wifi_strength = config.get("wifi_strength", None)
         self.product_type = config.get("type", None)
+        self.online_status = config.get("status", None)
 
     def get_sensor_info(self):
         """Retrieve calibrated temperatue from special endpoint."""

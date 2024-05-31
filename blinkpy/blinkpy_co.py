@@ -34,10 +34,10 @@ from blinkpy.helpers.constants import (
 from blinkpy.helpers.constants import __version__
 from blinkpy.auth_co import Auth, TokenRefreshFailed, LoginError
 
-_LOGGER = logging.getLogger(__name__)
-#import udi_interface
-#_LOGGER = udi_interface.LOGGER
-#Custom = udi_interface.Custom
+#_LOGGER = logging.getLogger(__name__)
+import udi_interface
+_LOGGER = udi_interface.LOGGER
+Custom = udi_interface.Custom
 
 class Blink:
     """Class to initialize communication."""

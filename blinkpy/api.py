@@ -5,10 +5,10 @@ from json import dumps
 from blinkpy.helpers.util import get_time, Throttle
 from blinkpy.helpers.constants import DEFAULT_URL, TIMEOUT, DEFAULT_USER_AGENT, DEFAULT_APP_BUILD
 
-_LOGGER = logging.getLogger(__name__)
-#import udi_interface
-#_LOGGER = udi_interface.LOGGER
-#Custom = udi_interface.Custom
+#_LOGGER = logging.getLogger(__name__)
+import udi_interface
+_LOGGER = udi_interface.LOGGER
+Custom = udi_interface.Custom
 MIN_THROTTLE_TIME = 5
 
 

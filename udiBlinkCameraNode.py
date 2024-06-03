@@ -108,7 +108,8 @@ class blink_camera_node(udi_interface.Node):
 
             temp = self.blink.get_camera_battery_voltage_info(self.camera.name)
             logging.debug('GV2 : {}'.format(temp))
-            self.BLINK_setDriver('GV2', bat_V2isy(temp), 72)
+
+            self.BLINK_setDriver('GV2', self.bat_V2isy(temp), 72)
 
 
             temp = int(self.cameraType[self.blink.get_camera_type_info(self.camera.name)])

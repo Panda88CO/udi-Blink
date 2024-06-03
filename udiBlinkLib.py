@@ -43,7 +43,7 @@ def bat2isy(self, bat_status):
     else:
         return(None)
 
-def bat_V2isy(self, bat_status):
+def bat_V2isy (self, bat_status):
     if isinstance(bat_status, int):
         return (bat_status)
     elif 'No Battery' == bat_status:

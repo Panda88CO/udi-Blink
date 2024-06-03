@@ -55,6 +55,7 @@ class Auth:
         self.data["region_id"] = self.region_id
         self.data["client_id"] = self.client_id
         self.data["account_id"] = self.account_id
+        
         return self.data
 
     @property
@@ -147,7 +148,8 @@ class Auth:
         self.token = self.login_response["auth"]["token"]
         self.client_id = self.login_response["account"]["client_id"]
         self.account_id = self.login_response["account"]["account_id"]
-
+        self.user_id = self.login_response["account"]["user_id"]
+        
     def startup(self):
         """Initialize tokens for communication."""
         self.validate_login()

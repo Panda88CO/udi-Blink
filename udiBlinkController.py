@@ -235,7 +235,7 @@ class BlinkSetup (udi_interface.Node):
                     nodes = self.poly.getNodes()
                     for nde in nodes:
                         if nde != 'setup':   # but not the setup node
-                            logging.debug('updating node {} data'.format(nde))
+                            logging.debug('updating node {} data'.format(nde))                            
                             nodes[nde].updateISYdrivers()
                          
                 except Exception as e:

@@ -97,6 +97,7 @@ class blink_camera_node(udi_interface.Node):
             logging.debug('GV1 : {}'.format(temp))          
             self.BLINK_setDriver('GV1', self.bat2isy(temp))
 
+            '''
             temp = self.blink.get_camera_battery_voltage_info(self.camera.name)
             logging.debug('GV2 : {}'.format(temp))
             if isinstance(temp, int):
@@ -106,7 +107,7 @@ class blink_camera_node(udi_interface.Node):
 
             temp = int(self.cameraType[self.blink.get_camera_type_info(self.camera.name)])
             logging.debug('GV3 : {}'.format(temp))
-          
+            '''
             self.BLINK_setDriver('GV3', temp)
                 #self.BLINK_setDriver('GV3', self.cameraType[self.blink.get_camera_type_info(self.camera.name)])
             #self.BLINK_setDriver('GV4', self.bool2isy(self.blink.get_camera_motion_enabled_info(self.camera.name)), True, True)
@@ -201,7 +202,7 @@ class blink_camera_node(udi_interface.Node):
     drivers= [  {'driver': 'ST' , 'value':0,  'uom':25},
                 {'driver': 'GV0', 'value':99, 'uom':25},  #Arm status
                 {'driver': 'GV1', 'value':99, 'uom':25}, # Battery
-                {'driver': 'GV2', 'value':99, 'uom':25}, # Battery
+                #{'driver': 'GV2', 'value':99, 'uom':25}, # Battery
                 {'driver': 'GV3', 'value':99, 'uom':25}, # Camera Type 
                 #{'driver': 'GV4', 'value':99, 'uom':25}, # Motion Detection Enabled
                 {'driver': 'GV5', 'value':99, 'uom':25}, # Motion Detected

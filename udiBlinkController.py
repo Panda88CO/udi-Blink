@@ -34,7 +34,7 @@ except ImportError:
 VERSION = '0.4.1'
 
 class BlinkSetup (udi_interface.Node):
-    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy
+    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done
 
     def  __init__(self, polyglot, primary, address, name):
         super().__init__( polyglot, primary, address, name)  

@@ -45,7 +45,7 @@
          <st id="ST" editor="online" /> 
          <st id="GV0" editor="armed" /> 
          <st id="GV1" editor="battery" />        
-         <st id="GV2" editor="batteryv" />
+         <st id="GV2" editor="bat_volt" />
          <st id="GV3" editor="cameratype" />
          <!--<st id="GV4" editor="motionen" /> -->
          <st id="GV5" editor="motiondetc" />

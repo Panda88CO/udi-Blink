@@ -29,17 +29,22 @@ ND-blinkcamera-ICON = Input
 ST-nlsblinkcamera-ST-NAME = Connected
 ST-nlsblinkcamera-GV0-NAME = Arm Status
 ST-nlsblinkcamera-GV1-NAME = Battery Status
+ST-nlsblinkcamera-GV2-NAME = Battery Level Indicator
+ST-nlsblinkcamera-GV3-NAME = CameraType
+ST-nlsblinkcamera-GV4-NAME = Motion Detection
+ST-nlsblinkcamera-GV5-NAME = Motion Detected
+ST-nlsblinkcamera-GV6-NAME = Temperature
+
 battery-0 = OK
 battery-1 = Not OK - TBD
 battery-2 = TBD
 battery-10 = USB powered
 battery-99 = Unknown
 
-ST-nlsblinkcamera-GV2-NAME = Battery Level Indicator
-batteryv-98 = Powered
-batteryv-99 = Unknown
+bat_voltage-98 = USB Powered
+bat_voltage-99 = Unknown
 
-ST-nlsblinkcamera-GV3-NAME = CameraType
+
 cameratype-0 = Mini
 cameratype-1 = DoorBell
 cameratype-2 = Blink Outdoor
@@ -47,16 +52,16 @@ cameratype-3 = XT-2
 cameratype-4 = Camera4
 cameratype-5 = Camera5
 cameratype-99 = Unknown
-ST-nlsblinkcamera-GV4-NAME = Motion Detection
+
 motionen-0 = Disabled
 motionen-1 = Enabled
 motionen-99 = Uknown
-ST-nlsblinkcamera-GV5-NAME = Motion Detected
+
 motiondetc-0 = No Motion
 motiondetc-1 = Motion Detected
 motiondetc-99 = Unknown
 
-ST-nlsblinkcamera-GV6-NAME = Temperature
+
 error-0 = No Support
 error-98 = N0 support
 error-99 = Unknown

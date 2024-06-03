@@ -20,8 +20,8 @@
   <editor id = "battery" > 
      <range  uom="25" subset="0-2,10,99" nls="battery" />
 </editor>
-  <editor id = "batteryv" > 
-    <range  uom="25" subset="98-99" nls="batteryv" />
+  <editor id = "bat_volt" > 
+    <range  uom="25" subset="98,99" nls="bat_voltage" />
     <range  uom="72" min=" 0" max="500"  prec="0" />
 </editor>
   <editor id = "cameratype" > 

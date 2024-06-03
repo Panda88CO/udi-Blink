@@ -227,7 +227,7 @@ class Blink:
         _LOGGER.debug('RESPONSE : {}'.format(response))
         try:
             for network in response["networks"]:
-                _LOGGER.error('FOR LOOP : {}'.format(network))
+                _LOGGER.debug('FOR LOOP : {}'.format(network))
                 camera_network = str(network["network_id"])
                 if camera_network not in all_cameras:
                     all_cameras[camera_network] = []

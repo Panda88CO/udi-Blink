@@ -23,7 +23,7 @@ except ImportError:
 
                
 class blink_camera_node(udi_interface.Node):
-    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done
+    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, connection2isy, bat_V2isy, node_queue, wait_for_node_done
 
 
     def __init__(self, polyglot, primary, address, name, camera, blinkSys):
@@ -87,17 +87,8 @@ class blink_camera_node(udi_interface.Node):
             temp = str(self.blink.get_camera_status(self.camera.name))
             logging.debug('get_camera_info: {}'.format(temp))
    
-            if temp == 'online':
-                state = 1
-            elif temp == 'offline':
-                state = 0
-            elif temp == 'done': # Not sure how to detect state for older cameras
-                state = 98
-            else:
-                logging.error('Unknown status returned : {}'.format(temp))
-                state = None
 
-            self.BLINK_setDriver('ST', state)
+            self.BLINK_setDriver('ST', self.connection2isy(temp))
             temp = self.blink.get_camera_arm_info(self.camera.name)
             logging.debug('GV0 : {}'.format(temp))
             self.BLINK_setDriver('GV0', self.bool2isy(temp))
@@ -108,9 +99,10 @@ class blink_camera_node(udi_interface.Node):
 
             temp = self.blink.get_camera_battery_voltage_info(self.camera.name)
             logging.debug('GV2 : {}'.format(temp))
-
-            self.BLINK_setDriver('GV2', self.bat_V2isy(temp), 72)
-
+            if isinstance(temp, int):
+                self.BLINK_setDriver('GV2', self.bat_V2isy(temp), 72)
+            else:
+                self.BLINK_setDriver('GV2', self.bat_V2isy(temp), 25)
 
             temp = int(self.cameraType[self.blink.get_camera_type_info(self.camera.name)])
             logging.debug('GV3 : {}'.format(temp))

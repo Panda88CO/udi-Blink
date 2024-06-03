@@ -33,6 +33,17 @@ def wait_for_node_done(self):
         time.sleep(0.1)
     self.n_queue.pop()
 
+def connection2isy(self, connection):
+    if connection == 'online':
+        state = 1
+    elif connection == 'offline':
+        state = 0
+    elif connection == 'done': # Not sure how to detect state for older cameras
+        state = 98
+    else:
+        logging.error('Unknown status returned : {}'.format(state))
+        state = None
+    return(state)
 
 
 def bat2isy(self, bat_status):

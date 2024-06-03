@@ -24,7 +24,8 @@ from  udiBlinkCameraNode import blink_camera_node
 
                
 class blink_sync_node(udi_interface.Node):
-    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy
+    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done
+
 
     def __init__(self, polyglot, primary, address, name, sync_unit, blinkSys  ):
         super().__init__( polyglot, primary, address, name)   

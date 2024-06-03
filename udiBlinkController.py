@@ -34,7 +34,8 @@ except ImportError:
 VERSION = '0.4.1'
 
 class BlinkSetup (udi_interface.Node):
-    #import udiFunctions
+    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy
+
     def  __init__(self, polyglot, primary, address, name):
         super().__init__( polyglot, primary, address, name)  
         
@@ -90,13 +91,7 @@ class BlinkSetup (udi_interface.Node):
         self.nodeDefineDone = True
 
 
-    def node_queue(self, data):
-        self.n_queue.append(data['address'])
-    
-    def wait_for_node_done(self):
-        while len(self.n_queue) == 0:
-            time.sleep(0.1)
-        self.n_queue.pop()
+
 
     def getValidName(self, name):
         name = bytes(name, 'utf-8').decode('utf-8','ignore')
@@ -131,7 +126,7 @@ class BlinkSetup (udi_interface.Node):
                 time.sleep(2)
             logging.setLevel(10)
             #logging.debug('syncUnits / syncString: {} - {}'.format(self.syncUnits, self.syncUnitString))
-            #self.node.setDriver('ST', 1, True, True)
+            self.BLINK_setDriver('ST', 1)
             #time.sleep(5)
 
             logging.debug('nodeDefineDone {}'.format(self.nodeDefineDone))
@@ -167,6 +162,8 @@ class BlinkSetup (udi_interface.Node):
 
         except Exception as e:
             logging.error('Blink Start Exception: {}'.format(e))
+            self.BLINK_setDriver('ST', 0)
+
 
 
 

@@ -184,12 +184,27 @@ class blink_system(object):
 
     def get_camera_battery_info(self, camera_name):
         logging.debug('get_camera_battery_info - {} '.format(camera_name ))
-        return(self.blink.cameras[camera_name].battery)
-
+        try:
+            temp = self.blink.cameras[camera_name].battery
+            if temp: 
+                return(self.blink.cameras[camera_name].battery)
+            else:
+                return('No Battery')
+        except Exception as e:
+            logging.debug('Battery info failed : {}'.format(e))
+            return(None)
 
     def get_camera_battery_voltage_info(self, camera_name):
         logging.debug('get_camera_battery_info - {} '.format(camera_name ))
-        return(self.blink.cameras[camera_name].battery_voltage )
+        try:
+            temp = self.blink.cameras[camera_name].battery_voltage 
+            if temp:
+                return(self.blink.cameras[camera_name].battery_voltage )
+            else:
+                return('No Battery')
+        except Exception as e:
+            logging.debug('Battery Voltage info failed : {}'.format(e))
+            return(None)        
 
 
     def get_camera_arm_info(self, camera_name):

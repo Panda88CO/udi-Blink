@@ -24,7 +24,8 @@ from  udiBlinkCameraNode import blink_camera_node
 
                
 class blink_sync_node(udi_interface.Node):
-    #import udiFunctions 
+    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy
+
     def __init__(self, polyglot, primary, address, name, sync_unit, blinkSys  ):
         super().__init__( polyglot, primary, address, name)   
         logging.debug('blink SYNC INIT- {}'.format(name))
@@ -56,21 +57,6 @@ class blink_sync_node(udi_interface.Node):
         time.sleep(1)
         self.nodeDefineDone = True
 
-
-    def node_queue(self, data):
-        self.n_queue.append(data['address'])
-
-    def wait_for_node_done(self):
-        while len(self.n_queue) == 0:
-            time.sleep(0.1)
-        self.n_queue.pop()
-
-
-    def bool2isy(self, val):
-        if val:
-            return(1)
-        else:
-            return(0)
 
 
 
@@ -112,13 +98,9 @@ class blink_sync_node(udi_interface.Node):
             
 
         self.nodeDefineDone = True
-        if self.sync_unit == None:
-            self.node.setDriver('GV1', 99, True, True)
-            self.node.setDriver('GV2', 99, True, True)
-        else:
-            self.node.setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit.name)), True, True)
-            tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
-            self.node.setDriver('GV2', self.bool2isy(tmp), True, True)
+        self.BLINK_setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit.name)))
+        tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
+        self.BLINK_setDriver('GV2', self.bool2isy(tmp))
 
     def stop(self):
         logging.info('stop {} - Cleaning up'.format(self.name))
@@ -126,13 +108,10 @@ class blink_sync_node(udi_interface.Node):
 
     def updateISYdrivers(self):
         logging.info('Sync updateISYdrivers - {}'.format(self.sync_unit.name))
-        if self.sync_unit == None:
-            self.node.setDriver('GV1', 99, True, True)
-            self.node.setDriver('GV2', 99, True, True)
-        else:
-            self.node.setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit.name)), True, True)
-            tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
-            self.node.setDriver('GV2', self.bool2isy(tmp), True, True)
+
+        self.BLINK_setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit.name)))
+        tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
+        self.BLINK_setDriver('GV2', self.bool2isy(tmp))
 
   
     def ISYupdate(self, command=None):

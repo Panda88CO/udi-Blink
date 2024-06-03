@@ -23,7 +23,7 @@ except ImportError:
 
                
 class blink_camera_node(udi_interface.Node):
-    #import udiFunctions
+    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy
 
     def __init__(self, polyglot, primary, address, name, camera, blinkSys):
         super().__init__( polyglot, primary, address, name)   
@@ -58,35 +58,10 @@ class blink_camera_node(udi_interface.Node):
         time.sleep(1)
         self.node = self.poly.getNode(address)
         self.nodeDefineDone = True
-        self.node.setDriver('ST', 98)
+        self.BLINK_setDriver('ST', 98, 25)
         
     
 
-    def node_queue(self, data):
-        self.n_queue.append(data['address'])
-
-    def wait_for_node_done(self):
-        while len(self.n_queue) == 0:
-            time.sleep(0.1)
-        self.n_queue.pop()
-
-
-
-    def bat2isy(self, bat_status):
-        if 'ok'  == bat_status:
-            return (0)
-        elif None == bat_status:
-            return(10)
-        else:
-            return(1)
-
-        #self.heartbeat()
-
-    def bool2isy(self, val):
-        if val:
-            return(1)
-        else:
-            return(0)
 
     def start(self):   
         time.sleep(2)
@@ -119,50 +94,45 @@ class blink_camera_node(udi_interface.Node):
                 state = 98
             else:
                 logging.error('Unknown status returned : {}'.format(temp))
-                state = 99
+                state = None
 
-            self.node.setDriver('ST', state)
+            self.BLINK_setDriver('ST', state)
             temp = self.blink.get_camera_arm_info(self.camera.name)
             logging.debug('GV0 : {}'.format(temp))
-            if temp != None:
-                self.node.setDriver('GV0', self.bool2isy(temp), True, True)
+            self.BLINK_setDriver('GV0', self.bool2isy(temp))
                 
             temp = self.blink.get_camera_battery_info(self.camera.name)
-            logging.debug('GV1 : {}'.format(temp))
-            if temp != None:            
-                self.node.setDriver('GV1', self.bat2isy(temp), True, True)
+            logging.debug('GV1 : {}'.format(temp))          
+            self.BLINK_setDriver('GV1', self.bat2isy(temp))
 
             temp = self.blink.get_camera_battery_voltage_info(self.camera.name)
             logging.debug('GV2 : {}'.format(temp))
-            if None == temp:
-                self.node.setDriver('GV2', 98, True, True, 25)
-            else:
-                self.node.setDriver('GV2', temp, True, True, 72)
+            self.BLINK_setDriver('GV2', bat_V2isy(temp), 72)
+
 
             temp = int(self.cameraType[self.blink.get_camera_type_info(self.camera.name)])
             logging.debug('GV3 : {}'.format(temp))
-            if temp != None:            
-                self.node.setDriver('GV3', temp)
-                #self.node.setDriver('GV3', self.cameraType[self.blink.get_camera_type_info(self.camera.name)])
-            #self.node.setDriver('GV4', self.bool2isy(self.blink.get_camera_motion_enabled_info(self.camera.name)), True, True)
+          
+            self.BLINK_setDriver('GV3', temp)
+                #self.BLINK_setDriver('GV3', self.cameraType[self.blink.get_camera_type_info(self.camera.name)])
+            #self.BLINK_setDriver('GV4', self.bool2isy(self.blink.get_camera_motion_enabled_info(self.camera.name)), True, True)
 
             temp = self.blink.get_camera_motion_detected_info(self.camera.name)
-            logging.debug('GV5 : {}'.format(temp))
-            if temp != None:       
-                self.node.setDriver('GV5', self.bool2isy(temp), True, True)
+            logging.debug('GV5 : {}'.format(temp))            
+            self.BLINK_setDriver('GV5', self.bool2isy(temp))
 
             temp_info = self.blink.get_camera_temperatureC_info(self.camera.name)
             logging.debug('GV6 : {}'.format(temp_info))
             if  None ==  temp_info:
-                self.node.setDriver('GV6', 0, True, True,  25)
+                self.BLINK_setDriver('GV6', 0, 25)
             elif 'K' == self.blink.temp_unit or 'k' == self.blink.temp_unit:
-                self.node.setDriver('GV6', temp_info+273.15, True, True, 26)
+                self.BLINK_setDriver('GV6', temp_info+273.15, 26)
             elif 'F' == self.blink.temp_unit or 'f' == self.blink.temp_unit:
-                self.node.setDriver('GV6', (temp_info*9/5)+32, True, True, 17)
+                self.BLINK_setDriver('GV6', (temp_info*9/5)+32, 17)
             else:
-                self.node.setDriver('GV6', temp_info, True, True, 4)
-            #self.node.setDriver('GV7', self.blink.get_camera_recording_info(self.camera.name))
-            #self.node.setDriver('GV8', self.bool2isy(self.pic_email_enabled))
+                self.BLINK_setDriver('GV6', temp_info, 4)
+            #self.BLINK_setDriver('GV7', self.blink.get_camera_recording_info(self.camera.name))
+            #self.BLINK_setDriver('GV8', self.bool2isy(self.pic_email_enabled))
         else:
             logging.debug('Drivers not ready')
     
@@ -204,7 +174,7 @@ class blink_camera_node(udi_interface.Node):
                 self.node.reportCmd('DON')
             else:
                 self.node.reportCmd('DOF')
-            self.node.setDriver('GV0', value, True, True)
+            self.BLINK_setDriver('GV0', value)
             self.blink.refresh_data()
             time.sleep(3)
             self.updateISYdrivers()

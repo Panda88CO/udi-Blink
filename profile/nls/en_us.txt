@@ -13,7 +13,7 @@ online-99 = Unknown
 ND-blinksync-NAME = Sync Unit
 ND-blinksync-ICON = Input
 
-ST-nlsblinksync-GV1-NAME = On-Line
+ST-nlsblinksync-GV1-NAME = Connection
 ST-nlsblinksync-GV2-NAME = Arm Status
 armed-0 = Disarmed
 armed-1 = Armed
@@ -32,7 +32,7 @@ ST-nlsblinkcamera-GV1-NAME = Battery Status
 battery-0 = OK
 battery-1 = Not OK - TBD
 battery-2 = TBD
-battery-10 = No Battery
+battery-10 = USB powered
 battery-99 = Unknown
 
 ST-nlsblinkcamera-GV2-NAME = Battery Level Indicator

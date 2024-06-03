@@ -118,7 +118,7 @@ class blink_camera_node(udi_interface.Node):
             elif temp == 'done': # Not sure how to detect state for older cameras
                 state = 98
             else:
-                logging.error('Unknown status returned : {}'.format(temp['status'] ))
+                logging.error('Unknown status returned : {}'.format(temp))
                 state = 99
 
             self.node.setDriver('ST', state)

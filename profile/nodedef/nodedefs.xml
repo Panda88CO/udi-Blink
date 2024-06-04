@@ -19,12 +19,25 @@
    <nodeDef id="blinksync" nls="nlsblinksync">
       <editors />
       <sts>
-         <st id="GV1" editor="online" />
-         <st id="GV2" editor="armed" />
+         <st id="ST" editor="online" />
       </sts>
       <cmds>
          <sends>
+         </sends>
+         <accepts>
+            <cmd id="UPDATE" /> 
 
+         </accepts>
+      </cmds>
+   </nodeDef> 
+
+   <nodeDef id="blinknetwork" nls="nlsblinknetwork">
+      <editors />
+      <sts>
+         <st id="GV0" editor="armed" />
+      </sts>
+      <cmds>
+         <sends>
             <cmd id="DON" /> 
             <cmd id="DOF" /> 
          </sends>
@@ -55,8 +68,6 @@
       </sts>
       <cmds>
          <sends>
-            <cmd id="DON" /> 
-            <cmd id="DOF" /> 
          </sends>
          <accepts>
             <cmd id="UPDATE" /> 

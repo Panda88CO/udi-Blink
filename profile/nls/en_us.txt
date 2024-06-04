@@ -1,5 +1,5 @@
 ND-setup-NAME = Blink Camera Info
-ND-contsetuproller-ICON = Input
+ND-contsetuproller-ICON = Alarm
 CMD-nlssetup-UPDATE-NAME = Update System Data
 ST-nlssetup-ST-NAME = Node Status
 node-0 = Down
@@ -10,26 +10,30 @@ online-1 = online
 online-98 = No support
 online-99 = Unknown
 
-ND-blinksync-NAME = Sync Unit
-ND-blinksync-ICON = Input
-
-ST-nlsblinksync-GV1-NAME = Connection
-ST-nlsblinksync-GV2-NAME = Arm Status
+ND-blinknetwork-NAME = Network
+ND-blinknetwork-ICON = Arm
+ST-nlsblinknetwork-GV0-NAME = Arm Status
 armed-0 = Disarmed
 armed-1 = Armed
 armed-99 = Unknown
+CMD-nlsblinknetwork-UPDATE-NAME = Update SyncUnit
+
+CMD-nlsblinknetwork-ARMALL-NAME = Set Arming
+
+ND-blinksync-NAME = Sync Unit
+ND-blinksync-ICON = ARM
+ST-nlsblinksync-ST-NAME = Connected
 CMD-nlsblinksync-UPDATE-NAME = Update SyncUnit
-CMD-nlsblinksync-QUERY-NAME = QUERY
-CMD-nlsblinksync-ARMALL-NAME = Set Arming
+
 doarm-0 = Disarm
 doarm-1 = Arm
 
 ND-blinkcamera-NAME = Blink Camera
-ND-blinkcamera-ICON = Input
+ND-blinkcamera-ICON = MotionSensor
 ST-nlsblinkcamera-ST-NAME = Connected
 ST-nlsblinkcamera-GV0-NAME = Arm Status
 ST-nlsblinkcamera-GV1-NAME = Battery Status
-ST-nlsblinkcamera-GV2-NAME = Battery Level Indicator
+#ST-nlsblinkcamera-GV2-NAME = Battery Level Indicator
 ST-nlsblinkcamera-GV3-NAME = CameraType
 ST-nlsblinkcamera-GV4-NAME = Motion Detection
 ST-nlsblinkcamera-GV5-NAME = Motion Detected

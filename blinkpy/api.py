@@ -129,7 +129,10 @@ def request_system_arm(blink, network):
     """
     _LOGGER.debug( 'request_system_arm {} '.format(network))
     url = f"{blink.urls.base_url}/api/v1/accounts/{blink.account_id}/networks/{network}/state/arm"
-    return http_post(blink, url)
+    temp = http_post(blink, url)
+    _LOGGER.debug('response = {}'.format(temp))
+    return(temp)
+
 
 
 @Throttle(seconds=MIN_THROTTLE_TIME)
@@ -142,7 +145,10 @@ def request_system_disarm(blink, network):
     :param network: Sync module network id.
     """
     url = f"{blink.urls.base_url}/api/v1/accounts/{blink.account_id}/networks/{network}/state/disarm"
-    return http_post(blink, url)
+    temp = http_post(blink, url)
+    _LOGGER.debug('response = {}'.format(temp))
+    return(temp)
+
 
 
 def request_command_status(blink, network, command_id):
@@ -296,8 +302,9 @@ def request_motion_detection_enable(blink, network, camera_id):
     """
     _LOGGER.debug( 'request_motion_detection_enable {} {} '.format(network, camera_id))
     url = f"{blink.urls.base_url}/network/{network}/camera/{camera_id}/enable"
-    return http_post(blink, url)
-
+    temp = http_post(blink, url)
+    _LOGGER.debug('response = {}'.format(temp))
+    return(temp)
 
 @Throttle(seconds=MIN_THROTTLE_TIME)
 def request_motion_detection_disable(blink, network, camera_id):
@@ -309,8 +316,9 @@ def request_motion_detection_disable(blink, network, camera_id):
     """
     _LOGGER.debug( 'request_motion_detection_disable {} {} '.format(network, camera_id))    
     url = f"{blink.urls.base_url}/network/{network}/camera/{camera_id}/disable"
-    return http_post(blink, url)
-
+    temp =  http_post(blink, url)
+    _LOGGER.debug('response = {}'.format(temp))
+    return(temp)
 
 def http_get(blink, url, stream=False, json=True, is_retry=False, timeout=TIMEOUT):
     """

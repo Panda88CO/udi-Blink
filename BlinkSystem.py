@@ -179,6 +179,34 @@ class blink_system(object):
     #def get_sync_blink_camera_unit(self, sync_unit, camera_name):
     #    logging.debug('get_sync_blink_camera_unit - {} from {}'.format(camera_name,sync_unit ))
 
+    def get_cameras_on_network(self, network_id):
+        logging.debug('get_cameras_on_network - {}'.format(network_id))
+        camera_list = []
+        raw_camera_list = self.blink.homescreen['cameras']
+        for indx, camera in enumerate (raw_camera_list):
+            if camera['network_id'] == network_id:
+                camera_list.append(camera)
+
+        return(camera_list)
+
+
+    def get_sync_modules_on_network(self, network_id):
+        logging.debug('get_sync_modules_on_network - {}'.format(network_id))
+        sync_list = []
+        raw_sync_list = self.blink.homescreen['sync_modules']
+        for indx, sync in enumerate (raw_sync_list):
+            if sync['network_id'] == network_id:
+                sync_list.append(sync)    
+        return(sync_list)
+    
+    def get_network_arm_state(self, network_id):
+        logging.debug('get_network_arm_state {}'.format(network_id))
+        arm_state = None
+        for indx, network in enumerate(self.blink.homescreen['networks']):
+            if network['id'] == network_id:
+                arm_state = network['armed']
+                return(arm_state)
+        return(arm_state)
 
     def get_camera_data(self, camera_name):
         logging.debug('get_camera_data - {} {}'.format(camera_name, self.blink.cameras[camera_name].attributes ))

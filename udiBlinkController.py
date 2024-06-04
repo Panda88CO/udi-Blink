@@ -92,16 +92,6 @@ class BlinkSetup (udi_interface.Node):
         self.nodeDefineDone = True
 
 
-
-
-    def getValidName(self, name):
-        name = bytes(name, 'utf-8').decode('utf-8','ignore')
-        return re.sub(r"[^A-Za-z0-9_ ]", "", name)
-
-    # remove all illegal characters from node address
-    def getValidAddress(self, name):
-        name = bytes(name, 'utf-8').decode('utf-8','ignore')
-        return re.sub(r"[^A-Za-z0-9_]", "", name.lower()[:14])
     
 
     def validate_params(self):
@@ -172,16 +162,17 @@ class BlinkSetup (udi_interface.Node):
         for indx, network in enumerate (network_node_list):
             name = network['name'].toupper()
             if name in self.Parameters:
-                if self.Parameters[name].toupper() == "TRUE":
+                if self.Parameters[name].toupper() == "ENABLED":
                     logging.debug('Adding network {}'.format(name)) 
                     self.network_names.append(network['name'])
                     node_address = self.poly.getValidAddress(str(network['id']))
                     node_name = self.poly.getValidName('Blink_'+str(network['name']))
                     logging.info('Adding {} network'.format(node_name))
-                    if not blink_network_node(self.poly, node_address, node_address, node_name, network['id'], self.blink ))
+                    if not blink_network_node(self.poly, node_address, node_address, node_name, network['id'], self.blink ):
+                        logging.error('Failed to create network node for {} '.format(node_name))
             else:
-                self.Parameters[name] = 'TRUE'
-                self.poly.notices[name] = 'New Network detected '+str(name)+' - please select True or False to enable it - then restart'
+                self.Parameters[name] = 'ENABLED'
+                self.poly.notices[name] = 'New Network detected '+str(name)+' - please select ENABLED or DISABLED - then restart'
             
             
 

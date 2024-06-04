@@ -127,12 +127,14 @@ def request_system_arm(blink, network):
     :param blink: Blink instance.
     :param network: Sync module network id.
     """
+    _LOGGER.debug( 'request_system_arm {} '.format(network))
     url = f"{blink.urls.base_url}/api/v1/accounts/{blink.account_id}/networks/{network}/state/arm"
     return http_post(blink, url)
 
 
 @Throttle(seconds=MIN_THROTTLE_TIME)
 def request_system_disarm(blink, network):
+    _LOGGER.debug( 'request_system_disarm {} '.format(network))
     """
     Disarm system.
 
@@ -292,6 +294,7 @@ def request_motion_detection_enable(blink, network, camera_id):
     :param network: Sync module network id.
     :param camera_id: Camera ID of camera to enable.
     """
+    _LOGGER.debug( 'request_motion_detection_enable {} {} '.format(network, camera_id))
     url = f"{blink.urls.base_url}/network/{network}/camera/{camera_id}/enable"
     return http_post(blink, url)
 
@@ -304,6 +307,7 @@ def request_motion_detection_disable(blink, network, camera_id):
     :param network: Sync module network id.
     :param camera_id: Camera ID of camera to disable.
     """
+    _LOGGER.debug( 'request_motion_detection_disable {} {} '.format(network, camera_id))    
     url = f"{blink.urls.base_url}/network/{network}/camera/{camera_id}/disable"
     return http_post(blink, url)
 

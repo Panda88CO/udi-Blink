@@ -166,7 +166,7 @@ class blink_system(object):
 
     def set_sync_arm (self, sync_name, armed=True):
         logging.debug('set_arm_sync = {}- {} '.format(sync_name, armed ))
-        self.blink.sync[sync_name].arm(armed)
+        self.blink.sync[sync_name].arm =armed
         #self.blink.refresh()
 
     def get_sync_online(self, sync_name):
@@ -213,7 +213,7 @@ class blink_system(object):
 
     def set_camera_arm(self, camera_name, armed=True):
         logging.debug('set_camera_arm - {} {}'.format(camera_name, armed ))
-        self.blink.cameras[camera_name].arm(armed)
+        self.blink.cameras[camera_name].arm = armed
 
     def get_camera_type_info(self, camera_name):
         logging.debug('get_camera_type_info - {} '.format(camera_name ))

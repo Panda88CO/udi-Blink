@@ -149,7 +149,7 @@ class Auth:
         self.client_id = self.login_response["account"]["client_id"]
         self.account_id = self.login_response["account"]["account_id"]
         self.user_id = self.login_response["account"]["user_id"]
-        
+
     def startup(self):
         """Initialize tokens for communication."""
         self.validate_login()
@@ -158,12 +158,12 @@ class Auth:
 
     def validate_response(self, response, json_resp):
         ##CO
-        _LOGGER.debug('validate_response:'.format(response))
+        _LOGGER.debug('validate_response: {}'.format(response))
 
         """Check for valid response."""
         if not json_resp:
             self.is_errored = False
-            _LOGGER.debug(response)
+            _LOGGER.debug('response: {}'.format(response))
             return response
         self.is_errored = True
         try:
@@ -178,6 +178,7 @@ class Auth:
             raise BlinkBadResponse from error
 
         self.is_errored = False
+        _LOGGER.debug('Validate response JSON {}'.format(json_data))
         return json_data
 
     def query(

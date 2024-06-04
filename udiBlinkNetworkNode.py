@@ -23,15 +23,15 @@ from  udiBlinkCameraNode import blink_camera_node
 
 
                
-class blink_sync_node(udi_interface.Node):
+class blink_network_node(udi_interface.Node):
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done
 
 
-    def __init__(self, polyglot, primary, address, name, sync_unit, blinkSys  ):
+    def __init__(self, polyglot, primary, address, name, network_id, blinkSys  ):
         super().__init__( polyglot, primary, address, name)   
         logging.debug('blink SYNC INIT- {}'.format(name))
         self.nodeDefineDone = False
-        self.sync_unit = sync_unit
+        self.network_id = network_id
         self.name = name
         self.blink = blinkSys
         self.primary = primary
@@ -59,18 +59,6 @@ class blink_sync_node(udi_interface.Node):
         self.nodeDefineDone = True
 
 
-
-
-    def getValidName(self, name):
-        name = bytes(name, 'utf-8').decode('utf-8','ignore')
-        return re.sub(r"[^A-Za-z0-9_ ]", "", name)
-
-    # remove all illegal characters from node address
-    def getValidAddress(self, name):
-        name = bytes(name, 'utf-8').decode('utf-8','ignore')
-        return re.sub(r"[^A-Za-z0-9_]", "", name.lower()[:14])
-    
-        #self.heartbeat()
 
 
     def start(self):        

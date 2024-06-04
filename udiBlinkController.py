@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from udiBlinkSyncNode import blink_sync_node
+from udiBlinkNetworkNode import blink_network_node
 from BlinkSystem import blink_system
 import sys
 import time 
@@ -158,19 +159,37 @@ class BlinkSetup (udi_interface.Node):
                 else:
                     logging.info('Accessing Blink completed ')
                 '''
-                self.add_sync_nodes()
-
+                #self.add_sync_nodes()
+                self.add_network_nodes()
         except Exception as e:
             logging.error('Blink Start Exception: {}'.format(e))
             self.BLINK_setDriver('ST', 0)
 
-    def add_networks (self):
-        logging.info('Adding sync units: {}'.format(self.syncUnits ))
-        self.sync_node_list = []
+    def add_network_nodes (self):
+        logging.info('Adding Blink network nodes: {}'.format(self.syncUnits ))
+        network_node_list = self.blink.get_network_list()
+        self.network_names = []
+        for indx, network in enumerate (network_node_list):
+            name = network['name'].toupper()
+            if name in self.Parameters:
+                if self.Parameters[name].toupper() == "TRUE":
+                    logging.debug('Adding network {}'.format(name)) 
+                    self.network_names.append(network['name'])
+                    node_address = self.poly.getValidAddress(str(network['id']))
+                    node_name = self.poly.getValidName('Blink_'+str(network['name']))
+                    logging.info('Adding {} network'.format(node_name))
+                    if not blink_network_node(self.poly, node_address, node_address, node_name, network['id'], self.blink ))
+            else:
+                self.Parameters[name] = 'TRUE'
+                self.poly.notices[name] = 'New Network detected '+str(name)+' - please select True or False to enable it - then restart'
+            
+            
+
+        '''
         if self.syncUnits != None :
             if not ('NONE'  in self.syncUnits or '' in self.syncUnits ):
                 for sync_name in self.syncUnits:                    
-                    sync_unit = self.blink.get_sync_unit(sync_name)
+                    sync_unit = self.blink.get_(sync_name)
                     address = self.getValidAddress(str(sync_name))
                         #address = str(sync).replace(' ','')[:14]
                     name = 'Blink_' + str(sync_name)
@@ -185,6 +204,7 @@ class BlinkSetup (udi_interface.Node):
                 if not blink_sync_node(self.poly, 'nosync', 'nosync', 'Blink Cameras', None, self.blink ):
                     logging.error('Failed to create dummy node {}'.format('nosync')) 
         self.sync_nodes_added = True
+        '''
         while not self.paramsProcessed:
             time.sleep(5)
             logging.info('waitng to process all parameters')
@@ -330,12 +350,12 @@ class BlinkSetup (udi_interface.Node):
                 self.poly.Notices['auth_key'] = 'Missing AUTH_KEY parameter'
                 self.authKey = ''
 
-            if 'SYNC_UNITS' in customParams:
-                self.syncUnitString = customParams['SYNC_UNITS']
-                self.syncUnits = self.strip_syncUnitStringtoList(self.syncUnitString)
-            else:
-                self.poly.Notices['sync_units'] = 'Missing SYNC_UNITS parameter - Add NONE if no sync units'
-                self.syncUnitString = ''
+            #if 'NETWORKS_UNITS' in customParams:
+            #    self.syncUnitString = customParams['NETWORKS_UNITS']
+            #    self.networkUnits = self.strip_syncUnitStringtoList(self.networkUnitString)
+            #else:
+            #    self.poly.Notices['networks'] = 'Specify desired NETWORK_UNITS'
+            #    self.syncUnitString = ''
 
             if 'EMAIL_ENABLED' in customParams:
                 self.email_en = customParams['EMAIL_ENABLED']

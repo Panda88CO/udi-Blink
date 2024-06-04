@@ -127,18 +127,18 @@ class blink_sync_node(udi_interface.Node):
         arm_enable = (1 == int(command.get('value')) )
         logging.info('Sync arm_all_cameras:{} - {}'.format(self.sync_unit.name, arm_enable ))
         
-        if self.sync_unit != None:
-            self.BLINK_setDriver('GV2', self.bool2isy(arm_enable))
-            self.blink.set_sync_arm(self.sync_unit.name,  arm_enable )
-            if arm_enable:
-                self.node.reportCmd('DON')
-            else:
-                self.node.reportCmd('DOF')
-            #self.updateISYdrivers()
-        else:
-            camera_list = self.blink.get_camera_list()
-            for camera in camera_list:
-                self.blink.set_camera_arm(self, camera, arm_enable)
+        #if self.sync_unit != None:
+        #    self.BLINK_setDriver('GV2', self.bool2isy(arm_enable))
+        #    self.blink.set_sync_arm(self.sync_unit.name,  arm_enable )
+        #    if arm_enable:
+        #        self.node.reportCmd('DON')
+        #    else:
+        #        self.node.reportCmd('DOF')
+        #    #self.updateISYdrivers()
+        #else:
+        camera_list = self.blink.get_camera_list()
+        for camera in camera_list:
+            self.blink.set_camera_arm(self, camera, arm_enable)
 
         time.sleep(3)
         self.blink.refresh_data()

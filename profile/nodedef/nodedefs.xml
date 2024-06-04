@@ -30,7 +30,6 @@
          </sends>
          <accepts>
             <cmd id="UPDATE" /> 
-            <cmd id="QUERY" /> 
             <cmd id="ARMALL" > 
                <p id="" editor="doarm" init="0" /> 
             </cmd >    
@@ -68,7 +67,6 @@
                 <p id="" editor="enable" init="1" /> 
             </cmd >  -->    
                                 
-            <cmd id="QUERY" /> 
             <cmd id="SNAPPIC" /> 
             <cmd id="SNAPVIDEO" /> 
             <!--<cmd id="EMAILPIC" > 

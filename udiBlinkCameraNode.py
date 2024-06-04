@@ -194,7 +194,6 @@ class blink_camera_node(udi_interface.Node):
                  #'MOTION' : motion_detection,
                  'SNAPPIC' : snap_pitcure,
                  'SNAPVIDEO' : snap_video,
-                 'QUERY' : ISYupdate,
                  #'EMAILPIC' : enable_email_picture,
                 }
 

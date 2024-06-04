@@ -138,7 +138,7 @@ class blink_sync_node(udi_interface.Node):
         #else:
         camera_list = self.blink.get_camera_list()
         for camera in camera_list:
-            self.blink.set_camera_arm(self, camera, arm_enable)
+            self.blink.set_camera_arm(camera, arm_enable)
 
         time.sleep(3)
         self.blink.refresh_data()

@@ -77,7 +77,7 @@ class blink_network_node(udi_interface.Node):
         self.camera_list = self.blink.get_cameras_on_network(self.network_id)
 
         logging.debug('Adding Cameras in list: {}'.format(self.camera_list))             
-        for indx, camera in self.camera_list.items():
+        for indx, camera in enumerate(self.camera_list):
             #camera_unit = self.blink.get_camera_unit(camera['name'])
 
             nodeName = self.poly.getValidName(str(camera.name))

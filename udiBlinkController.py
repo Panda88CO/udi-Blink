@@ -405,17 +405,17 @@ class BlinkSetup (udi_interface.Node):
             #self.node.setDriver('GV0', self.temp_unit, True, True)
     '''
 
-    id = 'setup'
-    commands = {
-                'UPDATE': update,
-                }
+    #id = 'setup'
+    #commands = {
+    #            'UPDATE': update,
+    #            }
 
     
 
 
-    drivers = [
-            {'driver': 'ST', 'value':1, 'uom':25}, # node
-           ]
+    #drivers = [
+    #        {'driver': 'ST', 'value':1, 'uom':25}, # node
+    #       ]
 
 if __name__ == "__main__":
     try:

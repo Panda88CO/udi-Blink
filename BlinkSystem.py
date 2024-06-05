@@ -211,7 +211,7 @@ class blink_system(object):
                 return(arm_state)
         return(arm_state)
 
-    def set_networs_arm_state(self, network_id, arm):
+    def set_network_arm_state(self, network_id, arm):
         logging.debug('set_network_arm_state {} {}'.format(network_id, arm))
         return(self.blink.set_network_arm(network_id, arm))
        

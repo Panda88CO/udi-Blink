@@ -19,7 +19,7 @@ except ImportError:
         logging.FileHandler("debug1.log"),
         logging.StreamHandler(sys.stdout) ]
     )
-from  udiBlinkCameraNode import blink_camera_node
+
 
 
                

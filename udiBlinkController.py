@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from udiBlinkSyncNode import blink_sync_node
+
 from udiBlinkNetworkNode import blink_network_node
 from BlinkSystem import blink_system
 import sys
@@ -98,7 +98,7 @@ class BlinkSetup (udi_interface.Node):
         logging.debug('validate_params: {}'.format(self.Parameters.dump()))
         self.paramsProcessed = True    
 
-    def strip_syncUnitStringtoList(self, syncString):
+    def strip_StringtoList(self, syncString):
         tmp = re.sub(r"[^A-Za-z0-9_,]", "", syncString)
         #logging.debug(tmp)
         tmp = tmp.split(',')
@@ -158,7 +158,7 @@ class BlinkSetup (udi_interface.Node):
             self.BLINK_setDriver('ST', 0)
 
     def add_network_nodes (self):
-        logging.info('Adding Blink network nodes: {}'.format(self.syncUnits ))
+        logging.info('Adding Blink network nodes:')
         node_adr_list = [self.id]
         network_node_list = self.blink.get_network_list()
         self.network_names = []
@@ -199,6 +199,7 @@ class BlinkSetup (udi_interface.Node):
 
 
 
+    '''
     def add_sync_nodes (self):
         logging.info('Adding sync units: {}'.format(self.syncUnits ))
         self.sync_node_list = []
@@ -226,6 +227,7 @@ class BlinkSetup (udi_interface.Node):
         #logging.debug('email_info  : {}'.format(self.email_info))
         self.blink.set_email_info(self.email_info)
         self.poly.updateProfile()
+    '''
 
     def stop(self):
         logging.info('Stop Called:')

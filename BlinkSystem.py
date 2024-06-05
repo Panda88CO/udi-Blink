@@ -188,7 +188,7 @@ class blink_system(object):
         logging.debug('raw camera list : {}'.format(raw_camera_list))
         for indx, camera in raw_camera_list.items():
             logging.debug('Camera: {}'.format(camera))
-            if str(camera['network_id']) == str(network_id):
+            if str(camera.sync.network_id) == str(network_id):
                 camera_list.append(camera)
 
         return(camera_list)

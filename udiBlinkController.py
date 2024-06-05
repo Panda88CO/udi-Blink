@@ -65,7 +65,7 @@ class BlinkSetup (udi_interface.Node):
         #self.n_queue = []
 
         self.poly.subscribe(self.poly.STOP, self.stop)
-        self.poly.subscribe(self.poly.START, self.start, address)
+        #self.poly.subscribe(self.poly.START, self.start, address)
         self.poly.subscribe(self.poly.LOGLEVEL, self.handleLevelChange)
         self.poly.subscribe(self.poly.CUSTOMPARAMS, self.handleParams)
         self.poly.subscribe(self.poly.POLL, self.systemPoll)
@@ -90,7 +90,7 @@ class BlinkSetup (udi_interface.Node):
         self.nodes_in_db = self.poly.getNodesFromDb()
         logging.debug('BlinkSetup init DONE')
         self.nodeDefineDone = True
-
+        self.start()
 
     
 

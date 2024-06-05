@@ -415,5 +415,10 @@ class Blink:
                 time.sleep(delay)
 
 
+    def set_network_arm(self, network_id, arm):
+        if arm:
+            return api.request_system_arm(self, network_id)
+        return api.request_system_disarm(self, network_id)
+
 class BlinkSetupError(Exception):
     """Class to handle setup errors."""

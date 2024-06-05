@@ -36,7 +36,7 @@ class blink_sync_node(udi_interface.Node):
         self.blink = blinkSys
         self.primary = primary
         self.address = address
-        self.sync_node_camera_list = []
+  
         self.n_queue = []  
         self.poly = polyglot
         #self.Parameters = Custom(polyglot, 'customparams')
@@ -80,28 +80,10 @@ class blink_sync_node(udi_interface.Node):
             time.sleep(2)
             logging.info('Waiting for nodes to be created')
 
-        if self.sync_unit == None: #no sync units used
-            self.camera_list = self.blink.get_camera_list()
-        else:
-            self.camera_list = self.blink.get_sync_camera_list(self.sync_unit )
-
-        logging.debug('Adding Cameras in list: {}'.format(self.camera_list))             
-        for camera_name in self.camera_list:
-            camera_unit = self.blink.get_camera_unit(camera_name)
-
-            nodeName = self.getValidName(str(camera_name))
-            #cameraName = str(name)#.replace(' ','')
-            nodeAdr = self.getValidAddress(str(camera_name))
-            #nodeAdr = str(name).replace(' ','')[:14]
-            logging.info('Adding Camera {} {} {}'.format(self.address,nodeAdr, nodeName))
-            blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera_unit, self.blink)
-            self.sync_node_camera_list.append(nodeAdr)
-            
-
+        self.sync_unit
         self.nodeDefineDone = True
-        self.BLINK_setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit.name)))
-        tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
-        self.BLINK_setDriver('GV2', self.bool2isy(tmp))
+        self.BLINK_setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit['name'])))
+
 
     def stop(self):
         logging.info('stop {} - Cleaning up'.format(self.name))
@@ -110,9 +92,8 @@ class blink_sync_node(udi_interface.Node):
     def updateISYdrivers(self):
         logging.info('Sync updateISYdrivers - {}'.format(self.sync_unit.name))
 
-        self.BLINK_setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit.name)))
-        tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
-        self.BLINK_setDriver('GV2', self.bool2isy(tmp))
+        self.BLINK_setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit['name'])))
+
 
   
     def ISYupdate(self, command=None):
@@ -173,7 +154,7 @@ class blink_sync_node(udi_interface.Node):
     drivers= [ 
                 {'driver': 'ST', 'value':0, 'uom':25},
                 {'driver': 'GV1', 'value':0, 'uom':25}, # on line 
-                {'driver': 'GV2', 'value':0, 'uom':25} # Armed
+
 
 
         ] 

@@ -95,7 +95,7 @@ class blink_network_node(udi_interface.Node):
             blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, sync['id'], self.blink)
             
         self.nodeDefineDone = True
-        self.BLINK_setDriver('GV1', self.bool2isy(self.blink.get_network_arm_state(self.network_id)))
+        self.BLINK_setDriver('GV0', self.bool2isy(self.blink.get_network_arm_state(self.network_id)))
         #tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
         #self.BLINK_setDriver('GV2', self.bool2isy(tmp))
 
@@ -106,7 +106,7 @@ class blink_network_node(udi_interface.Node):
     def updateISYdrivers(self):
         logging.info('Network updateISYdrivers - {}'.format(self.sync_unit.name))
 
-        self.BLINK_setDriver('GV1', self.bool2isy(self.blink.get_network_arm_state(self.network_id)))
+        self.BLINK_setDriver('GV0', self.bool2isy(self.blink.get_network_arm_state(self.network_id)))
         #tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
         #self.BLINK_setDriver('GV2', self.bool2isy(tmp))
 
@@ -137,7 +137,7 @@ class blink_network_node(udi_interface.Node):
 
             for camera in self.camera_list:
                 self.blink.set_camera_arm(camera, arm_enable)
-                self.BLINK_setDriver('GV2', self.bool2isy(arm_enable))
+                self.BLINK_setDriver('GV0', self.bool2isy(arm_enable))
             self.blink.set_sync_arm(self.sync_unit.name,  arm_enable )
             if arm_enable:
                 self.node.reportCmd('DON')
@@ -167,7 +167,7 @@ class blink_network_node(udi_interface.Node):
                 }
 
     drivers= [ 
-                {'driver': 'GV1', 'value':0, 'uom':25} # Armed
+                {'driver': 'GV0', 'value':0, 'uom':25} # Armed
         ] 
 
         

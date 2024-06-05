@@ -17,6 +17,8 @@ except ImportError:
 
 from blinkpy.blinkpy_co import Blink
 from blinkpy.auth_co import Auth
+
+
 import re
 import datetime
 import time
@@ -190,6 +192,7 @@ class blink_system(object):
         return(camera_list)
 
 
+
     def get_sync_modules_on_network(self, network_id):
         logging.debug('get_sync_modules_on_network - {}'.format(network_id))
         sync_list = []
@@ -207,6 +210,11 @@ class blink_system(object):
                 arm_state = network['armed']
                 return(arm_state)
         return(arm_state)
+
+    def set_networs_arm_state(self, network_id, arm):
+        logging.debug('set_network_arm_state {} {}'.format(network_id, arm))
+        return(self.blink.set_network_arm(network_id, arm))
+       
 
     def get_camera_data(self, camera_name):
         logging.debug('get_camera_data - {} {}'.format(camera_name, self.blink.cameras[camera_name].attributes ))

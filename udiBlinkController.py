@@ -240,15 +240,15 @@ class BlinkSetup (udi_interface.Node):
         exit()
  
 
-    def heartbeat(self):
-        logging.debug('heartbeat: ' + str(self.hb))
+    #def heartbeat(self):
+    #    logging.debug('heartbeat: ' + str(self.hb))
         
-        if self.hb == 0:
-            self.reportCmd('DON',2)
-            self.hb = 1
-        else:
-            self.reportCmd('DOF',2)
-            self.hb = 0
+    #    if self.hb == 0:
+    #        self.reportCmd('DON',2)
+    #        self.hb = 1
+    #    else:
+    #        self.reportCmd('DOF',2)
+    #        self.hb = 0
 
     def checkNodes(self):
         logging.info('Updating Nodes')

@@ -82,10 +82,10 @@ class BlinkSetup (udi_interface.Node):
         #logging.debug('self.address : ' + str(self.address))
         #logging.debug('self.name :' + str(self.name))   
         self.poly.ready()
-        self.poly.addNode(self, conn_status='ST')
-        self.wait_for_node_done()
+        #self.poly.addNode(self, conn_status='ST')
+        #self.wait_for_node_done()
 
-        self.node = self.poly.getNode(self.address)
+        #self.node = self.poly.getNode(self.address)
         #logging.debug('node: {}'.format(self.node))
         self.nodes_in_db = self.poly.getNodesFromDb()
         logging.debug('BlinkSetup init DONE')
@@ -159,8 +159,8 @@ class BlinkSetup (udi_interface.Node):
 
     def add_network_nodes (self):
         logging.info('Adding Blink network nodes:')
-        node_adr_list = [self.id]
-
+        #node_adr_list = [self.id]
+        node_adr_list = []
         network_node_list = self.blink.get_network_list()
         self.network_names = []
         for indx, network in enumerate (network_node_list):
@@ -233,8 +233,8 @@ class BlinkSetup (udi_interface.Node):
     def stop(self):
         logging.info('Stop Called:')
 
-        if 'self.node' in locals():
-            time.sleep(2)
+        #if 'self.node' in locals():
+        #    time.sleep(2)
 
         self.poly.stop()
         exit()

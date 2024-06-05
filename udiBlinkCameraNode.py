@@ -82,7 +82,7 @@ class blink_camera_node(udi_interface.Node):
         logging.debug('Node getCameraData')
 
     def updateISYdrivers(self):
-        if self.drivers != []:
+        if self.drivers != [] and self.nodeDefineDone:
             logging.debug('self.camera {}'.format(self.camera))
             logging.info('Camera updateISYdrivers - {}'.format(self.camera.name))
             temp = str(self.blink.get_camera_status(self.camera.name))

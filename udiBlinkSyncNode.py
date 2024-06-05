@@ -90,9 +90,10 @@ class blink_sync_node(udi_interface.Node):
 
 
     def updateISYdrivers(self):
-        logging.info('Sync updateISYdrivers - {}'.format(self.sync_unit.name))
-
-        self.BLINK_setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit['name'])))
+        
+        if self.nodeDefineDone:
+            logging.info('Sync updateISYdrivers - {}'.format(self.sync_unit.name))
+            self.BLINK_setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit['name'])))
 
 
   

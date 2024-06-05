@@ -107,9 +107,10 @@ class blink_network_node(udi_interface.Node):
 
 
     def updateISYdrivers(self):
-        logging.info('Network updateISYdrivers - {}'.format(self.sync_unit.name))
+        if self.nodeDefineDone:
+            logging.info('Network updateISYdrivers - {}'.format(self.network_id))
 
-        self.BLINK_setDriver('GV0', self.bool2isy(self.blink.get_network_arm_state(self.network_id)))
+            self.BLINK_setDriver('GV0', self.bool2isy(self.blink.get_network_arm_state(self.network_id)))
         #tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
         #self.BLINK_setDriver('GV2', self.bool2isy(tmp))
 

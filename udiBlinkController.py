@@ -255,7 +255,7 @@ class BlinkSetup (udi_interface.Node):
 
 
     def systemPoll (self, polltype):
-        if self.nodeDefineDone and self.sync_nodes_added:
+        if self.nodeDefineDone:
             logging.info('System Poll executing: {}'.format(polltype))
 
             if 'longPoll' in polltype:

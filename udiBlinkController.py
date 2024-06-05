@@ -111,6 +111,7 @@ class BlinkSetup (udi_interface.Node):
     def start (self):
         logging.info('Executing start - BlinkSetup')
         try:
+
             self.poly.updateProfile()
             while not self.paramsProcessed or not self.nodeDefineDone:
                 logging.info('Waiting for setup to complete param:{} nodes:{}'.format(self.paramsProcessed, self.nodeDefineDone ))
@@ -119,6 +120,7 @@ class BlinkSetup (udi_interface.Node):
             #logging.debug('syncUnits / syncString: {} - {}'.format(self.syncUnits, self.syncUnitString))
             self.BLINK_setDriver('ST', 1)
             #time.sleep(5)
+
 
             logging.debug('nodeDefineDone {}'.format(self.nodeDefineDone))
             if self.userName == None or self.userName == '' or self.password==None or self.password=='':
@@ -157,6 +159,7 @@ class BlinkSetup (udi_interface.Node):
 
     def add_network_nodes (self):
         logging.info('Adding Blink network nodes: {}'.format(self.syncUnits ))
+        node_adr_list = [self.id]
         network_node_list = self.blink.get_network_list()
         self.network_names = []
         for indx, network in enumerate (network_node_list):
@@ -168,40 +171,30 @@ class BlinkSetup (udi_interface.Node):
                     node_address = self.poly.getValidAddress(str(network['id']))
                     node_name = self.poly.getValidName('Blink_'+str(network['name']))
                     logging.info('Adding {} network'.format(node_name))
+                    node_adr_list.append(node_address)
                     if not blink_network_node(self.poly, node_address, node_address, node_name, network['id'], self.blink ):
                         logging.error('Failed to create network node for {} '.format(node_name))
             else:
                 self.Parameters[name] = 'ENABLED'
-                self.poly.notices[name] = 'New Network detected '+str(name)+' - please select ENABLED or DISABLED - then restart'
-            
-            
+                self.poly.notices[name] = 'New Network detected '+str(name)+' - please select ENABLED or DISABLED - then restart'         
 
-        '''
-        if self.syncUnits != None :
-            if not ('NONE'  in self.syncUnits or '' in self.syncUnits ):
-                for sync_name in self.syncUnits:                    
-                    sync_unit = self.blink.get_(sync_name)
-                    address = self.getValidAddress(str(sync_name))
-                        #address = str(sync).replace(' ','')[:14]
-                    name = 'Blink_' + str(sync_name)
-                    nodename = self.getValidName(str(name))
-                    #name = str(sync).replace(' ','')
-                    #nodename = 'BlinkSync ' + str(sync)
-                    logging.info('Adding sync unit {} as {} , {}'.format(sync_unit, address, nodename))
-                    if not blink_sync_node(self.poly, address, address, nodename, sync_unit, self.blink ):
-                        logging.error('Failed to create Sync_node {}'.format(sync_name))
-            elif self.syncUnits != [] or 'NONE' in self.syncUnits or '' in self.syncUnits  :
-                logging.info('No sync specified - create dummy node {} for all cameras '.format('nosync')) 
-                if not blink_sync_node(self.poly, 'nosync', 'nosync', 'Blink Cameras', None, self.blink ):
-                    logging.error('Failed to create dummy node {}'.format('nosync')) 
-        self.sync_nodes_added = True
-        '''
         while not self.paramsProcessed:
             time.sleep(5)
             logging.info('waitng to process all parameters')
         #logging.debug('email_info  : {}'.format(self.email_info))
         self.blink.set_email_info(self.email_info)
         self.poly.updateProfile()
+        
+        logging.debug('Checking for nodes not used - node list {} - {} {}'.format(node_adr_list, len(self.nodes_in_db), self.nodes_in_db))
+        for nde, node in enumerate(self.nodes_in_db):
+            #node = self.nodes_in_db[nde]
+            logging.debug('Scanning db for extra nodes : {}'.format(node))
+            if node['primaryNode'] not in node_adr_list:
+                logging.debug('Removing primary node : {} {}'.format(node['name'], node))
+                self.poly.delNode(node['address'])
+            elif node['address'] not in node_adr_list:
+                logging.debug('Removing sub node : {} {}'.format(node['name'], node))
+                self.poly.delNode(node['address'])
 
 
 

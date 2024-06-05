@@ -138,7 +138,7 @@ class BlinkSetup (udi_interface.Node):
                     while not self.auth_key_updated:                      
                         logging.debug('Waiting for new pin')
                         time.sleep(5)
-                self.blink.auth_key(str(self.authKey) )       
+                self.blink.auth_key(str(self.authKey))       
                 self.blink.finalize_auth()
 
                 '''
@@ -163,9 +163,9 @@ class BlinkSetup (udi_interface.Node):
         network_node_list = self.blink.get_network_list()
         self.network_names = []
         for indx, network in enumerate (network_node_list):
-            name = network['name'].toupper()
+            name = network['name'].upper()
             if name in self.Parameters:
-                if self.Parameters[name].toupper() == "ENABLED":
+                if self.Parameters[name].upper() == "ENABLED":
                     logging.debug('Adding network {}'.format(name)) 
                     self.network_names.append(network['name'])
                     node_address = self.poly.getValidAddress(str(network['id']))

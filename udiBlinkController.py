@@ -118,7 +118,7 @@ class BlinkSetup (udi_interface.Node):
                 time.sleep(2)
             logging.setLevel(10)
             #logging.debug('syncUnits / syncString: {} - {}'.format(self.syncUnits, self.syncUnitString))
-            self.BLINK_setDriver('ST', 1)
+            #self.BLINK_setDriver('ST', 1)
             #time.sleep(5)
 
 
@@ -155,7 +155,7 @@ class BlinkSetup (udi_interface.Node):
                 self.add_network_nodes()
         except Exception as e:
             logging.error('Blink Start Exception: {}'.format(e))
-            self.BLINK_setDriver('ST', 0)
+            #self.BLINK_setDriver('ST', 0)
 
     def add_network_nodes (self):
         logging.info('Adding Blink network nodes:')

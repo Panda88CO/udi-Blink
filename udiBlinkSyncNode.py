@@ -82,7 +82,7 @@ class blink_sync_node(udi_interface.Node):
 
         self.sync_unit
         self.nodeDefineDone = True
-        self.BLINK_setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit['name'])))
+        self.BLINK_setDriver('ST', self.bool2isy(self.blink.get_sync_online(self.sync_unit.name)))
 
 
     def stop(self):
@@ -93,7 +93,7 @@ class blink_sync_node(udi_interface.Node):
         
         if self.nodeDefineDone:
             logging.info('Sync updateISYdrivers - {}'.format(self.sync_unit.name))
-            self.BLINK_setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit['name'])))
+            self.BLINK_setDriver('GV1', self.bool2isy(self.blink.get_sync_online(self.sync_unit.name)))
 
 
   
@@ -147,14 +147,14 @@ class blink_sync_node(udi_interface.Node):
 
     commands = { 'UPDATE'   : ISYupdate,
 
-                 'ARMALL'   : arm_all_cameras
+                # 'ARMALL'   : arm_all_cameras
             
 
                 }
 
     drivers= [ 
-                {'driver': 'ST', 'value':0, 'uom':25},
-                {'driver': 'GV1', 'value':0, 'uom':25}, # on line 
+                {'driver': 'ST', 'value':0, 'uom':25}, # on line 
+                #{'driver': 'GV1', 'value':0, 'uom':25},
 
 
 

@@ -92,10 +92,10 @@ class blink_network_node(udi_interface.Node):
         logging.debug('Sync list : {}'.format(self.sync_list))
         for indx, sync in enumerate(self.sync_list):
             logging.debug('Sync: {}'.format(sync))
-            nodeName = self.poly.getValidName(str(sync['name']))
-            nodeAdr = self.poly.getValidAddress(str(sync['id']))
+            nodeName = self.poly.getValidName(str(sync.name))
+            nodeAdr = self.poly.getValidAddress(str(sync.sync_id))
             logging.info('Adding Camera {} {} {}'.format(self.address, nodeAdr, nodeName))
-            blink_sync_node(self.poly, self.primary, nodeAdr, nodeName, sync['id'], self.blink)
+            blink_sync_node(self.poly, self.primary, nodeAdr, nodeName, sync, self.blink)
             
         self.nodeDefineDone = True
         self.BLINK_setDriver('GV0', self.bool2isy(self.blink.get_network_arm_state(self.network_id)))

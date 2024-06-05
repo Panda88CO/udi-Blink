@@ -198,9 +198,11 @@ class blink_system(object):
     def get_sync_modules_on_network(self, network_id):
         logging.debug('get_sync_modules_on_network - {}'.format(network_id))
         sync_list = []
-        raw_sync_list = self.blink.homescreen['sync_modules']
-        for indx, sync in enumerate (raw_sync_list):
-            if sync['network_id'] == network_id:
+        raw_sync_list = self.blink.sync
+        logging.debug('raw_sync_list {}'.format(raw_sync_list))
+        for indx, sync in raw_sync_list.items():
+            logging.debug('sync modules {}'.format(sync))
+            if str(sync.network_id) == str(network_id):
                 sync_list.append(sync)    
         return(sync_list)
     

@@ -176,7 +176,7 @@ class BlinkSetup (udi_interface.Node):
                         logging.error('Failed to create network node for {} '.format(node_name))
             else:
                 self.Parameters[name] = 'ENABLED'
-                self.poly.notices[name] = 'New Network detected '+str(name)+' - please select ENABLED or DISABLED - then restart'         
+                self.poly.Notices[name] = 'New Network detected '+str(name)+' - please select ENABLED or DISABLED - then restart'         
 
         while not self.paramsProcessed:
             time.sleep(5)

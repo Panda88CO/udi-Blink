@@ -184,7 +184,7 @@ class blink_system(object):
     def get_cameras_on_network(self, network_id):
         logging.debug('get_cameras_on_network - {}'.format(network_id))
         camera_list = []
-        raw_camera_list = self.blink.homescreen['cameras']
+        raw_camera_list = self.blink.cameras
         for indx, camera in enumerate (raw_camera_list):
             if camera['network_id'] == network_id:
                 camera_list.append(camera)

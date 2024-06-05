@@ -88,7 +88,7 @@ class blink_network_node(udi_interface.Node):
             blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera['id'], self.blink)
             #self._camera_list.append(nodeAdr)
             
-        self.sync_list = self.blink.get_sync_mdules_on_network(self.network_id)
+        self.sync_list = self.blink.get_sync_modules_on_network(self.network_id)
         for indx, sync in enumerate(self.sync_list):
             nodeName = self.poly.getValidName(sync['name'])
             nodeAdr = self.poly.getValidAddress(sync['id'])

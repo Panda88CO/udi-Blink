@@ -87,7 +87,7 @@ class BlinkSetup (udi_interface.Node):
 
         self.node = self.poly.getNode(self.address)
         #logging.debug('node: {}'.format(self.node))
-
+        self.nodes_in_db = self.poly.getNodesFromDb()
         logging.debug('BlinkSetup init DONE')
         self.nodeDefineDone = True
 
@@ -160,6 +160,7 @@ class BlinkSetup (udi_interface.Node):
     def add_network_nodes (self):
         logging.info('Adding Blink network nodes:')
         node_adr_list = [self.id]
+
         network_node_list = self.blink.get_network_list()
         self.network_names = []
         for indx, network in enumerate (network_node_list):

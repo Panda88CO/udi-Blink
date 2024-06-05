@@ -185,6 +185,7 @@ class blink_system(object):
         logging.debug('get_cameras_on_network - {}'.format(network_id))
         camera_list = []
         raw_camera_list = self.blink.cameras
+        logging.debug('raw camera list : {}'.format(raw_camera_list))
         for indx, camera in enumerate (raw_camera_list):
             logging.debug('Camera: {}'.format(camera))
             if str(camera['network_id']) == str(network_id):

@@ -53,7 +53,7 @@
  <editors />
       <sts>
          <st id="ST" editor="online" /> 
-         <st id="GV0" editor="armed" /> 
+         <st id="GV0" editor="motionen" /> 
          <st id="GV1" editor="battery" />        
          <!--<st id="GV2" editor="bat_volt" />-->
          <st id="GV3" editor="cameratype" />
@@ -70,7 +70,7 @@
          <accepts>
             <cmd id="UPDATE" /> 
             <cmd id="ARM">
-                <p id="" editor="doarm" init="1" /> 
+                <p id="" editor="domotion" init="1" /> 
             </cmd >    
             <!--<cmd id="MOTION">
                 <p id="" editor="enable" init="1" /> 

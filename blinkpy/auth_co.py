@@ -11,6 +11,7 @@ from blinkpy.helpers.constants import (
     DEFAULT_USER_AGENT,
     LOGIN_ENDPOINT,
     TIMEOUT,
+    DEFAULT_APP_BUILD
 )
 try:
     import udi_interface
@@ -34,6 +35,9 @@ class Auth:
         :param no_prompt: Should any user input prompts
                           be supressed? True/FALSE
         """
+        agent=DEFAULT_USER_AGENT,
+        app_build=DEFAULT_APP_BUILD,
+
         if login_data is None:
             login_data = {}
         self.data = login_data
@@ -42,9 +46,13 @@ class Auth:
         self.region_id = login_data.get("region_id", None)
         self.client_id = login_data.get("client_id", None)
         self.account_id = login_data.get("account_id", None)
+        self.user_id = login_data.get("user_id", None)
         self.login_response = None
         self.is_errored = False
         self.no_prompt = no_prompt
+        self.no_prompt = no_prompt
+        self._agent = agent
+        self._app_build = app_build
         self.session = self.create_session()
 
     @property
@@ -55,6 +63,7 @@ class Auth:
         self.data["region_id"] = self.region_id
         self.data["client_id"] = self.client_id
         self.data["account_id"] = self.account_id
+        self.data["user_id"] = self.user_id
         
         return self.data
 

@@ -387,6 +387,16 @@ if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
         polyglot.start(VERSION)
+        network_interface_ok = False
+        while not network_interface_ok:
+            try:
+                polyglot.getNetworkInterface()
+                network_interface_ok = True
+            except:
+                logging.error('No network connection detected - check if network is down')
+                network_interface_ok = False
+                time.sleep(15)
+        
         BlinkSetup(polyglot, 'setup', 'setup', 'BlinkSetup')
 
         # Just sit and wait for events

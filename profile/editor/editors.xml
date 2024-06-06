@@ -36,7 +36,6 @@
   <editor id = "temp" > 
         <range uom="4" min="-40" max="105"  prec="1"/>
         <range uom="17" min="-40" max="221"  prec="1"/>
-        <range uom="26" min="233" max="378"  prec="1"/>
         <range uom="25" subset="0,99"  nls="error"/>
   </editor>
 

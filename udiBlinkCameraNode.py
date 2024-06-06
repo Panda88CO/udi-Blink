@@ -105,10 +105,9 @@ class blink_camera_node(udi_interface.Node):
                 self.BLINK_setDriver('GV2', self.bat_V2isy(temp), 72)
             else:
                 self.BLINK_setDriver('GV2', self.bat_V2isy(temp), 25)
-
+            '''
             temp = int(self.cameraType[self.blink.get_camera_type_info(self.camera.name)])
             logging.debug('GV3 : {}'.format(temp))
-            '''
             self.BLINK_setDriver('GV3', temp)
                 #self.BLINK_setDriver('GV3', self.cameraType[self.blink.get_camera_type_info(self.camera.name)])
             #self.BLINK_setDriver('GV4', self.bool2isy(self.blink.get_camera_motion_enabled_info(self.camera.name)), True, True)
@@ -121,8 +120,6 @@ class blink_camera_node(udi_interface.Node):
             logging.debug('GV6 : {}'.format(temp_info))
             if  None ==  temp_info:
                 self.BLINK_setDriver('GV6', 0, 25)
-            elif 'K' == self.blink.temp_unit or 'k' == self.blink.temp_unit:
-                self.BLINK_setDriver('GV6', temp_info+273.15, 26)
             elif 'F' == self.blink.temp_unit or 'f' == self.blink.temp_unit:
                 self.BLINK_setDriver('GV6', (temp_info*9/5)+32, 17)
             else:

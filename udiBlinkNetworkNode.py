@@ -151,7 +151,7 @@ class blink_network_node(udi_interface.Node):
             nodes[nde].updateISYdrivers()
 
 
-    id = 'blinksync'
+    id = 'blinknetwork'
 
     commands = { 'UPDATE'   : ISYupdate,
 

@@ -17,7 +17,6 @@ armed-0 = Disarmed
 armed-1 = Armed
 armed-99 = Unknown
 CMD-nlsblinknetwork-UPDATE-NAME = Update SyncUnit
-
 CMD-nlsblinknetwork-ARMALL-NAME = Set Arming
 
 ND-blinksync-NAME = Sync Unit

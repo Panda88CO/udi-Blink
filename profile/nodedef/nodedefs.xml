@@ -38,8 +38,6 @@
       </sts>
       <cmds>
          <sends>
-            <cmd id="DON" /> 
-            <cmd id="DOF" /> 
          </sends>
          <accepts>
             <cmd id="UPDATE" /> 

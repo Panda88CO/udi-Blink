@@ -292,10 +292,8 @@ class BlinkSetup (udi_interface.Node):
             self.temp_unit = 'C'
         elif unitS[0] == 'F' or unitS[0] == 'f':
             self.temp_unit = 'F'
-        elif unitS[0] == 'k' or unitS[0] == 'k':
-            self.temp_unit = 'K'
         else:
-            logging.error('Unknown unit string (first char must be C,F,K: {}'.format(unitS))
+            logging.error('Unknown unit string (first char must be C or F {}'.format(unitS))
         self.blink.set_temp_unit(self.temp_unit)
 
 
@@ -308,16 +306,14 @@ class BlinkSetup (udi_interface.Node):
             if 'TEMP_UNIT' in customParams:
                 temp = customParams['TEMP_UNIT'].upper()
                 if '' == temp or None == temp:
-                    self.poly.Notices['TEMP_UNIT'] = 'Missing temp unit (C,F,K)'                    
+                    self.poly.Notices['TEMP_UNIT'] = 'Missing temp unit (C or F)'                    
                 else:
                     if temp[0] == 'C':
                         self.blink.set_temp_unit('C') 
                     elif temp[0] == 'F' :
                         self.blink.set_temp_unit('F') 
-                    elif temp[0] == 'K' :
-                        self.blink.set_temp_unit('K') 
-                    if 'TEMP_UNIT' in self.poly.Notices:
-                            self.poly.Notices.delete('TEMP_UNIT')
+                if 'TEMP_UNIT' in self.poly.Notices:
+                        self.poly.Notices.delete('TEMP_UNIT')
 
             if 'USERNAME' in customParams:
                 self.userName = customParams['USERNAME']

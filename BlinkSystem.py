@@ -17,6 +17,8 @@ except ImportError:
 
 from blinkpy.blinkpy_co import Blink
 from blinkpy.auth_co import Auth
+
+
 import re
 import datetime
 import time
@@ -182,20 +184,25 @@ class blink_system(object):
     def get_cameras_on_network(self, network_id):
         logging.debug('get_cameras_on_network - {}'.format(network_id))
         camera_list = []
-        raw_camera_list = self.blink.homescreen['cameras']
-        for indx, camera in enumerate (raw_camera_list):
-            if camera['network_id'] == network_id:
+        raw_camera_list = self.blink.cameras
+        logging.debug('raw camera list : {}'.format(raw_camera_list))
+        for indx, camera in raw_camera_list.items():
+            logging.debug('Camera: {}'.format(camera))
+            if str(camera.sync.network_id) == str(network_id):
                 camera_list.append(camera)
 
         return(camera_list)
 
 
+
     def get_sync_modules_on_network(self, network_id):
         logging.debug('get_sync_modules_on_network - {}'.format(network_id))
         sync_list = []
-        raw_sync_list = self.blink.homescreen['sync_modules']
-        for indx, sync in enumerate (raw_sync_list):
-            if sync['network_id'] == network_id:
+        raw_sync_list = self.blink.sync
+        logging.debug('raw_sync_list {}'.format(raw_sync_list))
+        for indx, sync in raw_sync_list.items():
+            logging.debug('sync modules {}'.format(sync))
+            if str(sync.network_id) == str(network_id):
                 sync_list.append(sync)    
         return(sync_list)
     
@@ -207,6 +214,11 @@ class blink_system(object):
                 arm_state = network['armed']
                 return(arm_state)
         return(arm_state)
+
+    def set_network_arm_state(self, network_id, arm):
+        logging.debug('set_network_arm_state {} {}'.format(network_id, arm))
+        return(self.blink.set_network_arm(network_id, arm))
+       
 
     def get_camera_data(self, camera_name):
         logging.debug('get_camera_data - {} {}'.format(camera_name, self.blink.cameras[camera_name].attributes ))

@@ -11,17 +11,16 @@ online-98 = No support
 online-99 = Unknown
 
 ND-blinknetwork-NAME = Network
-ND-blinknetwork-ICON = Arm
+ND-blinknetwork-ICON = GenericCtl
 ST-nlsblinknetwork-GV0-NAME = Arm Status
 armed-0 = Disarmed
 armed-1 = Armed
 armed-99 = Unknown
 CMD-nlsblinknetwork-UPDATE-NAME = Update SyncUnit
-
 CMD-nlsblinknetwork-ARMALL-NAME = Set Arming
 
 ND-blinksync-NAME = Sync Unit
-ND-blinksync-ICON = ARM
+ND-blinksync-ICON = GenericCtl
 ST-nlsblinksync-ST-NAME = Connected
 CMD-nlsblinksync-UPDATE-NAME = Update SyncUnit
 
@@ -31,7 +30,7 @@ doarm-1 = Arm
 ND-blinkcamera-NAME = Blink Camera
 ND-blinkcamera-ICON = MotionSensor
 ST-nlsblinkcamera-ST-NAME = Connected
-ST-nlsblinkcamera-GV0-NAME = Arm Status
+ST-nlsblinkcamera-GV0-NAME = Motion Detection Status
 ST-nlsblinkcamera-GV1-NAME = Battery Status
 #ST-nlsblinkcamera-GV2-NAME = Battery Level Indicator
 ST-nlsblinkcamera-GV3-NAME = CameraType
@@ -65,6 +64,8 @@ motiondetc-0 = No Motion
 motiondetc-1 = Motion Detected
 motiondetc-99 = Unknown
 
+domotion-0 = Disabled
+domotion-1 = Enabled
 
 error-0 = No Support
 error-98 = N0 support
@@ -81,7 +82,7 @@ emailpic-1 = Email Enabled
 
 CMD-nlsblinkcamera-UPDATE-NAME = Update Camera
 CMD-nlsblinkcamera-QUERY-NAME = QUERY
-CMD-nlsblinkcamera-ARM-NAME = Set Arming
+CMD-nlsblinkcamera-ARM-NAME = Set Motion Detection
 CMD-nlsblinkcamera-MOTION-NAME = Set Motion Detection
 CMD-nlsblinkcamera-SNAPPIC-NAME = Take Picture
 CMD-nlsblinkcamera-SNAPVIDEO-NAME = Take Video

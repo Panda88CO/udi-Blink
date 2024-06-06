@@ -82,7 +82,8 @@ class blink_camera_node(udi_interface.Node):
         logging.debug('Node getCameraData')
 
     def updateISYdrivers(self):
-        if self.drivers != []:
+        if self.drivers != [] and self.nodeDefineDone:
+            logging.debug('self.camera {}'.format(self.camera))
             logging.info('Camera updateISYdrivers - {}'.format(self.camera.name))
             temp = str(self.blink.get_camera_status(self.camera.name))
             logging.debug('get_camera_info: {}'.format(temp))
@@ -104,10 +105,9 @@ class blink_camera_node(udi_interface.Node):
                 self.BLINK_setDriver('GV2', self.bat_V2isy(temp), 72)
             else:
                 self.BLINK_setDriver('GV2', self.bat_V2isy(temp), 25)
-
+            '''
             temp = int(self.cameraType[self.blink.get_camera_type_info(self.camera.name)])
             logging.debug('GV3 : {}'.format(temp))
-            '''
             self.BLINK_setDriver('GV3', temp)
                 #self.BLINK_setDriver('GV3', self.cameraType[self.blink.get_camera_type_info(self.camera.name)])
             #self.BLINK_setDriver('GV4', self.bool2isy(self.blink.get_camera_motion_enabled_info(self.camera.name)), True, True)
@@ -120,8 +120,6 @@ class blink_camera_node(udi_interface.Node):
             logging.debug('GV6 : {}'.format(temp_info))
             if  None ==  temp_info:
                 self.BLINK_setDriver('GV6', 0, 25)
-            elif 'K' == self.blink.temp_unit or 'k' == self.blink.temp_unit:
-                self.BLINK_setDriver('GV6', temp_info+273.15, 26)
             elif 'F' == self.blink.temp_unit or 'f' == self.blink.temp_unit:
                 self.BLINK_setDriver('GV6', (temp_info*9/5)+32, 17)
             else:
@@ -163,8 +161,8 @@ class blink_camera_node(udi_interface.Node):
             logging.info(' arm_cameras: {} - {}'.format(self.camera.name, arm_enable))
 
             temp = self.blink.set_camera_arm(self.camera.name,  arm_enable )
-            logging.debug('temp = {}'.format(temp))
-            logging.debug('blink.set_camera_arm({}, {}):{}'.format(self.camera.name,  arm_enable,  self.blink.get_camera_data(self.camera.name )))
+            time.sleep(1)
+            #logging.debug('blink.set_camera_arm({}, {}):{}'.format(self.camera.name,  arm_enable,  self.blink.get_camera_data(self.camera.name )))
             if arm_enable:
                 self.node.reportCmd('DON')
             else:

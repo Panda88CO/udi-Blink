@@ -199,37 +199,6 @@ class BlinkSetup (udi_interface.Node):
 
 
 
-
-    '''
-    def add_sync_nodes (self):
-        logging.info('Adding sync units: {}'.format(self.syncUnits ))
-        self.sync_node_list = []
-        if self.syncUnits != None :
-            if not ('NONE'  in self.syncUnits or '' in self.syncUnits ):
-                for sync_name in self.syncUnits:                    
-                    sync_unit = self.blink.get_sync_unit(sync_name)
-                    address = self.getValidAddress(str(sync_name))
-                        #address = str(sync).replace(' ','')[:14]
-                    name = 'Blink_' + str(sync_name)
-                    nodename = self.getValidName(str(name))
-                    #name = str(sync).replace(' ','')
-                    #nodename = 'BlinkSync ' + str(sync)
-                    logging.info('Adding sync unit {} as {} , {}'.format(sync_unit, address, nodename))
-                    if not blink_sync_node(self.poly, address, address, nodename, sync_unit, self.blink ):
-                        logging.error('Failed to create Sync_node {}'.format(sync_name))
-            elif self.syncUnits != [] or 'NONE' in self.syncUnits or '' in self.syncUnits  :
-                logging.info('No sync specified - create dummy node {} for all cameras '.format('nosync')) 
-                if not blink_sync_node(self.poly, 'nosync', 'nosync', 'Blink Cameras', None, self.blink ):
-                    logging.error('Failed to create dummy node {}'.format('nosync')) 
-        self.sync_nodes_added = True
-        while not self.paramsProcessed:
-            time.sleep(5)
-            logging.info('waitng to process all parameters')
-        #logging.debug('email_info  : {}'.format(self.email_info))
-        self.blink.set_email_info(self.email_info)
-        self.poly.updateProfile()
-    '''
-
     def stop(self):
         logging.info('Stop Called:')
 

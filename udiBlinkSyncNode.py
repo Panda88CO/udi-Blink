@@ -47,8 +47,6 @@ class blink_sync_node(udi_interface.Node):
         self.poly.subscribe(self.poly.STOP, self.stop)
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
 
-             
-
         # start processing events and create add our controller node
         polyglot.ready()
         self.poly.addNode(self)
@@ -104,43 +102,6 @@ class blink_sync_node(udi_interface.Node):
         self.updateISYdrivers()
 
         
-
-    def arm_all_cameras (self, command):
-        arm_enable = (1 == int(command.get('value')) )
-        logging.info('Sync arm_all_cameras:{} - {}'.format(self.sync_unit.name, arm_enable ))
-        
-        #if self.sync_unit != None:
-        #    self.BLINK_setDriver('GV2', self.bool2isy(arm_enable))
-        #    self.blink.set_sync_arm(self.sync_unit.name,  arm_enable )
-        #    if arm_enable:
-        #        self.node.reportCmd('DON')
-        #    else:
-        #        self.node.reportCmd('DOF')
-        #    #self.updateISYdrivers()
-        #else:
-
-        if self.sync_unit != None:
-
-            for camera in self.camera_list:
-                self.blink.set_camera_arm(camera, arm_enable)
-                self.BLINK_setDriver('GV2', self.bool2isy(arm_enable))
-            self.blink.set_sync_arm(self.sync_unit.name,  arm_enable )
-            if arm_enable:
-                self.node.reportCmd('DON')
-            else:
-                self.node.reportCmd('DOF')
-            #self.updateISYdrivers()
-        else:
-            camera_list = self.blink.get_camera_list()
-            for camera in camera_list:
-                self.blink.set_camera_arm(camera, arm_enable)
-        time.sleep(3)
-        self.blink.refresh_data()
-        self.updateISYdrivers()
-        nodes = self.poly.getNodes()
-        for nde in self.sync_node_camera_list:
-            logging.debug('updating node {} data'.format(nde))    
-            nodes[nde].updateISYdrivers()
 
 
     id = 'blinksync'

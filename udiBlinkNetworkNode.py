@@ -39,6 +39,8 @@ class blink_network_node(udi_interface.Node):
         self.sync_node_camera_list = []
         self.n_queue = []  
         self.poly = polyglot
+        self._camera_list = []
+        self._sync_list = []
         #self.Parameters = Custom(polyglot, 'customparams')
         # subscribe to the events we want
         #polyglot.subscribe(polyglot.CUSTOMPARAMS, self.parameterHandler)
@@ -86,7 +88,7 @@ class blink_network_node(udi_interface.Node):
             #nodeAdr = str(name).replace(' ','')[:14]
             logging.info('Adding Camera {} {} {}'.format(self.address,nodeAdr, nodeName))
             blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
-            #self._camera_list.append(nodeAdr)
+            self._camera_list.append(nodeAdr)
             
         self.sync_list = self.blink.get_sync_modules_on_network(self.network_id)
         logging.debug('Sync list : {}'.format(self.sync_list))
@@ -96,11 +98,14 @@ class blink_network_node(udi_interface.Node):
             nodeAdr = self.poly.getValidAddress(str(sync.sync_id))
             logging.info('Adding Camera {} {} {}'.format(self.address, nodeAdr, nodeName))
             blink_sync_node(self.poly, self.primary, nodeAdr, nodeName, sync, self.blink)
-            
+            self._sync_list.append(nodeAdr)
         self.nodeDefineDone = True
         self.BLINK_setDriver('GV0', self.bool2isy(self.blink.get_network_arm_state(self.network_id)))
         #tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
         #self.BLINK_setDriver('GV2', self.bool2isy(tmp))
+        logging.debug('_camera_list {}'.format(self._camera_list))
+        logging.debug('_sync_list {}'.format(self._sync_list))        
+
 
     def stop(self):
         logging.info('stop {} - Cleaning up'.format(self.name))
@@ -125,7 +130,7 @@ class blink_network_node(udi_interface.Node):
     # NEEDS UPDATE
     def arm_all_cameras (self, command):
         arm_enable = (1 == int(command.get('value')) )
-        logging.info('Sync arm_all_cameras:{} - {}'.format(self.network_id, arm_enable ))
+        logging.info('Sync arm_all_cameras:{} - {}'.format(self.net, arm_enable ))
         
         #if self.sync_unit != None:
         #    self.BLINK_setDriver('GV2', self.bool2isy(arm_enable))
@@ -142,11 +147,12 @@ class blink_network_node(udi_interface.Node):
         #    camera_list = self.blink.get_camera_list()
         #    for camera in camera_list:
         #        self.blink.set_camera_arm(camera, arm_enable)
+        logging.debug('_camera_list {}'.format(self._camera_list))
         time.sleep(3)
         self.blink.refresh_data()
         self.updateISYdrivers()
         nodes = self.poly.getNodes()
-        for nde in self.sync_node_camera_list:
+        for nde in self._camera_list:
             logging.debug('updating node {} data'.format(nde))    
             nodes[nde].updateISYdrivers()
 

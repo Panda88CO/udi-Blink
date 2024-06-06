@@ -161,8 +161,8 @@ class blink_camera_node(udi_interface.Node):
             logging.info(' arm_cameras: {} - {}'.format(self.camera.name, arm_enable))
 
             temp = self.blink.set_camera_arm(self.camera.name,  arm_enable )
-            logging.debug('temp = {}'.format(temp))
-            logging.debug('blink.set_camera_arm({}, {}):{}'.format(self.camera.name,  arm_enable,  self.blink.get_camera_data(self.camera.name )))
+            time.sleep(1)
+            #logging.debug('blink.set_camera_arm({}, {}):{}'.format(self.camera.name,  arm_enable,  self.blink.get_camera_data(self.camera.name )))
             if arm_enable:
                 self.node.reportCmd('DON')
             else:

@@ -10,13 +10,16 @@ TEMP_UNIT   : Temperature unit (C/F/K)
 USERNAME    : Blink login ID
 PASSWORD    : Blink password
 AUTH_KEY    : Authentication code from app (enter when appears in app)
-SYNC_UNITS  : List of SYNC units (comma separated if more than 1) or NONE if no sync unit
+
 EMAIL_ENABLED   : Enable emailing of pictures snapped (True/False)
 SMTP            : Address of SMTP server used to send mail e.g. smtp-mail.outlook.com
 SMTP_PORT       : SMTP port - default is 587
 SMTP_EMAIL      : Email account on SMTP server account
 SMTP_PASSWORD   : Password on SMTP aserver account
 EMAIL_RECEPIENT : Email where pictures are sent
+
+The networks defined in Blibk will be added here after first run.  Select te ones that are desired by enterning ENABLED (DISABLED to disbale)
+
 ### Polisy
 
 ## Notes 

@@ -4,18 +4,20 @@ The node is targeted primarily at arming and disarming cameras, but allows snapp
 (Furutre will add ability to have the picture emailed automatically to the user account)
 
 # Setup
-User needs provide username and password used for the Blink App.  A one time/2way authentication may also be needed.  In the case of 2 way autenticantion.  Obtain the code using the Blink app and enter the data under configuration
+User needs provide username and password used for the Blink App.  A 2FA authentication is also be needed during start up.  Start the node server.  A 2FA code is sent to your phone - enter the code under configuration and press save.
 
-The user must specify the sync unit(s) where the cameras are registered - A comman separated list is ok if more than 1 sync unit is being used.  If no sync unit is used specify NONE
+The node runs and extracts the differnt networks that are defind in Blink.  They will be added to the configuration and then select (Type) Enabled or Disabled.  Save and restart
+Go through the 2FA procedure again and the node should be up and running 
+
 
 Note, the API does not handle special characters in the camera and sync names - please remove/rename those before setting upthe node
 
-ShortPoll is heart beat from controller node, LongPoll updates data.  Do not run update too often, as system may get throttled by Blink - Suggested to be more than 60sec between updates
+ShortPoll is currently not used, LongPoll updates data.  Do not run update too often, as system may get throttled by Blink - Suggested to be more than 60sec between updates
 
 # Still to be done
-I only have 3 camera types - Mini, doorbell and Outdoot (new) - I do not know the older camera's name. If you have those please enable debug and click update camera and provide log file and I can update this 
+I only have 3 camera types - Mini, doorbell and Outdoor (new) - I do not know the older camera's name. If you have those please enable debug and click update camera and provide log file and I can update this 
 
 Plan is to add ability to send pictures of emails/videos taken.
 
 # misc
-Based on blink API https://github.com/fronzbot/blinkpy
+Based on blink API https://github.com/fronzbot/blinkpy - but somewhat modified

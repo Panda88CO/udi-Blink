@@ -125,7 +125,7 @@ class blink_network_node(udi_interface.Node):
     # NEEDS UPDATE
     def arm_all_cameras (self, command):
         arm_enable = (1 == int(command.get('value')) )
-        logging.info('Sync arm_all_cameras:{} - {}'.format(self.sync_unit.name, arm_enable ))
+        logging.info('Sync arm_all_cameras:{} - {}'.format(self.network_id, arm_enable ))
         
         #if self.sync_unit != None:
         #    self.BLINK_setDriver('GV2', self.bool2isy(arm_enable))

@@ -9,7 +9,7 @@ Configuration requires the following paramteres:
 TEMP_UNIT   : Temperature unit (C/F/K)
 USERNAME    : Blink login ID
 PASSWORD    : Blink password
-AUTH_KEY    : Authentication code from app (enter when appears in app)
+AUTH_KEY    : Authentication code 2FA from app (enter when appears in app)
 
 EMAIL_ENABLED   : Enable emailing of pictures snapped (True/False)
 SMTP            : Address of SMTP server used to send mail e.g. smtp-mail.outlook.com

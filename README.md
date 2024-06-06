@@ -4,7 +4,7 @@ The node is targeted primarily at arming and disarming cameras, but allows snapp
 (Furutre will add ability to have the picture emailed automatically to the user account)
 
 # Setup
-User needs provide username and password used for the Blink App.  A 2FA authentication is also be needed during start up.  Start the node server.  A 2FA code is sent to your phone - enter the code under configuration and press save.
+User needs provide username and password used for the Blink App.  A 2FA authentication is also be needed during start up.  Start the node server.  A 2FA code is sent to your phone - enter the code under configuration (AUTH_KEY) and press save.
 
 The node runs and extracts the differnt networks that are defind in Blink.  They will be added to the configuration and then select (Type) Enabled or Disabled.  Save and restart
 Go through the 2FA procedure again and the node should be up and running 

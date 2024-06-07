@@ -56,6 +56,8 @@ class Auth:
         self._app_build = app_build
         self.session = self.create_session()
 
+        self.pin_required = True
+
     @property
     def login_attributes(self):
         """Return a dictionary of login attributes."""
@@ -267,6 +269,7 @@ class Auth:
             try:
                 json_resp = response.json()
                 _LOGGER.debug('Json response : {}'.format(json_resp))
+                self.pin_required = json_resp['require_new_pin']
                 blink.available = json_resp["valid"]
                 if not json_resp["valid"]:
                     _LOGGER.error("%s", json_resp["message"])
@@ -275,7 +278,11 @@ class Auth:
                 _LOGGER.error("Did not receive valid response from server.")
                 return False
         return True
-
+    
+    def check_key_required(self):
+        """Check if 2FA key is required."""
+        return(self.pin_required)
+    '''
     def check_key_required(self):
         """Check if 2FA key is required."""
         try:
@@ -284,8 +291,7 @@ class Auth:
         except (KeyError, TypeError):
             pass
         return False
-
-
+    '''
 class TokenRefreshFailed(Exception):
     """Class to throw failed refresh exception."""
 

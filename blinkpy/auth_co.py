@@ -140,6 +140,7 @@ class Auth:
         try:
             _LOGGER.info("Token expired, attempting automatic refresh.")
             self.login_response = self.login()
+            _LOGGER.debug('refresh_token {}'.format(self.login_response ))
             self.extract_login_info()
             self.is_errored = False
         except LoginError as error:

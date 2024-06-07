@@ -52,6 +52,7 @@ class blink_system(object):
             self.blink.auth = auth_OK
             logging.info('Auth: {}'.format(auth_OK))
             self.blink.start()
+            logging.debug('PIN required ; {}'.format(self.blink.key_required))
             return(not self.blink.key_required)
                 #logging.info('Auth key required')
                 #return(True)

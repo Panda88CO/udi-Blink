@@ -119,7 +119,7 @@ class Auth:
     def login(self, login_url=LOGIN_ENDPOINT):
         """Attempt login to blink servers."""
         self.validate_login()
-        _LOGGER.info("Attempting login with %s", login_url)
+        _LOGGER.info("Attempting login with {}, {}".format(login_url, self.data))
         response = api.request_login(
             self,
             login_url,

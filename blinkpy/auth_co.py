@@ -64,7 +64,7 @@ class Auth:
         self.data["client_id"] = self.client_id
         self.data["account_id"] = self.account_id
         self.data["user_id"] = self.user_id
-        
+        _LOGGER.debug('login_attributes {}'.format(self.data))
         return self.data
 
     @property

@@ -86,7 +86,7 @@ def validate_login_data(data):
     """Check for missing keys."""
     data["uid"] = data.get("uid", gen_uid(const.SIZE_UID, uid_format=True))
     data["device_id"] = data.get("device_id", const.DEVICE_ID)
-
+    _LOGGER.debug('validate_login_data {}'.format(data))
     return data
 
 

@@ -63,6 +63,7 @@ class Blink:
         self.auth = Auth()
         self.account_id = None
         self.client_id = None
+        self.user_id = None
         self.network_ids = []
         self.urls = None
         self.sync = CaseInsensitiveDict({})

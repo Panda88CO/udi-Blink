@@ -38,13 +38,16 @@ def request_login(
         {
             "email": login_data["username"],
             "password": login_data["password"],
-            "unique_id": login_data["uid"],
+            "unique_id": login_data["unique_id"],
             "device_identifier": login_data["device_id"],
             "client_name": "POLISY",
             "reauth": True,
+            "app_version":"30.0",
+            "client_type":"android",
+            "os_version":"14",
         }
     )
-
+    _LOGGER.debug('request_login : {} - {}'.format(url, data))
     return auth.query(
         url=url,
         headers=headers,

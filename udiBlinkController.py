@@ -116,6 +116,7 @@ class BlinkSetup (udi_interface.Node):
         login_data['username'] = self.userName
         login_data['password'] = self.password
         login_data['device_id'] = 'ISY_PG3x'
+        login_data['reauth'] = True
         if 'uid' in self.customData.keys():
             logging.debug('uid found: {}'.format(self.customData['uid']))
             login_data['uid'] = self.customData['uid']

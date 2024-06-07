@@ -118,10 +118,10 @@ class BlinkSetup (udi_interface.Node):
         login_data['device_id'] = 'ISY_PG3x'
         if 'uid' in self.customData.keys():
             logging.debug('uid found: {}'.format(self.customData['uid']))
-            login_data['udi'] = self.customData['uid']
+            login_data['uid'] = self.customData['uid']
         else:
-            login_data['udi'] = self.gen_uid(16, True)
-            self.customData['uid'] = login_data['udi']
+            login_data['uid'] = self.gen_uid(16, True)
+            self.customData['uid'] = login_data['uid']
             logging.debug('uid created: {}'.format(self.customData['uid']))
         return(login_data)
 

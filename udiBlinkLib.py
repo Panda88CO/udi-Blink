@@ -6,6 +6,7 @@ Polyglot TEST v3 node server
 MIT License
 """
 import time
+import secrets
 try:
     import udi_interface
     logging = udi_interface.LOGGER
@@ -69,3 +70,11 @@ def bool2isy(self, val):
         return(0)
     else:
         return(None)
+
+def gen_uid(self, size, uid_format=False):
+    """Create a random sring."""
+    if uid_format:
+        token = f"Blink_{secrets.token_hex(4)}-{secrets.token_hex(2)}-{secrets.token_hex(2)}-{secrets.token_hex(2)}-{secrets.token_hex(6)}"
+    else:
+        token = secrets.token_hex(size)
+    return token

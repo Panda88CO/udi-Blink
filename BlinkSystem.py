@@ -45,14 +45,14 @@ class blink_system(object):
         self.email_en = False
 
 
-    def auth1 (self, userName, password):
+    def auth1 (self, login_data):
         # Can set no_prompt when initializing auth handler
-        login_data = {}
-        login_data['username'] = userName
-        login_data['password'] = password
+        #login_data = 
+        #login_data['username'] = userName
+        #login_data['password'] = password
         #login_data["uid"] = data.get("uid", gen_uid(const.SIZE_UID, uid_format=True))
-        login_data["uid"] = 'ThishIsATest123!@#'
-        login_data["device_id"] = 'ISYPG3x'
+        #login_data["uid"] = 'ThishIsATest123!@#'
+        #login_data["device_id"] = 'ISYPG3x'
 
         auth_OK = Auth(login_data, no_prompt=True)
         if auth_OK:

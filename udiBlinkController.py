@@ -35,7 +35,7 @@ except ImportError:
 VERSION = '0.4.4'
 
 class BlinkSetup (udi_interface.Node):
-    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done
+    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done, gen_uid
 
     def  __init__(self, polyglot, primary, address, name):
         super().__init__( polyglot, primary, address, name)  
@@ -62,6 +62,8 @@ class BlinkSetup (udi_interface.Node):
         }
         self.Parameters = Custom(polyglot, 'customParams')      
         self.Notices = Custom(polyglot, 'notices')
+        self.customData = Custom(polyglot, 'customdata')
+
         #self.n_queue = []
 
         self.poly.subscribe(self.poly.STOP, self.stop)
@@ -108,6 +110,22 @@ class BlinkSetup (udi_interface.Node):
             unitList.append(syncunit.upper())
         return(unitList)
 
+
+    def prepare_login_data(self):
+        login_data = {}
+        login_data['username'] = self.userName
+        login_data['password'] = self.password
+        login_data['device_id'] = 'ISY_PG3x'
+        if 'uid' in self.customData.keys():
+            logging.debug('uid found: {}'.format(self.customData['uid']))
+            login_data['udi'] = self.customData['uid']
+        else:
+            login_data['udi'] = self.gen_uid(16, True)
+            self.customData['uid'] = login_data['udi']
+            logging.debug('uid created: {}'.format(self.customData['uid']))
+        return(login_data)
+
+
     def start (self):
         logging.info('Executing start - BlinkSetup')
         try:
@@ -120,6 +138,7 @@ class BlinkSetup (udi_interface.Node):
             #logging.debug('syncUnits / syncString: {} - {}'.format(self.syncUnits, self.syncUnitString))
             #self.BLINK_setDriver('ST', 1)
             #time.sleep(5)
+            login_data = self.prepare_login_data()
 
 
             logging.debug('nodeDefineDone {}'.format(self.nodeDefineDone))
@@ -129,7 +148,7 @@ class BlinkSetup (udi_interface.Node):
                 exit()
             else:
                 self.auth_key_updated = False
-                auth_ok = self.blink.auth1(self.userName,self.password )
+                auth_ok = self.blink.auth1(login_data)
                 logging.debug('Auth setp 1: auth finished {}'.format(auth_ok))
                 if not auth_ok:
                     logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 

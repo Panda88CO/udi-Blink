@@ -266,6 +266,7 @@ class Auth:
             _LOGGER.debug('response : {}'.format(response))
             try:
                 json_resp = response.json()
+                _LOGGER.debug('Json response : {}'.format(json_resp))
                 blink.available = json_resp["valid"]
                 if not json_resp["valid"]:
                     _LOGGER.error("%s", json_resp["message"])

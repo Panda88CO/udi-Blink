@@ -263,6 +263,7 @@ class Auth:
         """Send 2FA key to blink servers."""
         if key is not None:
             response = api.request_verify(self, blink, key)
+            _LOGGER.debug('response : {}'.format(response))
             try:
                 json_resp = response.json()
                 blink.available = json_resp["valid"]

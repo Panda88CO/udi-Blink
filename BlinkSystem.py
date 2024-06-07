@@ -75,13 +75,14 @@ class blink_system(object):
         else:
             return{'no login'}
             '''
-        
+
+
     def auth_key(self, authenKey = None):
         logging.debug('auth_key')
         if self.blink.key_required:
             logging.info('Auth key required')
             if authenKey == None or authenKey == '':
-                
+    
                 return('AuthKey Empty: {}'.format(authenKey))
             else:
                 result = self.blink.auth.send_auth_key(self.blink, authenKey)
@@ -190,10 +191,7 @@ class blink_system(object):
             logging.debug('Camera: {}'.format(camera))
             if str(camera.sync.network_id) == str(network_id):
                 camera_list.append(camera)
-
         return(camera_list)
-
-
 
     def get_sync_modules_on_network(self, network_id):
         logging.debug('get_sync_modules_on_network - {}'.format(network_id))

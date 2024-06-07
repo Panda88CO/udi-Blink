@@ -72,6 +72,7 @@ def request_verify(auth, blink, verify_key):
     """Send verification key to blink servers."""
     url = f"{blink.urls.base_url}/api/v4/accounts/{blink.account_id}/users/{blink.auth.user_id}/clients/{blink.client_id}/client_verification/pin/verify"
     data = dumps({"pin": verify_key,"trusted": True} )
+    _LOGGER.debug('request_verify :url  {}  data {}'.format(url, data))
     return auth.query(
         url=url,
         headers=auth.header,

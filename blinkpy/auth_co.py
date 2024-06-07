@@ -47,7 +47,7 @@ class Auth:
         self.client_id = login_data.get("client_id", None)
         self.account_id = login_data.get("account_id", None)
         self.user_id = login_data.get("user_id", None)
-        self.uid =  login_data.get("uid", None)
+        self.unique_id =  login_data.get("unique_id", None)
         self.login_response = None
         self.is_errored = False
         self.no_prompt = no_prompt
@@ -65,7 +65,7 @@ class Auth:
         self.data["client_id"] = self.client_id
         self.data["account_id"] = self.account_id
         self.data["user_id"] = self.user_id
-        self.data['uid'] = self.uid
+        self.data['unique_id'] = self.unique_id
 
         _LOGGER.debug('login_attributes {}'.format(self.data))
         return self.data

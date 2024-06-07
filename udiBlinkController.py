@@ -117,13 +117,13 @@ class BlinkSetup (udi_interface.Node):
         login_data['password'] = self.password
         login_data['device_id'] = 'ISY_PG3x'
         login_data['reauth'] = True
-        if 'uid' in self.customData.keys():
-            logging.debug('uid found: {}'.format(self.customData['uid']))
-            login_data['uid'] = self.customData['uid']
+        if 'unique_id' in self.customData.keys():
+            logging.debug('uid found: {}'.format(self.customData['unique_id']))
+            login_data['unique_id'] = self.customData['unique_id']
         else:
-            login_data['uid'] = self.gen_uid(16, True)
-            self.customData['uid'] = login_data['uid']
-            logging.debug('uid created: {}'.format(self.customData['uid']))
+            login_data['unique_id'] = self.gen_uid(16, True)
+            self.customData['unique_id'] = login_data['unique_id']
+            logging.debug('uid created: {}'.format(self.customData['unique_id']))
         return(login_data)
 
 
@@ -139,15 +139,18 @@ class BlinkSetup (udi_interface.Node):
             #logging.debug('syncUnits / syncString: {} - {}'.format(self.syncUnits, self.syncUnitString))
             #self.BLINK_setDriver('ST', 1)
             #time.sleep(5)
-            login_data = self.prepare_login_data()
-
-
             logging.debug('nodeDefineDone {}'.format(self.nodeDefineDone))
+
+
+
+
+
             if self.userName == None or self.userName == '' or self.password==None or self.password=='':
                 logging.error('username and password must be provided to start node server')
                 self.poly.Notices['un'] = 'username and password must be provided to start node server'
                 exit()
             else:
+                login_data = self.prepare_login_data()
                 self.auth_key_updated = False
                 auth_ok = self.blink.auth1(login_data)
                 logging.debug('Auth setp 1: auth finished {}'.format(auth_ok))

@@ -53,6 +53,7 @@ class Auth:
         self.no_prompt = no_prompt
         self._agent = agent
         self._app_build = app_build
+        _LOGGER.debug ('no prompt = {}'.format(self.no_prompt))
         self.session = self.create_session()
 
     @property

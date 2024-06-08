@@ -278,11 +278,7 @@ class Auth:
                 _LOGGER.error("Did not receive valid response from server.")
                 return False
         return True
-    
-    def check_key_required(self):
-        """Check if 2FA key is required."""
-        return(self.pin_required)
-    '''
+
     def check_key_required(self):
         """Check if 2FA key is required."""
         try:
@@ -291,7 +287,8 @@ class Auth:
         except (KeyError, TypeError):
             pass
         return False
-    '''
+
+
 class TokenRefreshFailed(Exception):
     """Class to throw failed refresh exception."""
 

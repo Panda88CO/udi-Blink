@@ -56,8 +56,6 @@ class Auth:
         self._app_build = app_build
         self.session = self.create_session()
 
-        self.pin_required = True
-
     @property
     def login_attributes(self):
         """Return a dictionary of login attributes."""
@@ -269,7 +267,6 @@ class Auth:
             try:
                 json_resp = response.json()
                 _LOGGER.debug('Json response : {}'.format(json_resp))
-                self.pin_required = json_resp['require_new_pin']
                 blink.available = json_resp["valid"]
                 if not json_resp["valid"]:
                     _LOGGER.error("%s", json_resp["message"])

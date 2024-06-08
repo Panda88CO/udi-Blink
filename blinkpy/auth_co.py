@@ -24,7 +24,7 @@ except ImportError:
 class Auth:
     """Class to handle login communication."""
 
-    def __init__(self, login_data=None, no_prompt=False):
+    def __init__(self, login_data=None, no_prompt=True):
         """
         Initialize auth handler.
 
@@ -111,9 +111,9 @@ class Auth:
         """Check login information and prompt if not available."""
         self.data["username"] = self.data.get("username", None)
         self.data["password"] = self.data.get("password", None)
-        _LOGGER.debug('self.no_prompt {}'.format(self.no_prompt))
-        if not self.no_prompt:
-            self.data = util.prompt_login_data(self.data)
+        #_LOGGER.debug('self.no_prompt {}'.format(self.no_prompt))
+        #if not self.no_prompt:
+        #    self.data = util.prompt_login_data(self.data)
 
         self.data = util.validate_login_data(self.data)
 

@@ -224,7 +224,7 @@ class BlinkSetup (udi_interface.Node):
 
     def stop(self):
         logging.info('Stop Called:')
-
+        self.blink.logout()
         #if 'self.node' in locals():
         #    time.sleep(2)
 

@@ -54,7 +54,8 @@ class blink_system(object):
         #login_data["uid"] = 'ThishIsATest123!@#'
         #login_data["device_id"] = 'ISYPG3x'
         login_ok = None
-        self.auth_obj = Auth(login_data, no_prompt=True)
+        no_prompt = True
+        self.auth_obj = Auth(login_data, no_prompt)
         logging.info('Auth: {}'.format(self.auth_obj ))
         login_ok = self.blink.start()
         logging.debug('PIN required ; {}'.format(self.blink.key_required))

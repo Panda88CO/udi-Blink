@@ -51,7 +51,6 @@ class Auth:
         self.login_response = None
         self.is_errored = False
         self.no_prompt = no_prompt
-        self.no_prompt = no_prompt
         self._agent = agent
         self._app_build = app_build
         self.session = self.create_session()
@@ -111,6 +110,7 @@ class Auth:
         """Check login information and prompt if not available."""
         self.data["username"] = self.data.get("username", None)
         self.data["password"] = self.data.get("password", None)
+        logging.debug('self.no_prompt {}'.format(self.no_prompt))
         if not self.no_prompt:
             self.data = util.prompt_login_data(self.data)
 

@@ -124,6 +124,7 @@ class BlinkSetup (udi_interface.Node):
             login_data['unique_id'] = self.gen_uid(16, True)
             self.customData['unique_id'] = login_data['unique_id']
             logging.debug('uid created: {}'.format(self.customData['unique_id']))
+        logging.debug('prepare_login_data {}'.format(login_data))
         return(login_data)
 
 
@@ -151,7 +152,7 @@ class BlinkSetup (udi_interface.Node):
                 exit()
             else:
                 login_data = self.prepare_login_data()
-                self.auth_key_updated = False
+                #self.auth_key_updated = False
                 auth_ok = self.blink.refresh_login(login_data)
                 logging.debug('Auth setp 1: auth finished {}'.format(auth_ok))
                 if not auth_ok:

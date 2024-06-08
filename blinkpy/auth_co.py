@@ -24,7 +24,7 @@ except ImportError:
 class Auth:
     """Class to handle login communication."""
 
-    def __init__(self, login_data=None, no_prompt=True):
+    def __init__(self, login_data, no_prompt=True):
         """
         Initialize auth handler.
 
@@ -37,10 +37,11 @@ class Auth:
         """
         agent=DEFAULT_USER_AGENT,
         app_build=DEFAULT_APP_BUILD,
-
+        _LOGGER.debug('self.login_data'.format(login_data))
         if login_data is None:
             login_data = {}
         self.data = login_data
+        _LOGGER.debug('self.data'.format(self.data))
         self.token = login_data.get("token", None)
         self.host = login_data.get("host", None)
         self.region_id = login_data.get("region_id", None)

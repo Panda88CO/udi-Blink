@@ -105,7 +105,9 @@ class Blink:
         """Perform full system setup."""
         try:
             self.auth.startup()
+
             self.setup_login_ids()
+            
             self.setup_urls()
             #self.get_homescreen()
         except (LoginError, TokenRefreshFailed, BlinkSetupError):

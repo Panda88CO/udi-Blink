@@ -110,7 +110,7 @@ class Auth:
         """Check login information and prompt if not available."""
         self.data["username"] = self.data.get("username", None)
         self.data["password"] = self.data.get("password", None)
-        logging.debug('self.no_prompt {}'.format(self.no_prompt))
+        _LOGGER.debug('self.no_prompt {}'.format(self.no_prompt))
         if not self.no_prompt:
             self.data = util.prompt_login_data(self.data)
 
@@ -166,6 +166,7 @@ class Auth:
 
     def startup(self):
         """Initialize tokens for communication."""
+        _LOGGER.debug('startup')
         self.validate_login()
         if None in self.login_attributes.values():
             self.refresh_token()

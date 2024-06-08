@@ -152,16 +152,20 @@ class BlinkSetup (udi_interface.Node):
             else:
                 login_data = self.prepare_login_data()
                 self.auth_key_updated = False
-                auth_ok = self.blink.auth1(login_data)
-                logging.debug('Auth setp 1: auth finished {}'.format(auth_ok))
-                if not auth_ok:
-                    logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 
-                    self.poly.Notices['PIN'] = 'Enter 2FA PIN (message) in AUTH_KEY field and save'
-                    self.auth_key_updated = False
-                    while not self.auth_key_updated:                      
-                        logging.debug('Waiting for new pin')
-                        time.sleep(5)
-                self.blink.auth_key(str(self.authKey))       
+                login_ok = self.blink.refresh_login(login_data)
+                logging.debug('Auth setp 1: auth finished {}'.format(login_ok))
+                if login_ok:
+                    #if 'pin_trusted' in self.customData.keys():
+                    #    if  self.customData['pin_trusted']:
+                    #        logging.info ('Pin already trusted - we can skip 2FA')
+
+                            logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 
+                            self.poly.Notices['PIN'] = 'Enter 2FA PIN (message) in AUTH_KEY field and save'
+                            self.auth_key_updated = False
+                            while not self.auth_key_updated:                      
+                                logging.debug('Waiting for new pin')
+                                time.sleep(5)
+                            self.blink.auth_key(str(self.authKey))       
                 self.blink.finalize_auth()
 
                 '''
@@ -224,7 +228,7 @@ class BlinkSetup (udi_interface.Node):
 
     def stop(self):
         logging.info('Stop Called:')
-
+        self.blink.logout()
         #if 'self.node' in locals():
         #    time.sleep(2)
 

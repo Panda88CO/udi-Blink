@@ -45,7 +45,7 @@ class blink_system(object):
         self.email_en = False
 
 
-    def auth1 (self, login_data):
+    def refresh_login (self, login_data):
         # Can set no_prompt when initializing auth handler
         #login_data = 
         #login_data['username'] = userName
@@ -53,36 +53,34 @@ class blink_system(object):
         #login_data["uid"] = data.get("uid", gen_uid(const.SIZE_UID, uid_format=True))
         #login_data["uid"] = 'ThishIsATest123!@#'
         #login_data["device_id"] = 'ISYPG3x'
-
-        auth_OK = Auth(login_data, no_prompt=True)
-        if auth_OK:
-            self.blink.auth = auth_OK
-            logging.info('Auth: {}'.format(auth_OK))
-            self.blink.start()
-            logging.debug('PIN required ; {}'.format(self.blink.key_required))
-            return(not self.blink.key_required)
-                #logging.info('Auth key required')
-                #return(True)
-            #else:
-                #return('No need')
-            '''
-            if self.blink.key_required:
-                logging.info('Auth key required')
-                if authenKey == None or authenKey == '':
-                  
-                    return('AuthKey Empty: {}'.format(authenKey))
-                else:
-                    auth.send_auth_key(self.blink, authenKey)
-            logging.debug('setup_post_verify')
-            time.sleep(10)
-            self.blink.setup_post_verify()
-            time.sleep(1)
-            self.blink.refresh()
-            time.sleep(3)
-            return('ok')
-        else:
-            return{'no login'}
-            '''
+        login_ok = None
+        self.auth_obj = Auth(login_data, no_prompt=True)
+        logging.info('Auth: {}'.format(self.auth_obj ))
+        login_ok = self.blink.start()
+        logging.debug('PIN required ; {}'.format(self.blink.key_required))
+        return(login_ok)
+            #logging.info('Auth key required')
+            #return(True)
+        #else:
+            #return('No need')
+    '''
+        if self.blink.key_required:
+            logging.info('Auth key required')
+            if authenKey == None or authenKey == '':
+                
+                return('AuthKey Empty: {}'.format(authenKey))
+            else:
+                auth.send_auth_key(self.blink, authenKey)
+        logging.debug('setup_post_verify')
+        time.sleep(10)
+        self.blink.setup_post_verify()
+        time.sleep(1)
+        self.blink.refresh()
+        time.sleep(3)
+        return('ok')
+    else:
+        return{'no login'}
+        '''
 
 
     def auth_key(self, authenKey = None):
@@ -113,6 +111,10 @@ class blink_system(object):
         time.sleep(3)
         return('ok')
     
+    def logout(self):
+        logging.info('logout')
+        self.blink.auth.logout(self.blink)
+
     def auth_old (self, userName, password, authenKey = None):
         # Can set no_prompt when initializing auth handler
         auth = Auth({"username":userName, "password":password}, no_prompt=True)

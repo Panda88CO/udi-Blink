@@ -141,7 +141,7 @@ class BlinkSetup (udi_interface.Node):
             #self.BLINK_setDriver('ST', 1)
             #time.sleep(5)
             logging.debug('nodeDefineDone {}'.format(self.nodeDefineDone))
-            loging.debug('credentilas : {} {}'.format(self.userName, self.password))
+            logging.debug('credentilas : {} {}'.format(self.userName, self.password))
 
 
 

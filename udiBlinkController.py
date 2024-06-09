@@ -41,7 +41,6 @@ class BlinkSetup (udi_interface.Node):
         super().__init__( polyglot, primary, address, name)  
         
         logging.setLevel(10)
-        self.blink = blink_system()
         self.nodeDefineDone = False
         self.handleParamsDone = False
         self.paramsProcessed = False
@@ -152,8 +151,14 @@ class BlinkSetup (udi_interface.Node):
                 exit()
             else:
                 login_data = self.prepare_login_data()
+<<<<<<< Updated upstream
                 #self.auth_key_updated = False
                 auth_ok = self.blink.refresh_login(login_data)
+=======
+
+                self.blink = blink_system(login_data)
+                auth_ok = self.blink.check_key_required()
+>>>>>>> Stashed changes
                 logging.debug('Auth setp 1: auth finished {}'.format(auth_ok))
                 if not auth_ok:
                     logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 

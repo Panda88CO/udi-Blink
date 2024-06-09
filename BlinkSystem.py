@@ -33,17 +33,20 @@ from email.mime.text import MIMEText
 
 
 class blink_system(object):
-    def __init__(self):
+    def __init__(self, login_data = None):
         #self.userName =userName
         #self.password = password
         #self.AUTHKey = AUTHKey
         self.cameraType = {'owl'}
 
         logging.info('Accessing Blink system')
-        self.blink = Blink()
+        self.login_data = login_data
+        self.blink = Blink(login_data, True)
         self.temp_unit = 'C'
         self.email_en = False
 
+    def check_key_required(self):
+        return(self.blink.auth.check_key_required())
 
     def refresh_login (self, login_data):
         # Can set no_prompt when initializing auth handler

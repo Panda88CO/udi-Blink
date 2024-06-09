@@ -45,6 +45,8 @@ class Blink:
 
     def __init__(
         self,
+        login_data = None,
+        no_prompt = True,
         refresh_rate=DEFAULT_REFRESH,
         motion_interval=DEFAULT_MOTION_INTERVAL,
         no_owls=False,
@@ -60,7 +62,7 @@ class Blink:
                                 from de-asserting too quickly.
         :param no_owls: Disable searching for owl entries (blink mini cameras only known entity).  Prevents an uneccessary API call if you don't have these in your network.
         """
-        self.auth = Auth()
+        self.auth = Auth(login_data, no_prompt)
         self.account_id = None
         self.client_id = None
         self.user_id = None

@@ -144,14 +144,12 @@ class BlinkSetup (udi_interface.Node):
             logging.debug('nodeDefineDone {}'.format(self.nodeDefineDone))
             logging.debug('credentilas : {} {}'.format(self.userName, self.password))
 
-
-
-
             if self.userName == None or self.userName == '' or self.password==None or self.password=='':
                 logging.error('username and password must be provided to start node server')
                 self.poly.Notices['un'] = 'username and password must be provided to start node server'
                 exit()
             else:
+                logging.debug('STARTING BLINK SYSTEM')
                 login_data = self.prepare_login_data()
                 logging.debug('Login Data : {}'.format(login_data))
                 self.blink = blink_system(login_data)

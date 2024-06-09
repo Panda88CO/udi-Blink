@@ -52,6 +52,7 @@ class BlinkSetup (udi_interface.Node):
         self.userName = None
         self.password = None
         self.authKey = None
+        self.temp_unit = 'C'
         self.sync_nodes_added = False
         self.email_info = { 'smtp':None,
                             'smtp_port':587,
@@ -62,7 +63,7 @@ class BlinkSetup (udi_interface.Node):
         }
         self.Parameters = Custom(polyglot, 'customParams')      
         self.Notices = Custom(polyglot, 'notices')
-        self.customData = Custom(polyglot, 'customdata')
+        #self.customData = Custom(polyglot, 'customdata')
 
         #self.n_queue = []
 
@@ -154,6 +155,7 @@ class BlinkSetup (udi_interface.Node):
                 login_data = self.prepare_login_data()
                 logging.debug('Login Data : {}'.format(login_data))
                 self.blink = blink_system(login_data)
+                self.blink.set_temp_unit(self.temp_unit) 
                 auth_ok = self.blink.check_key_required()
                 logging.debug('Auth setp 1: auth finished {}'.format(auth_ok))
                 if not auth_ok:
@@ -302,10 +304,10 @@ class BlinkSetup (udi_interface.Node):
                 if '' == temp or None == temp:
                     self.poly.Notices['TEMP_UNIT'] = 'Missing temp unit (C or F)'                    
                 else:
-                    if temp[0] == 'C':
-                        self.blink.set_temp_unit('C') 
-                    elif temp[0] == 'F' :
-                        self.blink.set_temp_unit('F') 
+                    if temp[0] == 'C' or temp[0] == 'F':
+                        self.temp_unit = temp[0]
+
+            
                 if 'TEMP_UNIT' in self.poly.Notices:
                         self.poly.Notices.delete('TEMP_UNIT')
 

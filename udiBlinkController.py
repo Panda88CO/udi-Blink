@@ -41,7 +41,7 @@ class BlinkSetup (udi_interface.Node):
         super().__init__( polyglot, primary, address, name)  
         
         logging.setLevel(10)
-        self.blink = {blink_system()}
+        #self.blink = blink_system()
         self.nodeDefineDone = False
         self.handleParamsDone = False
         self.paramsProcessed = False
@@ -152,7 +152,7 @@ class BlinkSetup (udi_interface.Node):
                 exit()
             else:
                 login_data = self.prepare_login_data()
-
+                logging.debug('Login Data : {}'.format(login_data))
                 self.blink = blink_system(login_data)
                 auth_ok = self.blink.check_key_required()
                 logging.debug('Auth setp 1: auth finished {}'.format(auth_ok))

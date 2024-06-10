@@ -37,13 +37,13 @@ from email.mime.text import MIMEText
 
 class blink_system(Blink):
     def __init__( self,
-        login_data,
+        login_data = None,
         no_prompt = True,
         refresh_rate=DEFAULT_REFRESH,
         motion_interval=DEFAULT_MOTION_INTERVAL,
         no_owls=False
     ):
-        super().__init__( login_data,
+        super().__init__( login_data = None,
             no_prompt = True,
             refresh_rate=DEFAULT_REFRESH,
             motion_interval=DEFAULT_MOTION_INTERVAL,

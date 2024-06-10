@@ -64,7 +64,7 @@ class BlinkSetup (udi_interface.Node):
         self.Parameters = Custom(polyglot, 'customParams')      
         self.Notices = Custom(polyglot, 'notices')
         self.customData = Custom(polyglot, 'customdata')
-        self.customData.load()
+        #self.customData.load()
         #self.n_queue = []
 
         self.poly.subscribe(self.poly.STOP, self.stop)

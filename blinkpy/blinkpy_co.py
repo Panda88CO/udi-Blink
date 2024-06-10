@@ -119,6 +119,7 @@ class Blink:
             
             self.setup_urls()
             #self.get_homescreen()
+            return True
         except (LoginError, TokenRefreshFailed, BlinkSetupError):
             _LOGGER.error("Cannot setup Blink platform.")
             self.available = False

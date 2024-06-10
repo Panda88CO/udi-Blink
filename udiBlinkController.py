@@ -120,7 +120,8 @@ class BlinkSetup (udi_interface.Node):
         logging.debug('custom data: {}'.format(self.customData))
         if 'unique_id' in self.customData.keys():
             logging.debug('uid found: {}'.format(self.customData['unique_id']))
-            login_data['unique_id'] = self.customData['unique_id']
+            if self.customData['unique_id']: 
+                login_data['unique_id'] = self.customData['unique_id']
         else:
             login_data['unique_id'] = self.gen_uid(16, True)
             self.customData['unique_id'] = login_data['unique_id']
@@ -155,7 +156,13 @@ class BlinkSetup (udi_interface.Node):
                 self.blink = blink_system()
                 self.blink.start_blink(login_data, True)
                 self.blink.set_temp_unit(self.temp_unit) 
-                self.blink.start()
+                #try:
+                ok = self.blink.start()
+                if not ok:
+                    self.customData['unique_id'] = None
+                    self.poly.Notices['LOGIN'] = 'Login Failed - Try again'
+                    exit()
+                #except LoginError as 
 
                 auth_needed = self.blink.auth.check_key_required()
                 logging.debug('Auth setp 1: auth finished  - 2FA required: {}'.format(auth_needed))
@@ -294,7 +301,7 @@ class BlinkSetup (udi_interface.Node):
         self.blink.set_temp_unit(self.temp_unit)
 
     def handleData (self, Data ):
-        logging.debug('handleParams')
+        logging.debug('handleData')
         try:
             self.customData.load(Data)
             logging.debug('handleData load - {}'.format(self.customData))

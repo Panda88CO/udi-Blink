@@ -63,7 +63,9 @@ class Blink:
         :param no_owls: Disable searching for owl entries (blink mini cameras only known entity).  Prevents an uneccessary API call if you don't have these in your network.
         """
         _LOGGER.debug('blinkpy_co starting : {}'.format(login_data))
-        self.auth = Auth(login_data, no_prompt)
+        #self.auth = Auth(login_data, True)
+        self.auth = None
+        self._login_data = login_data
         self.account_id = None
         self.client_id = None
         self.user_id = None
@@ -103,6 +105,10 @@ class Blink:
                 self.last_refresh = int(time.time())
             return True
         return False
+
+    def init_blink(self, login_data, no_prompt):
+        self.login_data = login_data
+        self.auth = Auth(login_data, no_prompt)
 
     def start(self):
         """Perform full system setup."""

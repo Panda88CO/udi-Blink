@@ -60,6 +60,10 @@ class blink_system(Blink):
         self.email_en = False
 
 
+    def start_blink(self, login_data, no_prompt):
+        #self.login_data = login_data
+        self.init_blink(login_data, no_prompt)
+
     def refresh_login (self, login_data):
         # Can set no_prompt when initializing auth handler
         #login_data = 

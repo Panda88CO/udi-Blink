@@ -104,15 +104,14 @@ class blink_system(Blink):
 
 
     def auth_key(self, authenKey = None):
-        logging.debug('auth_key')
-        if self.key_required:
-            logging.info('Auth key required')
-            if authenKey == None or authenKey == '':
-    
-                return('AuthKey Empty: {}'.format(authenKey))
-            else:
-                result = self.auth.send_auth_key(self, authenKey)
-                self.key_required = not result
+        #logging.debug('auth_key')
+        logging.info('Auth key required')
+        if authenKey == None or authenKey == '':
+            return('AuthKey Empty: {}'.format(authenKey))
+        else:
+            result = self.auth.send_auth_key(self, authenKey)
+            logging.debug( 'result:  {}'.format(result))
+            self.key_required = not result
         '''
         logging.debug('setup_post_verify')
         time.sleep(10)

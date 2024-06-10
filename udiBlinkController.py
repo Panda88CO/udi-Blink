@@ -157,16 +157,16 @@ class BlinkSetup (udi_interface.Node):
                 self.blink.set_temp_unit(self.temp_unit) 
                 self.blink.start()
 
-                auth_ok = self.blink.auth.check_key_required()
-                logging.debug('Auth setp 1: auth finished  - 2FA required: {}'.format(auth_ok))
-                if auth_ok:
+                auth_needed = self.blink.auth.check_key_required()
+                logging.debug('Auth setp 1: auth finished  - 2FA required: {}'.format(auth_needed))
+                if auth_needed:
                     logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 
                     self.poly.Notices['PIN'] = 'Enter 2FA PIN (message) in AUTH_KEY field and save'
                     self.auth_key_updated = False
                     while not self.auth_key_updated:                      
                         logging.debug('Waiting for new pin')
                         time.sleep(5)
-                self.blink.auth_key(str(self.authKey))       
+                    self.blink.auth_key(str(self.authKey))       
                 self.blink.finalize_auth()
 
                 '''

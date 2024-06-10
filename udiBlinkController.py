@@ -64,7 +64,7 @@ class BlinkSetup (udi_interface.Node):
         self.Parameters = Custom(polyglot, 'customParams')      
         self.Notices = Custom(polyglot, 'notices')
         self.customData = Custom(polyglot, 'customdata')
-
+        self.customData.load()
         #self.n_queue = []
 
         self.poly.subscribe(self.poly.STOP, self.stop)
@@ -118,6 +118,7 @@ class BlinkSetup (udi_interface.Node):
         login_data['password'] = self.password
         login_data['device_id'] = 'ISY_PG3x'
         login_data['reauth'] = True
+        logging.debug('cusotom data: {}'.format(self.customData))
         if 'unique_id' in self.customData.keys():
             logging.debug('uid found: {}'.format(self.customData['unique_id']))
             login_data['unique_id'] = self.customData['unique_id']

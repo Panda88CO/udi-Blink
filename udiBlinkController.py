@@ -37,11 +37,12 @@ VERSION = '0.4.6'
 class BlinkSetup (udi_interface.Node):
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done, gen_uid
 
-    def  __init__(self, polyglot, primary, address, name):
+    def  __init__(self, polyglot, primary, address, name, blink):
         super().__init__( polyglot, primary, address, name)  
         
         logging.setLevel(10)
         #self.blink = blink_system()
+        self.blink = blink
         self.nodeDefineDone = False
         self.handleParamsDone = False
         self.paramsProcessed = False
@@ -158,7 +159,7 @@ class BlinkSetup (udi_interface.Node):
                 logging.debug('STARTING BLINK SYSTEM')
                 login_data = self.prepare_login_data()
                 #logging.debug('Login Data : {}'.format(login_data))
-                self.blink = blink_system()
+                
                 self.blink.start_blink(login_data, True)
                 self.blink.set_temp_unit(self.temp_unit) 
                 #try:
@@ -447,8 +448,8 @@ if __name__ == "__main__":
                 logging.error('No network connection detected - check if network is down')
                 network_interface_ok = False
                 time.sleep(15)
-        
-        BlinkSetup(polyglot, 'setup', 'setup', 'BlinkSetup')
+        blink = blink_system()
+        BlinkSetup(polyglot, 'setup', 'setup', 'BlinkSetup', blink)
 
         # Just sit and wait for events
         polyglot.runForever()

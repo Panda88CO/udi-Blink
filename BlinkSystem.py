@@ -121,6 +121,7 @@ class blink_system(Blink):
         time.sleep(3)
         return('ok')
         '''
+        
     def finalize_auth(self):
         logging.debug('finalize_auth')
         time.sleep(1)
@@ -165,7 +166,7 @@ class blink_system(Blink):
         logging.debug('blink_refresh_data')
         self.refresh()
     '''
-    
+
     def set_temp_unit(self, temp_unit):
         self.temp_unit = temp_unit
 

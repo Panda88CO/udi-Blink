@@ -32,7 +32,7 @@ except ImportError:
 
 
  
-VERSION = '0.4.5'
+VERSION = '0.4.6'
 
 class BlinkSetup (udi_interface.Node):
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done, gen_uid
@@ -112,12 +112,13 @@ class BlinkSetup (udi_interface.Node):
 
 
     def prepare_login_data(self):
+        logging.debug('prepare_login_data')
         login_data = {}
         login_data['username'] = self.userName
         login_data['password'] = self.password
         login_data['device_id'] = 'ISY_PG3x'
         login_data['reauth'] = True
-        logging.debug('custom data: {}'.format(self.customData))
+        #logging.debug('custom data: {}'.format(self.customData))
         if 'unique_id' in self.customData.keys():
             logging.debug('uid found: {}'.format(self.customData['unique_id']))
             if self.customData['unique_id'] is not None: 
@@ -130,7 +131,7 @@ class BlinkSetup (udi_interface.Node):
             login_data['unique_id'] = self.gen_uid(16, True)
             self.customData['unique_id'] = login_data['unique_id']
             logging.debug('uid created: {}'.format(self.customData['unique_id']))
-        logging.debug('prepare_login_data {}'.format(login_data))
+        #logging.debug('prepare_login_data {}'.format(login_data))
         return(login_data)
 
 
@@ -156,7 +157,7 @@ class BlinkSetup (udi_interface.Node):
             else:
                 logging.debug('STARTING BLINK SYSTEM')
                 login_data = self.prepare_login_data()
-                logging.debug('Login Data : {}'.format(login_data))
+                #logging.debug('Login Data : {}'.format(login_data))
                 self.blink = blink_system()
                 self.blink.start_blink(login_data, True)
                 self.blink.set_temp_unit(self.temp_unit) 
@@ -177,7 +178,7 @@ class BlinkSetup (udi_interface.Node):
                     while not self.auth_key_updated:                      
                         logging.debug('Waiting for new pin')
                         time.sleep(5)
-                    self.blink.auth_key(str(self.authKey))       
+                    self.blink.auth_key(str(self.authKey))
                 self.blink.finalize_auth()
 
                 '''

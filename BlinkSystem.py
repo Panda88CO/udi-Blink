@@ -126,7 +126,7 @@ class blink_system(Blink):
         time.sleep(1)
         self.setup_post_verify()
         time.sleep(5)
-        self.refresh()
+        self.refresh_sys()
         time.sleep(3)
         return('ok')
     
@@ -301,7 +301,7 @@ class blink_system(Blink):
         else:
             return('default')
 
-    def refresh(self):
+    def refresh_sys(self):
         return(self.refresh())
 
     def get_camera_motion_enabled_info(self, camera_name):

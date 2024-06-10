@@ -126,7 +126,7 @@ class blink_system(Blink):
         time.sleep(1)
         self.setup_post_verify()
         time.sleep(5)
-        self.refresh_sys()
+        self.refresh()
         time.sleep(3)
         return('ok')
     
@@ -160,10 +160,12 @@ class blink_system(Blink):
             return{'no login'}
     '''
 
+    '''
     def refresh_data(self):
         logging.debug('blink_refresh_data')
         self.refresh()
-        
+    '''
+    
     def set_temp_unit(self, temp_unit):
         self.temp_unit = temp_unit
 

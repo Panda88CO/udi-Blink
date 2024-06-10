@@ -58,7 +58,7 @@ class blink_system(Blink):
         #self.blink = Blink(login_data, True)
         self.temp_unit = 'C'
         self.email_en = False
-
+        
 
     def refresh_login (self, login_data):
         # Can set no_prompt when initializing auth handler

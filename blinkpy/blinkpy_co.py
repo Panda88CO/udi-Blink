@@ -117,13 +117,13 @@ class Blink:
             self.available = False
             return False
 
-        self.key_required = self.auth.check_key_required()
-        if self.key_required:
-            if self.auth.no_prompt:
-                return True
-            self.setup_prompt_2fa()
+        #self.key_required = self.auth.check_key_required()
+        #if self.key_required:
+        #    if self.auth.no_prompt:
+        #        return True
+        #    self.setup_prompt_2fa()
         
-        return self.setup_post_verify()
+        #return self.setup_post_verify()
 
     def setup_prompt_2fa(self):
         """Prompt for 2FA."""

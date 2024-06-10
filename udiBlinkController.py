@@ -154,6 +154,8 @@ class BlinkSetup (udi_interface.Node):
                 logging.debug('Login Data : {}'.format(login_data))
                 self.blink = blink_system(login_data)
                 self.blink.set_temp_unit(self.temp_unit) 
+                self.blink.start()
+                
                 auth_ok = self.blink.auth.check_key_required()
                 logging.debug('Auth setp 1: auth finished {}'.format(auth_ok))
                 if not auth_ok:

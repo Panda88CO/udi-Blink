@@ -120,8 +120,12 @@ class BlinkSetup (udi_interface.Node):
         logging.debug('custom data: {}'.format(self.customData))
         if 'unique_id' in self.customData.keys():
             logging.debug('uid found: {}'.format(self.customData['unique_id']))
-            if self.customData['unique_id']: 
+            if self.customData['unique_id'] is not None: 
                 login_data['unique_id'] = self.customData['unique_id']
+            else:
+                login_data['unique_id'] = self.gen_uid(16, True)
+                self.customData['unique_id'] = login_data['unique_id']
+                logging.debug('uid created: {}'.format(self.customData['unique_id']))              
         else:
             login_data['unique_id'] = self.gen_uid(16, True)
             self.customData['unique_id'] = login_data['unique_id']
@@ -237,9 +241,10 @@ class BlinkSetup (udi_interface.Node):
     def stop(self):
         logging.info('Stop Called:')
         self.blink.logout()
+        #should I reset the unique_id when logging out - self.customData['unique_id'] = None
         #if 'self.node' in locals():
         #    time.sleep(2)
-
+        
         self.poly.stop()
         exit()
  

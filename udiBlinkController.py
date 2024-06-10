@@ -71,6 +71,7 @@ class BlinkSetup (udi_interface.Node):
         #self.poly.subscribe(self.poly.START, self.start, address)
         self.poly.subscribe(self.poly.LOGLEVEL, self.handleLevelChange)
         self.poly.subscribe(self.poly.CUSTOMPARAMS, self.handleParams)
+        self.poly.subscribe(self.poly.CUSTOMDATA, self.handleData)
         self.poly.subscribe(self.poly.POLL, self.systemPoll)
         #self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
         self.poly.subscribe(self.poly.CONFIGDONE, self.validate_params)
@@ -79,8 +80,6 @@ class BlinkSetup (udi_interface.Node):
 
         self.hb = 0
         self.userParam = ['TEMP_UNIT', 'USERNAME','PASSWORD', 'AUTH_KEY', 'SYNC_UNITS' ]
-        self.Parameters = Custom(self.poly, 'customparams')
-        self.Notices = Custom(self.poly, 'notices')
         logging.debug('BlinkSetup init')
         #logging.debug('self.address : ' + str(self.address))
         #logging.debug('self.name :' + str(self.name))   
@@ -118,7 +117,7 @@ class BlinkSetup (udi_interface.Node):
         login_data['password'] = self.password
         login_data['device_id'] = 'ISY_PG3x'
         login_data['reauth'] = True
-        logging.debug('cusotom data: {}'.format(self.customData))
+        logging.debug('custom data: {}'.format(self.customData))
         if 'unique_id' in self.customData.keys():
             logging.debug('uid found: {}'.format(self.customData['unique_id']))
             login_data['unique_id'] = self.customData['unique_id']
@@ -294,7 +293,17 @@ class BlinkSetup (udi_interface.Node):
             logging.error('Unknown unit string (first char must be C or F {}'.format(unitS))
         self.blink.set_temp_unit(self.temp_unit)
 
-
+    def handleData (self, Data ):
+        logging.debug('handleParams')
+        try:
+            self.customData.load(Data)
+            logging.debug('handleData load - {}'.format(self.customData))
+    
+            self.poly.Notices.clear()
+        except Exception as e:
+            logging.error ("Exceptions : {}".format(e))
+    
+    
     def handleParams (self, customParams ):
         logging.debug('handleParams')
         try:

@@ -124,7 +124,7 @@ class blink_system(Blink):
         '''
     def finalize_auth(self):
         logging.debug('finalize_auth')
-        time.sleep(2)
+        time.sleep(1)
         self.setup_post_verify()
         time.sleep(5)
         self.refresh()

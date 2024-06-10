@@ -158,8 +158,8 @@ class BlinkSetup (udi_interface.Node):
                 self.blink.start()
 
                 auth_ok = self.blink.auth.check_key_required()
-                logging.debug('Auth setp 1: auth finished {}'.format(auth_ok))
-                if not auth_ok:
+                logging.debug('Auth setp 1: auth finished  - 2FA required: {}'.format(auth_ok))
+                if auth_ok:
                     logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 
                     self.poly.Notices['PIN'] = 'Enter 2FA PIN (message) in AUTH_KEY field and save'
                     self.auth_key_updated = False

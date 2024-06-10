@@ -62,6 +62,7 @@ class Blink:
                                 from de-asserting too quickly.
         :param no_owls: Disable searching for owl entries (blink mini cameras only known entity).  Prevents an uneccessary API call if you don't have these in your network.
         """
+        _LOGGER.debug('blinkpy_co starting : {}'.format(login_data))
         self.auth = Auth(login_data, no_prompt)
         self.account_id = None
         self.client_id = None

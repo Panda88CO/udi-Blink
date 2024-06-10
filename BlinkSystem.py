@@ -37,13 +37,13 @@ from email.mime.text import MIMEText
 
 class blink_system(Blink):
     def __init__( self,
-        login_data = None,
+        login_data,
         no_prompt = True,
         refresh_rate=DEFAULT_REFRESH,
         motion_interval=DEFAULT_MOTION_INTERVAL,
         no_owls=False
     ):
-        super().__init__( login_data = None,
+        super().__init__( login_data,
             no_prompt = True,
             refresh_rate=DEFAULT_REFRESH,
             motion_interval=DEFAULT_MOTION_INTERVAL,
@@ -53,12 +53,12 @@ class blink_system(Blink):
         #self.AUTHKey = AUTHKey
         self.cameraType = {'owl'}
 
-        logging.info('Accessing Blink system')
+        logging.info('Accessing Blink system - login data :{}'.format(login_data))
         self.login_data = login_data
         #self.blink = Blink(login_data, True)
         self.temp_unit = 'C'
         self.email_en = False
-        
+
 
     def refresh_login (self, login_data):
         # Can set no_prompt when initializing auth handler

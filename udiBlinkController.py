@@ -226,8 +226,12 @@ class BlinkSetup (udi_interface.Node):
         self.blink.set_email_info(self.email_info)
         self.poly.updateProfile()
 
+
         nodes_in_db = self.poly.getNodesFromDb()
+        nodes = self.poly.getNodes()
+        logging.debug('NODES: {}'.format(nodes))
         logging.debug('Checking for nodes not used - node list {} - {} {}'.format(node_adr_list, len(nodes_in_db), nodes_in_db))
+
         for nde, node in enumerate(nodes_in_db):
             #node = self.nodes_in_db[nde]
             logging.debug('Scanning db for extra nodes : {}'.format(node))

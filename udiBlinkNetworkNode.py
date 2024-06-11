@@ -107,6 +107,7 @@ class blink_network_node(udi_interface.Node):
         logging.debug('_sync_list {}'.format(self._sync_list))        
 
 
+
     def stop(self):
         logging.info('stop {} - Cleaning up'.format(self.name))
 

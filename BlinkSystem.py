@@ -301,6 +301,9 @@ class blink_system(Blink):
             return('doorbell')
         elif temp == 'xt2':
             return('XT-2')
+        elif temp == 'sedona':
+            return('sedona')
+
         else:
             return('default')
 
@@ -390,7 +393,7 @@ class blink_system(Blink):
         timeInf = int(time.time())
         photo_string =  camera_name+dinfo.strftime("_%m_%d_%Y-%H_%M_%S")+'.jpg'
         logging.debug('snap_picture - {} - {}'.format(camera_name, photo_string ))
-        self.refresh()  
+        self.refresh()
         thumbnailStr = self.cameras[camera_name].thumbnail
         logging.debug('humbnailStr: {} {}'.format(type(thumbnailStr), thumbnailStr))
         tsIndex = int(thumbnailStr.find('ts='))

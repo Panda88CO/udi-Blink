@@ -42,6 +42,7 @@ class blink_camera_node(udi_interface.Node):
                             'outdoorOld1':4,
                             'XT-2':3,
                             'indoorOld':5,
+                            'sedona' : 6, #outdoor v4
                             'default':99,
                              }
 

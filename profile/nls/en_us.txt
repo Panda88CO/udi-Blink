@@ -54,6 +54,7 @@ cameratype-2 = Blink Outdoor
 cameratype-3 = XT-2
 cameratype-4 = Camera4
 cameratype-5 = Camera5
+cameratype-6 = Outdoor v4
 cameratype-99 = Unknown
 
 motionen-0 = Disabled

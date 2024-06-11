@@ -272,7 +272,7 @@ class BlinkSetup (udi_interface.Node):
                 #Keep token current
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
                 try:
-                    self.blink.refresh_data()
+                    self.blink.refresh()
                     nodes = self.poly.getNodes()
                     for nde in nodes:
                         if nde != 'setup':   # but not the setup node

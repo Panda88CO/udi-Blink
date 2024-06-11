@@ -42,7 +42,7 @@ class blink_sync_node(udi_interface.Node):
         #self.Parameters = Custom(polyglot, 'customparams')
         # subscribe to the events we want
         #polyglot.subscribe(polyglot.CUSTOMPARAMS, self.parameterHandler)
-        #polyglot.subscribe(polyglot.POLL, self.poll)
+        polyglot.subscribe(polyglot.POLL, self.poll)
         self.poly.subscribe(self.poly.START, self.start, self.address)
         self.poly.subscribe(self.poly.STOP, self.stop)
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
@@ -97,11 +97,27 @@ class blink_sync_node(udi_interface.Node):
   
     def ISYupdate(self, command=None):
         logging.info('Sync ISYupdate')
-        self.blink.refresh()
-        
+        self.blink.refresh()        
         self.updateISYdrivers()
 
-        
+
+    def poll(self, polltype):
+        if self.nodeDefineDone:
+            logging.info('System Poll executing: {}'.format(polltype))
+
+            if 'longPoll' in polltype:
+                #Keep token current
+                #self.node.setDriver('GV0', self.temp_unit, True, True)
+                try:
+                    self.updateISYdriver()
+                except Exception as e:
+                    logging.debug('Exeption occcured : {}'.format(e))
+   
+                
+            if 'shortPoll' in polltype:
+                logging.info('Currently no function for shortPoll')
+        else:
+            logging.info('System Poll - Waiting for all nodes to be added')        
 
 
     id = 'blinksync'

@@ -229,10 +229,6 @@ class BlinkSetup (udi_interface.Node):
 
         nodes_in_db = self.poly.getNodesFromDb()
         nodes = self.poly.getNodes()
-        logging.debug('NODES: {}'.format(nodes))
-        for nde, node_info in nodes.items():
-            logging.debug('node info :{} - {}'.format(nde, node_info.keys()))
-
         
         logging.debug('Checking for nodes not used - node list {} - {} {}'.format(node_adr_list, len(nodes_in_db), nodes_in_db))
 

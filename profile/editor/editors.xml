@@ -1,6 +1,6 @@
 <editors> 
   <editor id = "online" > 
-     <range  uom="25" subset="0-1,99" nls="online"  />
+     <range  uom="25" subset="0-1,98-99" nls="online"  />
 </editor>
   <editor id = "node" > 
      <range  uom="25" subset="0-1,99" nls="online"  />
@@ -11,6 +11,9 @@
   <editor id = "doarm" > 
      <range  uom="25" subset="0-1" nls="doarm" />
 </editor>
+  <editor id = "domotion" > 
+     <range  uom="25" subset="0-1" nls="domotion" />
+</editor>
   <editor id = "enable" > 
      <range  uom="25" subset="0-1" nls="enable" />
 </editor>
@@ -20,10 +23,9 @@
   <editor id = "battery" > 
      <range  uom="25" subset="0-2,10,99" nls="battery" />
 </editor>
-  <editor id = "batteryv" > 
-     <range  uom="72" min=" 0" max="500"  prec="0" />
-     <range  uom="25" subset="99" nls="batteryv" />
-
+  <editor id = "bat_volt" > 
+    <range  uom="25" subset="98,99" nls="bat_voltage" />
+    <range  uom="72" min=" 0" max="500"  prec="0" />
 </editor>
   <editor id = "cameratype" > 
      <range  uom="25" subset="0-5,99" nls="cameratype" />
@@ -37,7 +39,6 @@
   <editor id = "temp" > 
         <range uom="4" min="-40" max="105"  prec="1"/>
         <range uom="17" min="-40" max="221"  prec="1"/>
-        <range uom="26" min="233" max="378"  prec="1"/>
         <range uom="25" subset="0,99"  nls="error"/>
   </editor>
 

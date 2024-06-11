@@ -1,41 +1,53 @@
 ND-setup-NAME = Blink Camera Info
-ND-contsetuproller-ICON = Input
+ND-contsetuproller-ICON = Alarm
 CMD-nlssetup-UPDATE-NAME = Update System Data
 ST-nlssetup-ST-NAME = Node Status
 node-0 = Down
 node-1 = Up
 node-99 = Unknown
-online-0 = off-line
-online-1 = on-line
+online-0 = offline
+online-1 = online
+online-98 = No support
 online-99 = Unknown
 
-ND-blinksync-NAME = Sync Unit
-ND-blinksync-ICON = Input
-
-ST-nlsblinksync-GV1-NAME = On-Line
-ST-nlsblinksync-GV2-NAME = Arm Status
+ND-blinknetwork-NAME = Network
+ND-blinknetwork-ICON = GenericCtl
+ST-nlsblinknetwork-GV0-NAME = Arm Status
 armed-0 = Disarmed
 armed-1 = Armed
 armed-99 = Unknown
+CMD-nlsblinknetwork-UPDATE-NAME = Update Network
+CMD-nlsblinknetwork-ARMALL-NAME = Set Arming
+
+ND-blinksync-NAME = Sync Unit
+ND-blinksync-ICON = GenericCtl
+ST-nlsblinksync-ST-NAME = Connected
 CMD-nlsblinksync-UPDATE-NAME = Update SyncUnit
-CMD-nlsblinksync-QUERY-NAME = QUERY
-CMD-nlsblinksync-ARMALL-NAME = Set Arming
+
 doarm-0 = Disarm
 doarm-1 = Arm
 
 ND-blinkcamera-NAME = Blink Camera
-ND-blinkcamera-ICON = Input
-ST-nlsblinkcamera-GV0-NAME = Arm Status
+ND-blinkcamera-ICON = MotionSensor
+ST-nlsblinkcamera-ST-NAME = Connected
+ST-nlsblinkcamera-GV0-NAME = Motion Detection Status
 ST-nlsblinkcamera-GV1-NAME = Battery Status
+#ST-nlsblinkcamera-GV2-NAME = Battery Level Indicator
+ST-nlsblinkcamera-GV3-NAME = CameraType
+ST-nlsblinkcamera-GV4-NAME = Motion Detection
+ST-nlsblinkcamera-GV5-NAME = Motion Detected
+ST-nlsblinkcamera-GV6-NAME = Temperature
+
 battery-0 = OK
 battery-1 = Not OK - TBD
 battery-2 = TBD
-battery-10 = No Battery
+battery-10 = USB powered
 battery-99 = Unknown
-ST-nlsblinkcamera-GV2-NAME = Battery Level Indicator
-batteryv-99 = Powered
 
-ST-nlsblinkcamera-GV3-NAME = CameraType
+bat_voltage-98 = USB Powered
+bat_voltage-99 = Unknown
+
+
 cameratype-0 = Mini
 cameratype-1 = DoorBell
 cameratype-2 = Blink Outdoor
@@ -43,17 +55,20 @@ cameratype-3 = XT-2
 cameratype-4 = Camera4
 cameratype-5 = Camera5
 cameratype-99 = Unknown
-ST-nlsblinkcamera-GV4-NAME = Motion Detection
+
 motionen-0 = Disabled
 motionen-1 = Enabled
 motionen-99 = Uknown
-ST-nlsblinkcamera-GV5-NAME = Motion Detected
+
 motiondetc-0 = No Motion
 motiondetc-1 = Motion Detected
 motiondetc-99 = Unknown
 
-ST-nlsblinkcamera-GV6-NAME = Temperature
+domotion-0 = Disabled
+domotion-1 = Enabled
+
 error-0 = No Support
+error-98 = N0 support
 error-99 = Unknown
 
 ST-nlsblinkcamera-GV7-NAME = Record
@@ -67,7 +82,7 @@ emailpic-1 = Email Enabled
 
 CMD-nlsblinkcamera-UPDATE-NAME = Update Camera
 CMD-nlsblinkcamera-QUERY-NAME = QUERY
-CMD-nlsblinkcamera-ARM-NAME = Set Arming
+CMD-nlsblinkcamera-ARM-NAME = Set Motion Detection
 CMD-nlsblinkcamera-MOTION-NAME = Set Motion Detection
 CMD-nlsblinkcamera-SNAPPIC-NAME = Take Picture
 CMD-nlsblinkcamera-SNAPVIDEO-NAME = Take Video

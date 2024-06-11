@@ -97,7 +97,7 @@ class blink_sync_node(udi_interface.Node):
   
     def ISYupdate(self, command=None):
         logging.info('Sync ISYupdate')
-        self.blink.refresh_data()
+        self.blink.refresh()
         
         self.updateISYdrivers()
 

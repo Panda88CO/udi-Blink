@@ -131,7 +131,7 @@ class blink_camera_node(udi_interface.Node):
     
     def ISYupdate (self, command = None):
         logging.info(' ISYupdate: {}'.format(self.camera.name ))
-        self.blink.refresh_data()
+        self.blink.refresh()
         logging.debug('Camera {} data: {}'.format(self.camera.name,  self.blink.get_camera_data(self.camera.name )))
         self.updateISYdrivers()
     
@@ -150,7 +150,7 @@ class blink_camera_node(udi_interface.Node):
         #logging.debug('temp = {}'.format(temp))
         temp = self.blink.set_camera_motion_detect(self.camera.name,  motion_enable )
         logging.debug('blink.set_camera_motion_detect({}, {}):{}'.format(self.camera.name,  motion_enable, self.blink.get_camera_data(self.camera.name ) ))
-        self.blink.refresh_data()
+        self.blink.refresh()
         time.sleep(3)
         self.updateISYdrivers()
 
@@ -168,7 +168,7 @@ class blink_camera_node(udi_interface.Node):
             else:
                 self.node.reportCmd('DOF')
             self.BLINK_setDriver('GV0', value)
-            self.blink.refresh_data()
+            self.blink.refresh()
             time.sleep(3)
             self.updateISYdrivers()
         except Exception as e:

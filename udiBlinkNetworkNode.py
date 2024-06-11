@@ -122,7 +122,7 @@ class blink_network_node(udi_interface.Node):
   
     def ISYupdate(self, command=None):
         logging.info('Sync ISYupdate')
-        self.blink.refresh_data()
+        self.blink.refresh()
         
         self.updateISYdrivers()
 
@@ -149,7 +149,7 @@ class blink_network_node(udi_interface.Node):
         #        self.blink.set_camera_arm(camera, arm_enable)
         logging.debug('_camera_list {}'.format(self._camera_list))
         time.sleep(3)
-        self.blink.refresh_data()
+        self.blink.refresh()
         self.updateISYdrivers()
         nodes = self.poly.getNodes()
         for nde in self._camera_list:

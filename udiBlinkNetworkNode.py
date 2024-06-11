@@ -116,7 +116,7 @@ class blink_network_node(udi_interface.Node):
             logging.debug('Scanning db for extra nodes : {}'.format(node))
             if node['primaryNode'] == self.primary:                
                 logging.debug('Checking network nodes: {} {}'.format(node['name'], node))
-                if node['address'] not in self._camera_list and node['address']  not in self._sync_list:
+                if node['address'] not in self._camera_list and node['address'] not in self._sync_list and node['address'] != self.primary:
                     self.poly.delNode(node['address'])
 
     def stop(self):

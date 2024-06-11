@@ -230,6 +230,9 @@ class BlinkSetup (udi_interface.Node):
         nodes_in_db = self.poly.getNodesFromDb()
         nodes = self.poly.getNodes()
         logging.debug('NODES: {}'.format(nodes))
+        for nde, node_info in nodes.items():
+            logging.debug('node info :{} - {}'.format(nde, node_info))
+
         logging.debug('Checking for nodes not used - node list {} - {} {}'.format(node_adr_list, len(nodes_in_db), nodes_in_db))
 
         for nde, node in enumerate(nodes_in_db):
@@ -237,9 +240,6 @@ class BlinkSetup (udi_interface.Node):
             logging.debug('Scanning db for extra nodes : {}'.format(node))
             if node['primaryNode'] not in node_adr_list:
                 logging.debug('Removing primary node : {} {}'.format(node['name'], node))
-                self.poly.delNode(node['address'])
-            elif node['address'] not in node_adr_list:
-                logging.debug('Removing sub node : {} {}'.format(node['name'], node))
                 self.poly.delNode(node['address'])
 
 

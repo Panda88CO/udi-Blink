@@ -225,9 +225,10 @@ class BlinkSetup (udi_interface.Node):
         #logging.debug('email_info  : {}'.format(self.email_info))
         self.blink.set_email_info(self.email_info)
         self.poly.updateProfile()
-        
-        logging.debug('Checking for nodes not used - node list {} - {} {}'.format(node_adr_list, len(self.nodes_in_db), self.nodes_in_db))
-        for nde, node in enumerate(self.nodes_in_db):
+
+        nodes_in_db = self.poly.getNodesFromDb()
+        logging.debug('Checking for nodes not used - node list {} - {} {}'.format(node_adr_list, len(nodes_in_db), nodes_in_db))
+        for nde, node in enumerate(nodes_in_db):
             #node = self.nodes_in_db[nde]
             logging.debug('Scanning db for extra nodes : {}'.format(node))
             if node['primaryNode'] not in node_adr_list:

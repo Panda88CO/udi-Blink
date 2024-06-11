@@ -16,7 +16,7 @@ ST-nlsblinknetwork-GV0-NAME = Arm Status
 armed-0 = Disarmed
 armed-1 = Armed
 armed-99 = Unknown
-CMD-nlsblinknetwork-UPDATE-NAME = Update SyncUnit
+CMD-nlsblinknetwork-UPDATE-NAME = Update Network
 CMD-nlsblinknetwork-ARMALL-NAME = Set Arming
 
 ND-blinksync-NAME = Sync Unit

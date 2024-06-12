@@ -201,10 +201,11 @@ class BlinkSetup (udi_interface.Node):
         logging.info('Adding Blink network nodes:')
         #node_adr_list = [self.id]
         node_adr_list = []
-        network_node_list = self.blink.get_network_list()
+        network_nodes = self.blink.get_network_dict()
+        logging.debug('Netwok node list : {}'.format(network_nodes))
         self.network_names = []
-        for indx, network in enumerate (network_node_list):
-            name = network['name'].upper()
+        for network in network_nodes:
+            name = network['name']
             if name in self.Parameters:
                 if self.Parameters[name].upper() == "ENABLED":
                     logging.debug('Adding network {}'.format(name)) 

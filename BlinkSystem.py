@@ -171,9 +171,11 @@ class blink_system(Blink):
         self.temp_unit = temp_unit
 
 
-    def get_network_list(self):
+    def get_network_dict(self):
         logging.debug('get_network_list')
-        return( self.homescreen['networks'])
+
+        #return( self.homescreen['networks'])
+        return(self.networks)
 
 
 

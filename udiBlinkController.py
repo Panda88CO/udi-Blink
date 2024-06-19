@@ -225,8 +225,7 @@ class BlinkSetup (udi_interface.Node):
         #logging.debug('email_info  : {}'.format(self.email_info))
         self.blink.set_email_info(self.email_info)
         self.poly.updateProfile()
-
-
+        logging.debug('Parameters defined :{}'.format(self.Parameters))
         nodes_in_db = self.poly.getNodesFromDb()
         nodes = self.poly.getNodes()
         

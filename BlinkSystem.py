@@ -175,7 +175,7 @@ class blink_system:
         """Start Blink (login/refresh)"""
         try:
             await self._blink.start()
-            return 'OK
+            return 'OK'
         except BlinkTwoFARequiredError:
             logging.info("Two-Factor Authentication required")
             #await self._blink.prompt_2fa()

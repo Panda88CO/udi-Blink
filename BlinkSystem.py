@@ -216,7 +216,7 @@ class blink_system:
         if not authenKey:
             return f'AuthKey Empty: {authenKey}'
         
-        result = await self._blink.auth.send_auth_key(self._blink, authenKey)
+        result = await self._blink.send_2fa_code(authenKey)
         logging.debug(f'Auth key result: {result}')
         return result
 

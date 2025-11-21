@@ -27,7 +27,7 @@ from concurrent.futures import Future
 
 # Import the new async blinkpy
 from blinkpy.blinkpy import Blink
-from blinkpy.auth import Auth
+from blinkpy.auth import Auth, BlinkTwoFARequiredError
 from blinkpy.helpers.constants import (
     DEFAULT_MOTION_INTERVAL,
     DEFAULT_REFRESH,
@@ -176,6 +176,10 @@ class blink_system:
         try:
             await self._blink.start()
             return True
+        except BlinkTwoFARequiredError:
+            logging.info("Two-Factor Authentication required")
+            #await self._blink.prompt_2fa()
+            
         except Exception as e:
             logging.error(f"Start error: {e}")
             return False

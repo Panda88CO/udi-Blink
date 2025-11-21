@@ -174,17 +174,16 @@ class blink_system:
     @async_to_sync
     async def start(self):
         """Start Blink (login/refresh)"""
-        self._key_required = False
         try:
             await self._blink.start()
-            return True
+            return 'OK'
         except BlinkTwoFARequiredError:
             logging.info("Two-Factor Authentication required")
-            self._key_required = True
-            return True
+            #await self._blink.prompt_2fa()
+            return '2FA_REQUIRED'
         except Exception as e:
             logging.error(f"Start error: {e}")
-            return False
+            return 'ERROR'
 
     @property
     def auth(self):
@@ -192,7 +191,9 @@ class blink_system:
 
     @property
     def key_required(self):
-        return self._key_required
+        if self._blink and self._blink.auth:
+            return self._blink.auth.check_key_required()
+        return False
         
     @property
     def cameras(self):
@@ -340,7 +341,7 @@ class blink_system:
     @async_to_sync
     async def set_camera_arm(self, camera_name, armed=True):
         if camera_name in self.cameras:
-            self.cameras[camera_name].arm = armed
+            # self.cameras[camera_name].arm = armed # Property is read-only
             await self.cameras[camera_name].async_arm(armed)
             return True
         return False
@@ -363,7 +364,8 @@ class blink_system:
     @async_to_sync
     async def set_camera_motion_detect(self, camera_name, enabled=True):
         if camera_name in self.cameras:
-            return await self.cameras[camera_name].async_set_motion_detect(enabled)
+            # async_set_motion_detect is deprecated/removed, use async_arm
+            return await self.cameras[camera_name].async_arm(enabled)
         return False
 
     def get_camera_motion_detected_info(self, camera_name):
@@ -381,7 +383,12 @@ class blink_system:
 
     def get_camera_status(self, camera_name):
         if camera_name in self.cameras:
-            return self.cameras[camera_name].status # or online_status?
+            camera = self.cameras[camera_name]
+            # New blinkpy Camera object doesn't have status/online attribute
+            # Use sync module status as proxy
+            if camera.sync and hasattr(camera.sync, 'online'):
+                return 'online' if camera.sync.online else 'offline'
+            return 'online' # Default assumption
         return None
 
     @async_to_sync

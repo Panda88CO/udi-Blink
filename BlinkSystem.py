@@ -240,6 +240,9 @@ class blink_system:
     def set_temp_unit(self, temp_unit):
         self.temp_unit = temp_unit
 
+    def get_temp_unit(self):
+        return self.temp_unit
+
     @async_to_sync
     async def refresh(self):
         if self._blink:

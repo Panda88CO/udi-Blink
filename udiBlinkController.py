@@ -162,15 +162,15 @@ class BlinkSetup (udi_interface.Node):
                 self.blink.start_blink(login_data, True)
                 self.blink.set_temp_unit(self.temp_unit) 
                 #try:
-                res = self.blink.start()
-                if res in ['ERROR']:
+                ok = self.blink.start()
+                if not ok:
                     self.customData['unique_id'] = None
                     self.poly.Notices['LOGIN'] = 'Login Failed - Try again'
                     exit()
                 #except LoginError as 
-                #auth_needed = self.blink.key_required
-                logging.debug('Auth setp 1: auth finished  - 2FA required: {}'.format(res in ['2FA_REQUIRED']))
-                if res:
+                auth_needed = self.blink.key_required
+                logging.debug('Auth setp 1: auth finished  - 2FA required: {}'.format(auth_needed))
+                if auth_needed:
                     logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 
                     self.poly.Notices['PIN'] = 'Enter 2FA PIN (message) in AUTH_KEY field and save'
                     self.auth_key_updated = False

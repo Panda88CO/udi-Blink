@@ -44,13 +44,17 @@ def async_to_sync(func):
     def wrapper(self, *args, **kwargs):
         if self._loop and self._loop.is_running():
             coro = func(self, *args, **kwargs)
+            logging.debug(f"async_to_sync: Calling {func.__name__}, got {type(coro)}")
             if not asyncio.iscoroutine(coro):
                 logging.error(f'async_to_sync: Not a coroutine object! Got type={type(coro)}')
                 return coro # Should not happen if used correctly
             
-            future = asyncio.run_coroutine_threadsafe(coro, self._loop)
             try:
+                future = asyncio.run_coroutine_threadsafe(coro, self._loop)
                 return future.result(timeout=30)
+            except TypeError as e:
+                logging.error(f"TypeError in run_coroutine_threadsafe for {func.__name__}: {e}")
+                raise e
             except Exception as e:
                 logging.error(f"Error executing async method {func.__name__}: {e}")
                 return None

@@ -111,8 +111,8 @@ print(f"   ✓ {len(st_labels)} ST labels\n")
 # ============================================================================
 # [3/4] Scan udiYo*.py files with udi_interface.Node classes
 # ============================================================================
-print("[3/4] Scanning udiYo*.py files with udi_interface.Node classes...\n")
-udiyo_files = sorted([f for f in os.listdir('.') if f.startswith('udiYo') and f.endswith('.py')])
+print("[3/4] Scanning udi*.py files with udi_interface.Node classes...\n")
+udiyo_files = sorted([f for f in os.listdir('.') if f.startswith('udi') and f.endswith('.py')])
 
 issues = defaultdict(list)
 skipped = []

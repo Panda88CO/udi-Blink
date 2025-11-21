@@ -106,12 +106,12 @@ class blink_system:
         """Stop the event loop and cleanup"""
         if self._loop and self._loop.is_running():
             async def cleanup():
-                if self._blink and hasattr(self._blink, 'session') and self._blink.session:
-                    if not self._blink.session.closed:
+                if hasattr(self, '_session') and self._session:
+                    if not self._session.closed:
                         logging.info("Closing aiohttp session")
-                        await self._blink.session.close()
+                        await self._session.close()
                         # Wait for closure
-                        while not self._blink.session.closed:
+                        while not self._session.closed:
                             await asyncio.sleep(0.1)
             
             future = asyncio.run_coroutine_threadsafe(cleanup(), self._loop)
@@ -129,9 +129,9 @@ class blink_system:
         """Create Blink instance and session in the event loop"""
         import aiohttp
         connector = aiohttp.TCPConnector(force_close=True)
-        session = aiohttp.ClientSession(connector=connector)
+        self._session = aiohttp.ClientSession(connector=connector)
         self._blink = Blink(
-            session=session,
+            session=self._session,
             refresh_rate=self._refresh_rate,
             motion_interval=self._motion_interval,
             no_owls=self._no_owls
@@ -149,7 +149,7 @@ class blink_system:
         }
         
         # Create Auth with data and session
-        self._blink.auth = Auth(auth_data, no_prompt=no_prompt, session=self._blink.session)
+        self._blink.auth = Auth(auth_data, no_prompt=no_prompt, session=self._session)
         
         if "device_id" in login_data:
             self._blink.auth.device_id = login_data["device_id"]

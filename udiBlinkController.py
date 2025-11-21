@@ -192,6 +192,7 @@ class BlinkSetup (udi_interface.Node):
                 else:
                     logging.info('Accessing Blink completed ')
                 '''
+                self.poly.Notices.clear()
                 #self.add_sync_nodes()
                 self.add_network_nodes()
         except Exception as e:
@@ -205,9 +206,11 @@ class BlinkSetup (udi_interface.Node):
         network_node_list = self.blink.get_network_list()
         self.network_names = []
         logging.debug(f'Network node list: {network_node_list}')
-
+        logging.debug(f'Parameter list: {self.Parameters}')
         for indx, network in enumerate (network_node_list):
+            logging.debug('Processing network {} : {}'.format(network))
             name = network['name'].upper()
+            logging.debug('Processing network {} : {}'.format(name, network))
             if name in self.Parameters:
                 if self.Parameters[name].upper() == "ENABLED":
                     logging.debug('Adding network {}'.format(name)) 
@@ -220,9 +223,9 @@ class BlinkSetup (udi_interface.Node):
                         logging.error('Failed to create network node for {} '.format(node_name))
             else:
                 self.Parameters[name] = 'ENABLED'
-                self.Parameters.load({name:'ENABLED'}, True)
+                #self.Parameters.load({name:'ENABLED'}, True)
                 self.poly.Notices[name] = 'New Network detected '+str(name)+' - please select ENABLED or DISABLED - then restart'         
-
+        logging.debug(f'Parameter list after loop: {self.Parameters}')
         while not self.paramsProcessed:
             time.sleep(5)
             logging.info('waitng to process all parameters')

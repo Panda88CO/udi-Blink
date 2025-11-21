@@ -41,7 +41,7 @@ class BlinkSetup (udi_interface.Node):
         super().__init__( polyglot, primary, address, name)  
         
         logging.setLevel(10)
-        #self.blink = blink_system()
+        self.blink = blink_system()
         self.nodeDefineDone = False
         self.handleParamsDone = False
         self.paramsProcessed = False
@@ -158,7 +158,7 @@ class BlinkSetup (udi_interface.Node):
                 logging.debug('STARTING BLINK SYSTEM')
                 login_data = self.prepare_login_data()
                 #logging.debug('Login Data : {}'.format(login_data))
-                self.blink = blink_system()
+                #self.blink = blink_system()
                 self.blink.start_blink(login_data, True)
                 self.blink.set_temp_unit(self.temp_unit) 
                 #try:
@@ -169,7 +169,7 @@ class BlinkSetup (udi_interface.Node):
                     exit()
                 #except LoginError as 
 
-                auth_needed = self.blink.auth.check_key_required()
+                auth_needed = self.blink.key_required
                 logging.debug('Auth setp 1: auth finished  - 2FA required: {}'.format(auth_needed))
                 if auth_needed:
                     logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 

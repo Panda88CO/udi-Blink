@@ -212,7 +212,7 @@ class BlinkSetup (udi_interface.Node):
             name = network['name'].upper()
             logging.debug('Processing network {} : {}'.format(name, network))
             if name in self.Parameters:
-                if self.Parameters[name].upper() == "ENABLED":
+                if self.Parameters[name][0].upper() == "E":
                     logging.debug('Adding network {}'.format(name)) 
                     self.network_names.append(network['name'])
                     node_address = self.poly.getValidAddress(str(network['id']))
@@ -223,7 +223,6 @@ class BlinkSetup (udi_interface.Node):
                         logging.error('Failed to create network node for {} '.format(node_name))
             else:
                 self.Parameters[name] = 'ENABLED'
-                #self.Parameters.load({name:'ENABLED'}, True)
                 self.poly.Notices[name] = 'New Network detected '+str(name)+' - please select ENABLED or DISABLED - then restart'         
         logging.debug(f'Parameter list after loop: {self.Parameters}')
         while not self.paramsProcessed:

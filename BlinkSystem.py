@@ -44,23 +44,13 @@ def async_to_sync(func):
     def wrapper(self, *args, **kwargs):
         if self._loop and self._loop.is_running():
             coro = func(self, *args, **kwargs)
-            logging.debug(f"async_to_sync: Calling {func.__name__}, got {type(coro)}")
-            if not asyncio.iscoroutine(coro):
-                logging.error(f'async_to_sync: Not a coroutine object! Got type={type(coro)}')
-                return coro # Should not happen if used correctly
-            
             try:
                 future = asyncio.run_coroutine_threadsafe(coro, self._loop)
                 return future.result(timeout=30)
-            except TypeError as e:
-                logging.error(f"TypeError in run_coroutine_threadsafe for {func.__name__}: {e}")
-                raise e
             except Exception as e:
                 logging.error(f"Error executing async method {func.__name__}: {e}")
                 return None
-        else:
-            logging.error("Event loop not running")
-            return None
+        return None
     return wrapper
 
 class blink_system:
@@ -146,16 +136,21 @@ class blink_system:
             motion_interval=self._motion_interval,
             no_owls=self._no_owls
         )
-        self._blink.auth = Auth()
+        # Auth will be set up in _setup_auth
         return True
 
     @async_to_sync
-    async def _setup_auth(self, login_data):
+    async def _setup_auth(self, login_data, no_prompt):
         if not self._blink: return False
-        self._blink.auth.login_attributes = {
+        
+        auth_data = {
             "username": login_data.get("username"),
             "password": login_data.get("password"),
         }
+        
+        # Create Auth with data and session
+        self._blink.auth = Auth(auth_data, no_prompt=no_prompt, session=self._blink.session)
+        
         if "device_id" in login_data:
             self._blink.auth.device_id = login_data["device_id"]
         if "unique_id" in login_data:
@@ -173,7 +168,7 @@ class blink_system:
         
         # Setup auth
         if login_data:
-            self._setup_auth(login_data)
+            self._setup_auth(login_data, no_prompt)
 
     @async_to_sync
     async def start(self):

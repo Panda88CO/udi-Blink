@@ -25,10 +25,8 @@ except ImportError:
 class blink_camera_node(udi_interface.Node):
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, connection2isy, bat_V2isy, node_queue, wait_for_node_done
 
-
-    def __init__(self, polyglot, primary, address, name, camera, blinkSys):
-        id = 'blinkcameraC' 
-        drivers= [  {'driver': 'ST' , 'value':0,  'uom':25},
+    id = 'blinkcameraC' 
+    drivers= [  {'driver': 'ST' , 'value':0,  'uom':25},
                 {'driver': 'GV0', 'value':99, 'uom':25},  #Arm status
                 {'driver': 'GV1', 'value':99, 'uom':25}, # Battery
                 #{'driver': 'GV2', 'value':99, 'uom':25}, # Battery
@@ -40,7 +38,9 @@ class blink_camera_node(udi_interface.Node):
                 #{'driver': 'GV8', 'value':0, 'uom':25}, # Email Picture Eanble
                 {'driver': 'TIME', 'value':0, 'uom':151},
                  ] 
+        
 
+    def __init__(self, polyglot, primary, address, name, camera, blinkSys):
         super().__init__( polyglot, primary, address, name)   
         logging.debug('blink INIT- {}'.format(name))
 
@@ -233,19 +233,6 @@ class blink_camera_node(udi_interface.Node):
                  #'EMAILPIC' : enable_email_picture,
                 }
 
-
-    drivers= [  {'driver': 'ST' , 'value':0,  'uom':25},
-                {'driver': 'GV0', 'value':99, 'uom':25},  #Arm status
-                {'driver': 'GV1', 'value':99, 'uom':25}, # Battery
-                #{'driver': 'GV2', 'value':99, 'uom':25}, # Battery
-                {'driver': 'GV3', 'value':99, 'uom':25}, # Camera Type 
-                #{'driver': 'GV4', 'value':99, 'uom':25}, # Motion Detection Enabled
-                {'driver': 'GV5', 'value':99, 'uom':25}, # Motion Detected
-                {'driver': 'CLITEMP', 'value':99, 'uom':25}, # TempC
-                #{'driver': 'GV7', 'value':99, 'uom':25}, # Recording
-                #{'driver': 'GV8', 'value':0, 'uom':25}, # Email Picture Eanble
-                {'driver': 'TIME', 'value':0, 'uom':151},
-                 ] 
 
         
 

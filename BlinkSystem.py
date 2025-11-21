@@ -174,16 +174,17 @@ class blink_system:
     @async_to_sync
     async def start(self):
         """Start Blink (login/refresh)"""
+        self._key_required = False
         try:
             await self._blink.start()
-            return 'OK'
+            return True
         except BlinkTwoFARequiredError:
             logging.info("Two-Factor Authentication required")
-            #await self._blink.prompt_2fa()
-            return '2FA_REQUIRED'
+            self._key_required = True
+            return True
         except Exception as e:
             logging.error(f"Start error: {e}")
-            return 'ERROR'
+            return False
 
     @property
     def auth(self):
@@ -191,9 +192,7 @@ class blink_system:
 
     @property
     def key_required(self):
-        if self._blink and self._blink.auth:
-            return self._blink.auth.check_key_required()
-        return False
+        return self._key_required
         
     @property
     def cameras(self):

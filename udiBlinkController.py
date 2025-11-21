@@ -168,8 +168,7 @@ class BlinkSetup (udi_interface.Node):
                     self.poly.Notices['LOGIN'] = 'Login Failed - Try again'
                     exit()
                 #except LoginError as 
-
-                auth_needed = self.blink.key_required
+                #auth_needed = self.blink.key_required
                 logging.debug('Auth setp 1: auth finished  - 2FA required: {}'.format(res in ['2FA_REQUIRED']))
                 if res:
                     logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 

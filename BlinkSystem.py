@@ -268,14 +268,13 @@ class blink_system:
 
     def get_sync_camera_list(self, sync_unit):
         if not sync_unit: return []
-        # sync_unit.cameras is a list of camera names in new blinkpy?
-        # Or sync_unit.cameras is a dict?
-        # Let's assume it behaves like a list of names or objects
-        return list(sync_unit.cameras)
+        # sync_unit.cameras is a dict of cameras in blinkpy
+        cameras = getattr(sync_unit, 'cameras', {})
+        return list(cameras)
 
     def get_sync_arm_info(self, sync_name):
         if sync_name in self.sync:
-            return self.sync[sync_name].arm
+            return getattr(self.sync[sync_name], 'arm', None)
         return None
 
     @async_to_sync
@@ -287,54 +286,73 @@ class blink_system:
 
     def get_sync_online(self, sync_name):
         if sync_name in self.sync:
-            return self.sync[sync_name].online
+            return getattr(self.sync[sync_name], 'online', None)
         return None
 
     def get_cameras_on_network(self, network_id):
         camera_list = []
         for name, camera in self.cameras.items():
-            if str(camera.sync.network_id) == str(network_id):
+            # Use getattr for safety on sync and network_id
+            sync = getattr(camera, 'sync', None)
+            if sync and str(getattr(sync, 'network_id', '')) == str(network_id):
                 camera_list.append(camera)
         return camera_list
 
     def get_sync_modules_on_network(self, network_id):
         sync_list = []
         for name, sync in self.sync.items():
-            if str(sync.network_id) == str(network_id):
+            if str(getattr(sync, 'network_id', '')) == str(network_id):
                 sync_list.append(sync)
         return sync_list
 
     def get_network_arm_state(self, network_id):
+        # Try to find sync module for this network and return its arm state
+        for name, sync_module in self.sync.items():
+            if str(getattr(sync_module, 'network_id', '')) == str(network_id):
+                return getattr(sync_module, 'arm', None)
+        
+        # Fallback to homescreen if sync module not found (legacy)
         networks = self.homescreen.get('networks', [])
         for network in networks:
-            if network['id'] == network_id:
-                return network['armed']
+            if str(network.get('id', '')) == str(network_id):
+                return network.get('armed')
         return None
 
     @async_to_sync
     async def set_network_arm_state(self, network_id, arm):
-        if self._blink:
-            return await self._blink.set_network_arm(network_id, arm)
+        if not self._blink: return False
+        
+        # Find the sync module for this network
+        for name, sync_module in self.sync.items():
+            if str(sync_module.network_id) == str(network_id):
+                await sync_module.async_arm(arm)
+                return True
+                
+        # Fallback: try to find by iterating networks if sync module not found
+        # (Though usually sync modules cover all networks)
         return False
 
     def get_camera_data(self, camera_name):
         if camera_name in self.cameras:
-            return self.cameras[camera_name].attributes
+            return getattr(self.cameras[camera_name], 'attributes', {})
         return {}
 
     def get_camera_battery_info(self, camera_name):
         if camera_name in self.cameras:
-            return self.cameras[camera_name].battery or 'No Battery'
+            camera = self.cameras[camera_name]
+            val = getattr(camera, 'battery_level', getattr(camera, 'battery', None))
+            return val if val is not None else 'No Battery'
         return None
 
     def get_camera_battery_voltage_info(self, camera_name):
         if camera_name in self.cameras:
-            return self.cameras[camera_name].battery_voltage or 'No Battery'
+            val = getattr(self.cameras[camera_name], 'battery_voltage', None)
+            return val if val is not None else 'No Battery'
         return None
 
     def get_camera_arm_info(self, camera_name):
         if camera_name in self.cameras:
-            return self.cameras[camera_name].arm
+            return getattr(self.cameras[camera_name], 'arm', None)
         return None
 
     @async_to_sync
@@ -347,7 +365,8 @@ class blink_system:
 
     def get_camera_type_info(self, camera_name):
         if camera_name not in self.cameras: return 'default'
-        temp = self.cameras[camera_name].product_type
+        temp = getattr(self.cameras[camera_name], 'product_type', 'default')
+        logging.debug('get_camera_type_info: {} {}'.format(camera_name, temp))
         if temp == 'owl': return 'mini'
         elif temp == 'catalina': return 'Blink Outdoor'
         elif temp == 'lotus': return 'doorbell'
@@ -357,7 +376,8 @@ class blink_system:
 
     def get_camera_motion_enabled_info(self, camera_name):
         if camera_name in self.cameras:
-            return self.cameras[camera_name].motion_enabled
+            # motion_enabled is removed in 0.24.1, use arm
+            return getattr(self.cameras[camera_name], 'arm', None)
         return None
 
     @async_to_sync
@@ -369,12 +389,14 @@ class blink_system:
 
     def get_camera_motion_detected_info(self, camera_name):
         if camera_name in self.cameras:
-            return self.cameras[camera_name].motion_detected
+            # Use getattr to be safe, or check attributes dict
+            return getattr(self.cameras[camera_name], 'motion_detected', None)
         return None
 
     def get_camera_temperatureC_info(self, camera_name):
         if camera_name in self.cameras:
-            return self.cameras[camera_name].temperature_c
+            return getattr(self.cameras[camera_name], 'temperature_c', 
+                   getattr(self.cameras[camera_name], 'temperature', None))
         return None
 
     def get_camera_recording_info(self, camera_name):

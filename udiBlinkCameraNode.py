@@ -27,12 +27,31 @@ class blink_camera_node(udi_interface.Node):
 
 
     def __init__(self, polyglot, primary, address, name, camera, blinkSys):
+        id = 'blinkcameraC' 
+        drivers= [  {'driver': 'ST' , 'value':0,  'uom':25},
+                {'driver': 'GV0', 'value':99, 'uom':25},  #Arm status
+                {'driver': 'GV1', 'value':99, 'uom':25}, # Battery
+                #{'driver': 'GV2', 'value':99, 'uom':25}, # Battery
+                {'driver': 'GV3', 'value':99, 'uom':25}, # Camera Type 
+                #{'driver': 'GV4', 'value':99, 'uom':25}, # Motion Detection Enabled
+                {'driver': 'GV5', 'value':99, 'uom':25}, # Motion Detected
+                {'driver': 'CLITEMP', 'value':99, 'uom':25}, # TempC
+                #{'driver': 'GV7', 'value':99, 'uom':25}, # Recording
+                #{'driver': 'GV8', 'value':0, 'uom':25}, # Email Picture Eanble
+                {'driver': 'TIME', 'value':0, 'uom':151},
+                 ] 
+
         super().__init__( polyglot, primary, address, name)   
         logging.debug('blink INIT- {}'.format(name))
+
         self.camera = camera
         self.name = name
         self.node = None
         self.blink = blinkSys
+        self.temp_unit = self.blink.get_temp_unit()           
+        if self.temp_unit == 'F':
+            self.id = 'blinkcameraF' 
+
         self.pic_email_enabled = False
         self.nodeDefineDone = False
         self.poly = polyglot
@@ -118,13 +137,13 @@ class blink_camera_node(udi_interface.Node):
             self.BLINK_setDriver('GV5', self.bool2isy(temp))
 
             temp_info = self.blink.get_camera_temperatureC_info(self.camera.name)
-            logging.debug('GV6 : {}'.format(temp_info))
+            logging.debug('CLITEMP : {}'.format(temp_info))
             if  None ==  temp_info:
-                self.BLINK_setDriver('GV6', 0, 25)
+                self.BLINK_setDriver('CLITEMP', 0, 25)
             elif 'F' == self.blink.temp_unit or 'f' == self.blink.temp_unit:
-                self.BLINK_setDriver('GV6', (temp_info*9/5)+32, 17)
+                self.BLINK_setDriver('CLITEMP', (temp_info*9/5)+32, 17)
             else:
-                self.BLINK_setDriver('GV6', temp_info, 4)
+                self.BLINK_setDriver('CLITEMP', temp_info, 4)
             #self.BLINK_setDriver('GV7', self.blink.get_camera_recording_info(self.camera.name))
             #self.BLINK_setDriver('GV8', self.bool2isy(self.pic_email_enabled))
         else:
@@ -157,13 +176,14 @@ class blink_camera_node(udi_interface.Node):
 
     def arm_camera (self, command):
         try:
+
             value = int(command.get('value'))
             arm_enable = (1 == int(command.get('value')) )
             logging.info(' arm_cameras: {} - {}'.format(self.camera.name, arm_enable))
 
             temp = self.blink.set_camera_arm(self.camera.name,  arm_enable )
             time.sleep(1)
-            #logging.debug('blink.set_camera_arm({}, {}):{}'.format(self.camera.name,  arm_enable,  self.blink.get_camera_data(self.camera.name )))
+            logging.debug('blink.set_camera_arm({}, {}):{}'.format(self.camera.name,  arm_enable,  self.blink.get_camera_data(self.camera.name )))
             if arm_enable:
                 self.node.reportCmd('DON')
             else:
@@ -203,7 +223,7 @@ class blink_camera_node(udi_interface.Node):
         else:
             logging.info('System Poll - Waiting for all nodes to be added')
 
-    id = 'blinkcamera'
+
 
     commands = { 'UPDATE': ISYupdate,
                  'ARM' : arm_camera,
@@ -221,9 +241,10 @@ class blink_camera_node(udi_interface.Node):
                 {'driver': 'GV3', 'value':99, 'uom':25}, # Camera Type 
                 #{'driver': 'GV4', 'value':99, 'uom':25}, # Motion Detection Enabled
                 {'driver': 'GV5', 'value':99, 'uom':25}, # Motion Detected
-                {'driver': 'GV6', 'value':99, 'uom':25}, # TempC
+                {'driver': 'CLITEMP', 'value':99, 'uom':25}, # TempC
                 #{'driver': 'GV7', 'value':99, 'uom':25}, # Recording
                 #{'driver': 'GV8', 'value':0, 'uom':25}, # Email Picture Eanble
+                {'driver': 'TIME', 'value':0, 'uom':151},
                  ] 
 
         

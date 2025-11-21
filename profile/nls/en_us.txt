@@ -36,8 +36,8 @@ ST-nlsblinkcamera-GV1-NAME = Battery Status
 ST-nlsblinkcamera-GV3-NAME = CameraType
 ST-nlsblinkcamera-GV4-NAME = Motion Detection
 ST-nlsblinkcamera-GV5-NAME = Motion Detected
-ST-nlsblinkcamera-GV6-NAME = Temperature
-
+ST-nlsblinkcamera-CLITEMP-NAME = Temperature
+ST-nlsblinkcamera-TIME-NAME = Last Update TIME
 battery-0 = OK
 battery-1 = Not OK - TBD
 battery-2 = TBD

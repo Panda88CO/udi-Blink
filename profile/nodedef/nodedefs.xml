@@ -47,7 +47,7 @@
    </nodeDef> 
 
 
-   <nodeDef id="blinkcamera" nls="nlsblinkcamera">
+   <nodeDef id="blinkcameraC" nls="nlsblinkcamera">
  <editors />
       <sts>
          <st id="ST" editor="online" /> 
@@ -57,8 +57,8 @@
          <st id="GV3" editor="cameratype" />
          <!--<st id="GV4" editor="motionen" /> -->
          <st id="GV5" editor="motiondetc" />
-         <st id="GV6" editor="temp" />
-         <!--<st id="GV7" editor="record" /> -->                                                
+         <st id="CLITEMP" editor="tempC" />
+         <st id="TIME" editor="unixtime" />                                                
          <!--<st id="GV8" editor="emailpic" /> -->
 
       </sts>
@@ -84,4 +84,39 @@
    </nodeDef> 
 </nodeDefs> 
 
-     
+<nodeDef id="blinkcameraF" nls="nlsblinkcamera">
+ <editors />
+      <sts>
+         <st id="ST" editor="online" /> 
+         <st id="GV0" editor="motionen" /> 
+         <st id="GV1" editor="battery" />        
+         <!--<st id="GV2" editor="bat_volt" />-->
+         <st id="GV3" editor="cameratype" />
+         <!--<st id="GV4" editor="motionen" /> -->
+         <st id="GV5" editor="motiondetc" />
+         <st id="GV6" editor="tempF" />
+         <st id="TIME" editor="unixtime" />                                                
+         <!--<st id="GV8" editor="emailpic" /> -->
+
+      </sts>
+      <cmds>
+         <sends>
+         </sends>
+         <accepts>
+            <cmd id="UPDATE" /> 
+            <cmd id="ARM">
+                <p id="" editor="domotion" init="1" /> 
+            </cmd >    
+            <!--<cmd id="MOTION">
+                <p id="" editor="enable" init="1" /> 
+            </cmd >  -->    
+                                
+            <cmd id="SNAPPIC" /> 
+            <cmd id="SNAPVIDEO" /> 
+            <!--<cmd id="EMAILPIC" > 
+               <p id="" editor="emailpic" init="0" /> 
+            </cmd> -->
+         </accepts>
+      </cmds>
+   </nodeDef> 
+</nodeDefs>    

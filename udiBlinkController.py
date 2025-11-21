@@ -177,7 +177,9 @@ class BlinkSetup (udi_interface.Node):
                     while not self.auth_key_updated:                      
                         logging.debug('Waiting for new pin')
                         time.sleep(1)
+                    self.poly.Notices['INIT'] = 'System Initializing - it may take a little while'    
                     self.blink.auth_key(str(self.authKey))
+
                 self.blink.finalize_auth()
 
                 '''
@@ -202,6 +204,7 @@ class BlinkSetup (udi_interface.Node):
         node_adr_list = []
         network_node_list = self.blink.get_network_list()
         self.network_names = []
+        logging.debug(f'Network node list: {network_node_list}')
 
         for indx, network in enumerate (network_node_list):
             name = network['name'].upper()
@@ -217,6 +220,7 @@ class BlinkSetup (udi_interface.Node):
                         logging.error('Failed to create network node for {} '.format(node_name))
             else:
                 self.Parameters[name] = 'ENABLED'
+                self.Parameters.load({name:'ENABLED'}, True)
                 self.poly.Notices[name] = 'New Network detected '+str(name)+' - please select ENABLED or DISABLED - then restart'         
 
         while not self.paramsProcessed:

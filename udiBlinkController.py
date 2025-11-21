@@ -215,7 +215,7 @@ class BlinkSetup (udi_interface.Node):
                     if not blink_network_node(self.poly, node_address, node_address, node_name, network['id'], self.blink ):
                         logging.error('Failed to create network node for {} '.format(node_name))
             else:
-                self.Parameters[name] = 'ENABLED'
+                self.poly.Parameters[name] = 'ENABLED'
                 self.poly.Notices[name] = 'New Network detected '+str(name)+' - please select ENABLED or DISABLED - then restart'         
 
         while not self.paramsProcessed:

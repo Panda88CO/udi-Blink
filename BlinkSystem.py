@@ -175,14 +175,14 @@ class blink_system:
         """Start Blink (login/refresh)"""
         try:
             await self._blink.start()
-            return True
+            return 'OK
         except BlinkTwoFARequiredError:
             logging.info("Two-Factor Authentication required")
             #await self._blink.prompt_2fa()
-            
+            return '2FA_REQUIRED'
         except Exception as e:
             logging.error(f"Start error: {e}")
-            return False
+            return 'ERROR'
 
     @property
     def auth(self):
@@ -212,7 +212,7 @@ class blink_system:
 
     @async_to_sync
     async def auth_key(self, authenKey=None):
-        logging.info('Submitting auth key')
+        logging.info(f'Submitting auth key {authenKey}')
         if not authenKey:
             return f'AuthKey Empty: {authenKey}'
         

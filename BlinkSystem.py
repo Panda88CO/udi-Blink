@@ -392,8 +392,10 @@ class blink_system:
         return False
 
     def get_camera_motion_detected_info(self, camera_name):
+
         if camera_name in self.cameras:
             # Use getattr to be safe, or check attributes dict
+            logging.debug('get_camera_motion_detected_info: {} {}'.format(camera_name, getattr(self.cameras[camera_name], 'motion_detected', None)))    
             return getattr(self.cameras[camera_name], 'motion_detected', None)
         return None
 

@@ -291,7 +291,8 @@ class BlinkSetup (udi_interface.Node):
                 
             if 'shortPoll' in polltype:
                 #self.heartbeat()
-                logging.info('Currently no function for shortPoll')
+                #logging.info('Currently no function for shortPoll')
+                pass
         else:
             logging.info('System Poll - Waiting for all nodes to be added')
   

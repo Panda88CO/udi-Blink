@@ -215,13 +215,14 @@ class blink_camera_node(udi_interface.Node):
                 #Keep token current
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
                 try:
-                    self.updateISYdriver()
+                    self.updateISYdrivers()
                 except Exception as e:
                     logging.debug('Exeption occcured : {}'.format(e))
    
                 
             if 'shortPoll' in polltype:
-                logging.info('Currently no function for shortPoll')
+                pass
+                #logging.info('Currently no function for shortPoll')
         else:
             logging.info('System Poll - Waiting for all nodes to be added')
 

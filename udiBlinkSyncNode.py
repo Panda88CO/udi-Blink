@@ -115,7 +115,8 @@ class blink_sync_node(udi_interface.Node):
    
                 
             if 'shortPoll' in polltype:
-                logging.info('Currently no function for shortPoll')
+                pass
+                #logging.info('Currently no function for shortPoll')
         else:
             logging.info('System Poll - Waiting for all nodes to be added')        
 

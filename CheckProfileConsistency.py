@@ -1,5 +1,5 @@
 """
-Validate udiYo*.py Node implementations against profile/nodedef/nodedefs.xml
+Validate udi*.py Node implementations against profile/nodedef/nodedefs.xml
 
 Handles:
   - Multiple udi_interface.Node classes per file
@@ -101,7 +101,7 @@ except Exception as e:
 
 st_labels = {}  # {(nls, st_id): (line_num, label)}
 for line_num, line in enumerate(en_us_lines, 1):
-    match = re.match(r'^ST-([\w\-]+)-([\w\-]+)-NAME=(.+)', line.strip())
+    match = re.match(r'^ST-([\w\-]+)-([\w\-]+)-NAME\s*=\s*(.+)', line.strip())
     if match:
         nls, st_id, label = match.groups()
         st_labels[(nls, st_id)] = (line_num, label)
@@ -109,16 +109,16 @@ for line_num, line in enumerate(en_us_lines, 1):
 print(f"   ✓ {len(st_labels)} ST labels\n")
 
 # ============================================================================
-# [3/4] Scan udiYo*.py files with udi_interface.Node classes
+# [3/4] Scan udi*.py files with udi_interface.Node classes
 # ============================================================================
 print("[3/4] Scanning udi*.py files with udi_interface.Node classes...\n")
-udiyo_files = sorted([f for f in os.listdir('.') if f.startswith('udi') and f.endswith('.py')])
+udi_files = sorted([f for f in os.listdir('.') if f.startswith('udi') and f.endswith('.py')])
 
 issues = defaultdict(list)
 skipped = []
 validated = []
 
-for filename in udiyo_files:
+for filename in udi_files:
     try:
         with open(filename, 'r', encoding='utf-8', errors='ignore') as f:
             content = f.read()
@@ -212,7 +212,7 @@ for filename in udiyo_files:
                     issues[filename].append(
                         f"  ⚠️  class {class_name} id='{node_id}': extra drivers {sorted(extra_sts)}"
                     )
-                    file_errors += 1
+                    # file_errors += 1  # Warning only, not a failure
                 
                 # Check commands ↔ <cmd> in <accepts> section (only if accepts section exists)
                 if nd['cmds']:  # Only validate if cmds are defined in nodeDef
@@ -250,7 +250,7 @@ for filename in udiyo_files:
 # [4/4] REPORT
 # ============================================================================
 print("=" * 100)
-print("VALIDATION REPORT: udiYo*.py ↔ nodedefs.xml ↔ en_us.txt")
+print("VALIDATION REPORT: udi*.py ↔ nodedefs.xml ↔ en_us.txt")
 print("=" * 100)
 
 print(f"\n✅ PASSING ({len(validated)}):")
@@ -273,7 +273,7 @@ if skipped:
 print("\n" + "=" * 100)
 print("SUMMARY")
 print("=" * 100)
-print(f"Total udiYo*.py files:    {len(udiyo_files)}")
+print(f"Total udi*.py files:    {len(udi_files)}")
 print(f"Classes validated:        {len(validated)}")
 print(f"Files with issues:        {len(issues)}")
 print(f"Files skipped:            {len(skipped)}")

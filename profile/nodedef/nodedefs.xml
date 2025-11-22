@@ -7,11 +7,8 @@
       <cmds>
          <sends>
          </sends>
-         <accepts>
-            <cmd id="UPDATE" /> 
-         </accepts>
       </cmds>
-   </nodeDef> 
+   </nodeDef>
 
 
    <nodeDef id="blinksync" nls="nlsblinksync">
@@ -47,8 +44,8 @@
    </nodeDef> 
 
 
-   <nodeDef id="blinkcameraC" nls="nlsblinkcamera">
- <editors />
+<nodeDef id="blinkcameraC" nls="nlsblinkcamera">
+   <editors />
       <sts>
          <st id="ST" editor="online" /> 
          <st id="GV0" editor="motionen" /> 
@@ -82,10 +79,8 @@
          </accepts>
       </cmds>
    </nodeDef> 
-</nodeDefs> 
-
 <nodeDef id="blinkcameraF" nls="nlsblinkcamera">
- <editors />
+   <editors />
       <sts>
          <st id="ST" editor="online" /> 
          <st id="GV0" editor="motionen" /> 
@@ -94,7 +89,7 @@
          <st id="GV3" editor="cameratype" />
          <!--<st id="GV4" editor="motionen" /> -->
          <st id="GV5" editor="motiondetc" />
-         <st id="GV6" editor="tempF" />
+         <st id="CLITEMP" editor="tempF" />
          <st id="TIME" editor="unixtime" />                                                
          <!--<st id="GV8" editor="emailpic" /> -->
 

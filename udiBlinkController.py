@@ -32,11 +32,12 @@ except ImportError:
 
 
  
-VERSION = '0.6.1'
+VERSION = '0.6.2'
 
 class BlinkSetup (udi_interface.Node):
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done, gen_uid
-
+    id = 'setup'
+    drivers = [{'driver': 'ST', 'value': 0, 'uom': 25}]
     def  __init__(self, polyglot, primary, address, name):
         super().__init__( polyglot, primary, address, name)  
         
@@ -461,5 +462,5 @@ if __name__ == "__main__":
         polyglot.runForever()
     except (KeyboardInterrupt, SystemExit):
         sys.exit(0)
-        
+
 

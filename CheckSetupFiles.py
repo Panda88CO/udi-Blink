@@ -35,7 +35,7 @@ defined_nls_keys = set()
 nls_key_lines = {}
 for line_num, line in enumerate(en_us_lines, 1):
     # Match keys like: swstate-0=Off, swstate-1=On
-    match = re.match(r'^(\w+)-(\d+)=', line)
+    match = re.match(r'^(\w+)-(\d+)\s*=\s*', line)
     if match:
         nls_key = match.group(1)
         defined_nls_keys.add(nls_key)

@@ -79,6 +79,7 @@ class blink_camera_node(udi_interface.Node):
         time.sleep(1)
         self.node = self.poly.getNode(address)
         self.nodeDefineDone = True
+        
         self.BLINK_setDriver('ST', 98, 25)
         
     

@@ -323,6 +323,7 @@ class blink_system:
 
     @async_to_sync
     async def set_network_arm_state(self, network_id, arm):
+        
         if not self._blink: return False
         
         # Find the sync module for this network

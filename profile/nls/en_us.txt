@@ -29,6 +29,10 @@ doarm-1 = Arm
 
 ND-blinkcamera-NAME = Blink Camera
 ND-blinkcamera-ICON = MotionSensor
+ND-blinkcameraC-NAME = Blink Camera
+ND-blinkcameraC-ICON = MotionSensor
+ND-blinkcameraF-NAME = Blink Camera
+ND-blinkcameraF-ICON = MotionSensor
 ST-nlsblinkcamera-ST-NAME = Connected
 ST-nlsblinkcamera-GV0-NAME = Motion Detection Status
 ST-nlsblinkcamera-GV1-NAME = Battery Status

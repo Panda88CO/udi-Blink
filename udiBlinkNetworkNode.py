@@ -173,9 +173,12 @@ class blink_network_node(udi_interface.Node):
         #    #self.updateISYdrivers()
         #else:
 
-        self.blink.set_network_arm_state(self.network_id, arm_enable)
+        success = self.blink.set_network_arm_state(self.network_id, arm_enable)
+        logging.debug('set_network_arm_state returned: {}'.format(success))
         time.sleep(1)
-        self.BLINK_setDriver('GV0', self.bool2isy(self.blink.get_network_arm_state(self.network_id)))
+        ok = self.blink.get_network_arm_state(self.network_id)
+        logging.debug('get_network_arm_state returned: {}'.format(ok))
+        self.BLINK_setDriver('GV0', self.bool2isy(ok))
         #    camera_list = self.blink.get_camera_list()
         #    for camera in camera_list:
         #        self.blink.set_camera_arm(camera, arm_enable)

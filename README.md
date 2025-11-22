@@ -21,4 +21,4 @@ I only have 3 camera types - Mini, doorbell and Outdoor (new) - I do not know th
 Plan is to add ability to send pictures of emails/videos taken.
 
 # misc
-Based on blink API https://github.com/fronzbot/blinkpy - but somewhat modified
+Based on blink API https://github.com/fronzbot/blinkpy

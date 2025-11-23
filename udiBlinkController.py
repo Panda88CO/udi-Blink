@@ -177,7 +177,7 @@ class BlinkSetup (udi_interface.Node):
                     self.auth_key_updated = False
                     while not self.auth_key_updated:                      
                         logging.debug('Waiting for new pin')
-                        time.sleep(1)
+                        time.sleep(3)
                     self.poly.Notices['INIT'] = 'System Initializing - it may take a little while'    
                     self.blink.auth_key(str(self.authKey))
 

@@ -44,7 +44,7 @@ class blink_network_node(udi_interface.Node):
         #self.Parameters = Custom(polyglot, 'customparams')
         # subscribe to the events we want
         #polyglot.subscribe(polyglot.CUSTOMPARAMS, self.parameterHandler)
-        polyglot.subscribe(polyglot.POLL, self.poll)
+        #polyglot.subscribe(polyglot.POLL, self.poll)
         self.poly.subscribe(self.poly.START, self.start, self.address)
         self.poly.subscribe(self.poly.STOP, self.stop)
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
@@ -131,9 +131,10 @@ class blink_network_node(udi_interface.Node):
                 #Keep token current
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
                 try:
-                    self.updateISYdriver()
+                    pass
+                    #self.updateISYdrivers()
                 except Exception as e:
-                    logging.debug('Exeption occcured : {}'.format(e))
+                    logging.error('Exeption occcured : {}'.format(e))
    
                 
             if 'shortPoll' in polltype:

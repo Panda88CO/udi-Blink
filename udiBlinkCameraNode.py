@@ -66,7 +66,7 @@ class blink_camera_node(udi_interface.Node):
                              }
 
         self.n_queue = []     
-        polyglot.subscribe(polyglot.POLL, self.poll)
+        #polyglot.subscribe(polyglot.POLL, self.poll)
         self.poly.subscribe(polyglot.START, self.start, self.address)
         self.poly.subscribe(polyglot.STOP, self.stop)
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
@@ -215,9 +215,10 @@ class blink_camera_node(udi_interface.Node):
                 #Keep token current
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
                 try:
-                    self.updateISYdrivers()
+                    pass
+                    #self.updateISYdrivers()
                 except Exception as e:
-                    logging.debug('Exeption occcured : {}'.format(e))
+                    logging.error('Exeption occcured : {}'.format(e))
    
                 
             if 'shortPoll' in polltype:

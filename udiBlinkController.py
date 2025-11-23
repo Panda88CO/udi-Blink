@@ -273,9 +273,9 @@ class BlinkSetup (udi_interface.Node):
 
     def systemPoll (self, polltype):
         if self.nodeDefineDone:
-            logging.info('System Poll executing: {}'.format(polltype))
 
             if 'longPoll' in polltype:
+                logging.info('System Poll executing: {}'.format(polltype))
                 #Keep token current
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
                 try:

@@ -1,12 +1,13 @@
 # udi-blink
 This node server is mostly targeted to arm and disarm cameras from within IoP/ISY (e.g. follow arming of alarm system)
-It does provide ability to snap a picture based on e.g. a trigger motion sensor - this picture does replace the existing thumbnail in the Blink app.  Similar videos can also be triggered.  
+It does provide ability to snap a picture based on e.g. a trigger motion sensor - this picture does replace the existing thumbnail in the Blink app.  Similar videos can also be triggered.  Camera reports motion, but it needs to be polled which cannot happen too often or the system will throttle. 
 An option to have pictures emailed to you is added - may add video email support as well later, but they can currently be viewed in app
+
 ## Installation
-ShortPoll has no functionality presetnly, LongPoll updates data.  Do not run update too often, as system may get throttled by Blink. 
+ShortPoll has no functionality at present, LongPoll updates data.  Do not run update too often, as system may get throttled by Blink. 
 
 Configuration requires the following paramteres: 
-TEMP_UNIT   : Temperature unit (C/F/K)
+TEMP_UNIT   : Temperature unit (C/F)
 USERNAME    : Blink login ID
 PASSWORD    : Blink password
 AUTH_KEY    : Authentication code 2FA from app (enter when received and then SAVE - do not restart)
@@ -23,8 +24,8 @@ The networks defined in Blibk will be added here after first run.  Select te one
 ### Polisy
 
 ## Notes 
-Note - one cannot enable a camera is system is disarmed - If system is armed, the individual cameras can be disabled
+Note - one cannot enable a camera if system is disarmed - If system is armed, the individual cameras can be disabled
 
-For mail server setup - a possible way it to create an mail account at www.outlook.com
+For mail server setup - a possible way is to create an mail account at www.outlook.com
 The SMTP is smtp-mail.outlook.com, SMTP_PORT is 587, SMTP_EMAIL and SMTP_PASSWORD are the ones you select when d=creating the account.  
 I did try to use the build in ISY mail server, but it does not seem to support attachments

@@ -44,7 +44,7 @@ class blink_network_node(udi_interface.Node):
         #self.Parameters = Custom(polyglot, 'customparams')
         # subscribe to the events we want
         #polyglot.subscribe(polyglot.CUSTOMPARAMS, self.parameterHandler)
-        polyglot.subscribe(polyglot.POLL, self.poll)
+        #polyglot.subscribe(polyglot.POLL, self.poll)
         self.poly.subscribe(self.poly.START, self.start, self.address)
         self.poly.subscribe(self.poly.STOP, self.stop)
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
@@ -125,19 +125,21 @@ class blink_network_node(udi_interface.Node):
 
     def poll(self, polltype):
         if self.nodeDefineDone:
-            logging.info('System Poll executing: {}'.format(polltype))
 
             if 'longPoll' in polltype:
+                logging.info('System Poll executing: {}'.format(polltype))
                 #Keep token current
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
                 try:
-                    self.updateISYdriver()
+                    pass
+                    #self.updateISYdrivers()
                 except Exception as e:
-                    logging.debug('Exeption occcured : {}'.format(e))
+                    logging.error('Exeption occcured : {}'.format(e))
    
                 
             if 'shortPoll' in polltype:
-                logging.info('Currently no function for shortPoll')
+                pass
+                #logging.info('Currently no function for shortPoll')
         else:
             logging.info('System Poll - Waiting for all nodes to be added')
 
@@ -173,9 +175,12 @@ class blink_network_node(udi_interface.Node):
         #    #self.updateISYdrivers()
         #else:
 
-        self.blink.set_network_arm_state(self.network_id, arm_enable)
+        success = self.blink.set_network_arm_state(self.network_id, arm_enable)
+        logging.debug('set_network_arm_state returned: {}'.format(success))
         time.sleep(1)
-        self.BLINK_setDriver('GV0', self.bool2isy(self.blink.get_network_arm_state(self.network_id)))
+        ok = self.blink.get_network_arm_state(self.network_id)
+        logging.debug('get_network_arm_state returned (Armed): {}'.format(ok))
+        self.BLINK_setDriver('GV0', self.bool2isy(ok))
         #    camera_list = self.blink.get_camera_list()
         #    for camera in camera_list:
         #        self.blink.set_camera_arm(camera, arm_enable)

@@ -32,16 +32,17 @@ except ImportError:
 
 
  
-VERSION = '0.4.8'
+VERSION = '0.6.4'
 
 class BlinkSetup (udi_interface.Node):
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done, gen_uid
-
+    id = 'setup'
+    drivers = [{'driver': 'ST', 'value': 0, 'uom': 25}]
     def  __init__(self, polyglot, primary, address, name):
         super().__init__( polyglot, primary, address, name)  
         
         logging.setLevel(10)
-        #self.blink = blink_system()
+        self.blink = blink_system()
         self.nodeDefineDone = False
         self.handleParamsDone = False
         self.paramsProcessed = False
@@ -158,7 +159,7 @@ class BlinkSetup (udi_interface.Node):
                 logging.debug('STARTING BLINK SYSTEM')
                 login_data = self.prepare_login_data()
                 #logging.debug('Login Data : {}'.format(login_data))
-                self.blink = blink_system()
+                #self.blink = blink_system()
                 self.blink.start_blink(login_data, True)
                 self.blink.set_temp_unit(self.temp_unit) 
                 #try:
@@ -168,8 +169,7 @@ class BlinkSetup (udi_interface.Node):
                     self.poly.Notices['LOGIN'] = 'Login Failed - Try again'
                     exit()
                 #except LoginError as 
-
-                auth_needed = self.blink.auth.check_key_required()
+                auth_needed = self.blink.key_required
                 logging.debug('Auth setp 1: auth finished  - 2FA required: {}'.format(auth_needed))
                 if auth_needed:
                     logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 
@@ -177,8 +177,10 @@ class BlinkSetup (udi_interface.Node):
                     self.auth_key_updated = False
                     while not self.auth_key_updated:                      
                         logging.debug('Waiting for new pin')
-                        time.sleep(5)
+                        time.sleep(3)
+                    self.poly.Notices['INIT'] = 'System Initializing - it may take a little while'    
                     self.blink.auth_key(str(self.authKey))
+
                 self.blink.finalize_auth()
 
                 '''
@@ -191,6 +193,7 @@ class BlinkSetup (udi_interface.Node):
                 else:
                     logging.info('Accessing Blink completed ')
                 '''
+                self.poly.Notices.clear()
                 #self.add_sync_nodes()
                 self.add_network_nodes()
         except Exception as e:
@@ -203,10 +206,13 @@ class BlinkSetup (udi_interface.Node):
         node_adr_list = []
         network_node_list = self.blink.get_network_list()
         self.network_names = []
+        logging.debug(f'Network node list: {network_node_list}')
+        logging.debug(f'Parameter list: {self.Parameters}')
         for indx, network in enumerate (network_node_list):
             name = network['name'].upper()
+            logging.debug('Processing network {} : {}'.format(name, network))
             if name in self.Parameters:
-                if self.Parameters[name].upper() == "ENABLED":
+                if self.Parameters[name][0].upper() == "E":
                     logging.debug('Adding network {}'.format(name)) 
                     self.network_names.append(network['name'])
                     node_address = self.poly.getValidAddress(str(network['id']))
@@ -217,8 +223,8 @@ class BlinkSetup (udi_interface.Node):
                         logging.error('Failed to create network node for {} '.format(node_name))
             else:
                 self.Parameters[name] = 'ENABLED'
-                self.poly.Notices[name] = 'New Network detected '+str(name)+' - please select ENABLED or DISABLED - then restart'         
-
+                self.poly.Notices[name] = str(name) + 'network found - Add as custom Parameter with value ENABLED or DISABLED - then restart'         
+        logging.debug(f'Parameter list after loop: {self.Parameters}')
         while not self.paramsProcessed:
             time.sleep(5)
             logging.info('waitng to process all parameters')
@@ -267,9 +273,9 @@ class BlinkSetup (udi_interface.Node):
 
     def systemPoll (self, polltype):
         if self.nodeDefineDone:
-            logging.info('System Poll executing: {}'.format(polltype))
 
             if 'longPoll' in polltype:
+                logging.info('System Poll executing: {}'.format(polltype))
                 #Keep token current
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
                 try:
@@ -281,12 +287,13 @@ class BlinkSetup (udi_interface.Node):
                             nodes[nde].updateISYdrivers()
                          
                 except Exception as e:
-                    logging.debug('Exeption occcured : {}'.format(e))
+                    logging.error('Exeption occcured : {}'.format(e))
    
                 
             if 'shortPoll' in polltype:
                 #self.heartbeat()
-                logging.info('Currently no function for shortPoll')
+                #logging.info('Currently no function for shortPoll')
+                pass
         else:
             logging.info('System Poll - Waiting for all nodes to be added')
   
@@ -455,5 +462,5 @@ if __name__ == "__main__":
         polyglot.runForever()
     except (KeyboardInterrupt, SystemExit):
         sys.exit(0)
-        
+
 

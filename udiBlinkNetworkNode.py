@@ -31,6 +31,7 @@ class blink_network_node(udi_interface.Node):
         super().__init__( polyglot, primary, address, name)   
         logging.debug('blink SYNC INIT- {}'.format(name))
         self.nodeDefineDone = False
+        self.networkNodeReady = False
         self.network_id = network_id
         self.name = name
         self.blink = blinkSys
@@ -101,6 +102,7 @@ class blink_network_node(udi_interface.Node):
             self._sync_list.append(nodeAdr)
         self.nodeDefineDone = True
         self.BLINK_setDriver('GV0', self.bool2isy(self.blink.get_network_arm_state(self.network_id)))
+        self.setDriver('ST', 1)
         #tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
         #self.BLINK_setDriver('GV2', self.bool2isy(tmp))
         logging.debug('_camera_list {}'.format(self._camera_list))
@@ -142,6 +144,10 @@ class blink_network_node(udi_interface.Node):
                 #logging.info('Currently no function for shortPoll')
         else:
             logging.info('System Poll - Waiting for all nodes to be added')
+
+    def set_connection_status(self, connected):
+        logging.info('set_connection_status {} - {}'.format(self.name, connected))
+        self.setDriver('ST', 1 if connected else 0)
 
     def updateISYdrivers(self):
         if self.nodeDefineDone:
@@ -204,8 +210,10 @@ class blink_network_node(udi_interface.Node):
                 }
 
     drivers= [ 
+                {'driver': 'ST', 'value': 1, 'uom': 25},
                 {'driver': 'GV0', 'value':0, 'uom':25} # Armed
-        ] 
+        ]
+ 
 
         
 

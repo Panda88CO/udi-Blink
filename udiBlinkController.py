@@ -32,7 +32,7 @@ except ImportError:
 
 
  
-VERSION = '0.6.6'
+VERSION = '0.6.7'
 
 class BlinkSetup (udi_interface.Node):
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done, gen_uid
@@ -279,15 +279,22 @@ class BlinkSetup (udi_interface.Node):
                 #Keep token current
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
                 try:
-                    self.blink.refresh()
+                    success = self.blink.refresh()
                     nodes = self.poly.getNodes()
                     for nde in nodes:
                         if nde != 'setup':   # but not the setup node
-                            logging.debug('updating node {} data'.format(nde))                            
-                            nodes[nde].updateISYdrivers()
+                            if nodes[nde].id == 'blinknetwork' and hasattr(nodes[nde], 'set_connection_status'):
+                                nodes[nde].set_connection_status(True if success else False)
+
+                            if success:
+                                logging.debug('updating node {} data'.format(nde)) 
+                                if nodes[nde].nodeDefineDone and hasattr(nodes[nde], 'updateISYdrivers'):                         
+                                    nodes[nde].updateISYdrivers()
+                            else:
+                                logging.warning('Blink System refresh failed - skipping update drivers for node {}'.format(nde))
                          
                 except Exception as e:
-                    logging.error('Exeption occcured : {}'.format(e))
+                    logging.error('Exception occcured : {}'.format(e))
    
                 
             if 'shortPoll' in polltype:

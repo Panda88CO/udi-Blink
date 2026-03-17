@@ -12,6 +12,7 @@ online-99 = Unknown
 
 ND-blinknetwork-NAME = Network
 ND-blinknetwork-ICON = GenericCtl
+ST-nlsblinknetwork-ST-NAME = Connected
 ST-nlsblinknetwork-GV0-NAME = Arm Status
 armed-0 = Disarmed
 armed-1 = Armed

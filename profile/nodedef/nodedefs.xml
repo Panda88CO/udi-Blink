@@ -31,6 +31,7 @@
       <sts>
          <st id="ST" editor="online" />
          <st id="GV0" editor="armed" />
+         <st id="TIME" editor="unixtime" />
       </sts>
       <cmds>
          <sends>

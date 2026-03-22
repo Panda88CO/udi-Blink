@@ -152,6 +152,8 @@ class blink_network_node(udi_interface.Node):
     def updateISYdrivers(self):
         if self.nodeDefineDone:
             logging.info('Network updateISYdrivers - {}'.format(self.network_id))
+            # Timestamp reflects the last successful network data refresh.
+            self.BLINK_setDriver('TIME', int(time.time()), 151)
             self.BLINK_setDriver('GV0', self.bool2isy(self.blink.get_network_arm_state(self.network_id)))
 
                          
@@ -211,7 +213,8 @@ class blink_network_node(udi_interface.Node):
 
     drivers= [ 
                 {'driver': 'ST', 'value': 1, 'uom': 25},
-                {'driver': 'GV0', 'value':0, 'uom':25} # Armed
+            {'driver': 'GV0', 'value':0, 'uom':25}, # Armed
+            {'driver': 'TIME', 'value':0, 'uom':151}
         ]
  
 

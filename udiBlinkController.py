@@ -42,7 +42,9 @@ class BlinkSetup (udi_interface.Node):
         super().__init__( polyglot, primary, address, name)  
         
         logging.setLevel(10)
+        
         self.blink = blink_system()
+        self.connected = False
         self.nodeDefineDone = False
         self.handleParamsDone = False
         self.paramsProcessed = False
@@ -196,6 +198,7 @@ class BlinkSetup (udi_interface.Node):
                 self.poly.Notices.clear()
                 #self.add_sync_nodes()
                 self.add_network_nodes()
+
         except Exception as e:
             logging.error('Blink Start Exception: {}'.format(e))
             #self.BLINK_setDriver('ST', 0)
@@ -244,7 +247,7 @@ class BlinkSetup (udi_interface.Node):
                 logging.debug('Removing primary node : {} {}'.format(node['name'], node))
                 self.poly.delNode(node['address'])
 
-
+        self.connected = True
 
     def stop(self):
         logging.info('Stop Called:')
@@ -257,15 +260,15 @@ class BlinkSetup (udi_interface.Node):
         exit()
  
 
-    #def heartbeat(self):
-    #    logging.debug('heartbeat: ' + str(self.hb))
+    def heartbeat(self):
+        logging.debug('heartbeat: ' + str(self.hb))
         
-    #    if self.hb == 0:
-    #        self.reportCmd('DON',2)
-    #        self.hb = 1
-    #    else:
-    #        self.reportCmd('DOF',2)
-    #        self.hb = 0
+        if self.hb == 0:
+            self.reportCmd('DON',2)
+            self.hb = 1
+        else:
+            self.reportCmd('DOF',2)
+            self.hb = 0
 
     def checkNodes(self):
         logging.info('Updating Nodes')
@@ -280,6 +283,7 @@ class BlinkSetup (udi_interface.Node):
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
                 try:
                     success = self.blink.refresh()
+                    self.connected = success
                     nodes = self.poly.getNodes()
                     for nde in nodes:
                         if nde != 'setup':   # but not the setup node
@@ -298,8 +302,10 @@ class BlinkSetup (udi_interface.Node):
    
                 
             if 'shortPoll' in polltype:
-                #self.heartbeat()
-                #logging.info('Currently no function for shortPoll')
+                if self.connected:
+                    self.heartbeat()
+                else:
+                    logging.warning('System Apperas offline - stopping heartbeat')
                 pass
         else:
             logging.info('System Poll - Waiting for all nodes to be added')

@@ -64,7 +64,7 @@ class BlinkSetup (udi_interface.Node):
                             'email_recepient':None,
                             'email_en': False
         }
-        self.Parameters = Custom(polyglot, 'customParams')      
+        self.Parameters = Custom(polyglot, 'customparams')
         self.Notices = Custom(polyglot, 'notices')
         self.customData = Custom(polyglot, 'customdata')
         #self.customData.load()
@@ -225,6 +225,7 @@ class BlinkSetup (udi_interface.Node):
                     if not blink_network_node(self.poly, node_address, node_address, node_name, network['id'], self.blink ):
                         logging.error('Failed to create network node for {} '.format(node_name))
             else:
+                logging.warning('Network {} not in parameters - adding with default ENABLED value'.format(name))
                 self.Parameters[name] = 'ENABLED'
                 self.poly.Notices[name] = str(name) + 'network found - Add as custom Parameter with value ENABLED or DISABLED - then restart'         
         logging.debug(f'Parameter list after loop: {self.Parameters}')

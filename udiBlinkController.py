@@ -32,7 +32,7 @@ except ImportError:
 
 
  
-VERSION = '0.6.9'
+VERSION = '0.6.10'
 
 class BlinkSetup (udi_interface.Node):
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done, gen_uid
@@ -260,15 +260,6 @@ class BlinkSetup (udi_interface.Node):
         exit()
  
 
-    def heartbeat(self):
-        logging.debug('heartbeat: ' + str(self.hb))
-        
-        if self.hb == 0:
-            self.reportCmd('DON',2)
-            self.hb = 1
-        else:
-            self.reportCmd('DOF',2)
-            self.hb = 0
 
     def checkNodes(self):
         logging.info('Updating Nodes')
@@ -291,6 +282,9 @@ class BlinkSetup (udi_interface.Node):
                         if nde != 'setup':   # but not the setup node
                             if nodes[nde].id == 'blinknetwork' and hasattr(nodes[nde], 'set_connection_status'):
                                 nodes[nde].set_connection_status(True if success else False)
+                                if success:
+                                    if nodes[nde].id == 'blinknetwork' and hasattr(nodes[nde], 'heartbeat'):
+                                        nodes[nde].heartbeat()
 
                             if success:
                                 logging.debug('updating node {} data'.format(nde)) 

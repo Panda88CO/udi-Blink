@@ -37,11 +37,13 @@ class blink_network_node(udi_interface.Node):
         self.blink = blinkSys
         self.primary = primary
         self.address = address
+
         self.sync_node_camera_list = []
         self.n_queue = []  
         self.poly = polyglot
         self._camera_list = []
         self._sync_list = []
+        self.hb = 0
         #self.Parameters = Custom(polyglot, 'customparams')
         # subscribe to the events we want
         #polyglot.subscribe(polyglot.CUSTOMPARAMS, self.parameterHandler)
@@ -161,6 +163,16 @@ class blink_network_node(udi_interface.Node):
         #self.BLINK_setDriver('GV2', self.bool2isy(tmp))
 
   
+    def heartbeat(self):
+        logging.debug('heartbeat: ' + str(self.hb))
+        
+        if self.hb == 0:
+            self.reportCmd('DON',2)
+            self.hb = 1
+        else:
+            self.reportCmd('DOF',2)
+            self.hb = 0
+
     def ISYupdate(self, command=None):
         logging.info('Sync ISYupdate')
         self.blink.refresh()

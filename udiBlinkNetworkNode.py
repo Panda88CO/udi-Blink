@@ -164,14 +164,11 @@ class blink_network_node(udi_interface.Node):
 
   
     def heartbeat(self):
-        logging.debug('heartbeat: ' + str(self.hb))
-        
-        if self.hb == 0:
-            self.reportCmd('DON',2)
-            self.hb = 1
-        else:
-            self.reportCmd('DOF',2)
-            self.hb = 0
+        logging.debug('heartbeat')        
+        self.reportCmd('DON',2)
+        time.sleep(5)
+        self.reportCmd('DOF',2)
+
 
     def ISYupdate(self, command=None):
         logging.info('Sync ISYupdate')

@@ -44,7 +44,7 @@ class BlinkSetup (udi_interface.Node):
         logging.setLevel(10)
         
         self.blink = blink_system()
-        self.connected = False
+        #self.connected = False
         self.nodeDefineDone = False
         self.handleParamsDone = False
         self.paramsProcessed = False
@@ -283,7 +283,9 @@ class BlinkSetup (udi_interface.Node):
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
                 try:
                     success = self.blink.refresh()
-                    self.connected = success
+                    #self.connected = success
+                    if success:
+                        self.heartbeat()
                     nodes = self.poly.getNodes()
                     for nde in nodes:
                         if nde != 'setup':   # but not the setup node
@@ -292,6 +294,7 @@ class BlinkSetup (udi_interface.Node):
 
                             if success:
                                 logging.debug('updating node {} data'.format(nde)) 
+                                
                                 if nodes[nde].nodeDefineDone and hasattr(nodes[nde], 'updateISYdrivers'):                         
                                     nodes[nde].updateISYdrivers()
                             else:
@@ -302,10 +305,10 @@ class BlinkSetup (udi_interface.Node):
    
                 
             if 'shortPoll' in polltype:
-                if self.connected:
-                    self.heartbeat()
-                else:
-                    logging.warning('System Apperas offline - stopping heartbeat')
+                #if self.connected:
+                #    self.heartbeat()
+                #else:
+                #    logging.warning('System Apperas offline - stopping heartbeat')
                 pass
         else:
             logging.info('System Poll - Waiting for all nodes to be added')

@@ -6,6 +6,8 @@
        </sts>
       <cmds>
          <sends>
+            <cmd id="DON" /> 
+            <cmd id="DOF" /> 
          </sends>
       </cmds>
    </nodeDef>

@@ -274,9 +274,6 @@ class BlinkSetup (udi_interface.Node):
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
                 try:
                     success = self.blink.refresh()
-                    #self.connected = success
-                    if success:
-                        self.heartbeat()
                     nodes = self.poly.getNodes()
                     for nde in nodes:
                         if nde != 'setup':   # but not the setup node

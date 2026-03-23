@@ -221,7 +221,7 @@ class blink_network_node(udi_interface.Node):
                 }
 
     drivers= [ 
-                {'driver': 'ST', 'value': 1, 'uom': 25},
+            {'driver': 'ST', 'value': 1, 'uom': 25},
             {'driver': 'GV0', 'value':0, 'uom':25}, # Armed
             {'driver': 'TIME', 'value':0, 'uom':151}
         ]

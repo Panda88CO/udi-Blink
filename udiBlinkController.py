@@ -278,10 +278,16 @@ class BlinkSetup (udi_interface.Node):
                     for nde in nodes:
                         if nde != 'setup':   # but not the setup node
                             if nodes[nde].id == 'blinknetwork' and hasattr(nodes[nde], 'set_connection_status'):
+                                logging.debug('Updating connection status for node {} to {}'.format(nde, success))
                                 nodes[nde].set_connection_status(True if success else False)
                                 if success:
-                                    if nodes[nde].id == 'blinknetwork' and hasattr(nodes[nde], 'heartbeat'):
-                                        nodes[nde].heartbeat()
+                                    logging.debug('Updating heartbeat for node {}'.format(nde))
+                                    heartbeat_cb = getattr(nodes[nde], 'heartbeat', None)
+                                    if nodes[nde].id == 'blinknetwork' and callable(heartbeat_cb):
+                                        logging.debug('Executing heartbeat for node {}'.format(nde))
+                                        heartbeat_cb()
+                                    elif nodes[nde].id == 'blinknetwork':
+                                        logging.warning('Node {} is missing callable heartbeat'.format(nde))
 
                             if success:
                                 logging.debug('updating node {} data'.format(nde)) 
@@ -427,6 +433,15 @@ class BlinkSetup (udi_interface.Node):
 
     def update(self, command = None):
         self.systemPoll(['longPoll'])
+
+    def heartbeat(self):
+        logging.debug('Controller heartbeat: {}'.format(self.hb))
+        if self.hb == 0:
+            self.reportCmd('DON', 2)
+            self.hb = 1
+        else:
+            self.reportCmd('DOF', 2)
+            self.hb = 0
    
     '''
     def set_t_unit(self, command ):

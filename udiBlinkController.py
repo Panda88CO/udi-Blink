@@ -206,8 +206,7 @@ class BlinkSetup (udi_interface.Node):
 
     def add_network_nodes (self):
         logging.info('Adding Blink network nodes:')
-        #node_adr_list = [self.id]
-        node_adr_list = []
+        node_adr_list = [self.address]
         network_node_list = self.blink.get_network_list()
         self.network_names = []
         logging.debug(f'Network node list: {network_node_list}')

@@ -372,10 +372,13 @@ class blink_system:
         temp = getattr(self.cameras[camera_name], 'product_type', 'default')
         logging.debug('get_camera_type_info: {} {}'.format(camera_name, temp))
         if temp == 'owl': return 'mini'
-        elif temp == 'catalina': return 'Blink Outdoor'
-        elif temp == 'lotus': return 'doorbell'
+        elif temp == 'catalina': return 'Blink gen2'
+        elif temp in ['lotus', 'galapagos']: return 'doorbell'
         elif temp == 'xt2': return 'XT-2'
-        elif temp == 'sedona': return 'sedona'
+        elif temp == 'clownfish': return 'gen3'
+        elif temp == 'sedona': return 'outdoor4'                
+        elif temp == 'hawk': return 'mini2'
+        elif temp == 'pigeon': return 'wiredFloodLight'        
         else: return 'default'
 
     def get_camera_motion_enabled_info(self, camera_name):

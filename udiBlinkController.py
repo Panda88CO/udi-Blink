@@ -45,7 +45,6 @@ class BlinkSetup (udi_interface.Node):
         logging.setLevel(10)
         
         self.blink = blink_system()
-        #self.connected = False
         self.nodeDefineDone = False
         self.handleParamsDone = False
         self.paramsProcessed = False

@@ -19,12 +19,12 @@ def BLINK_setDriver(self, key, value, Unit=None):
     logging.debug('BLINK_setDriver : {} {} {}'.format(key, value, Unit))
     if value == None:
         logging.debug('None value passed = seting 99, UOM 25')
-        self.node.setDriver(key, 99, True, True, 25)
+        self.node.setDriver(key, 99, True, False, 25)
     else:
         if Unit:
-            self.node.setDriver(key, value, True, True, Unit)
+            self.node.setDriver(key, value, True, False, Unit)
         else:
-            self.node.setDriver(key, value)
+            self.node.setDriver(key, value, True, False)
 
 def node_queue(self, data):
     self.n_queue.append(data['address'])

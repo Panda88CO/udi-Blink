@@ -6,6 +6,7 @@
        </sts>
       <cmds>
          <sends>
+
          </sends>
       </cmds>
    </nodeDef>
@@ -31,9 +32,12 @@
       <sts>
          <st id="ST" editor="online" />
          <st id="GV0" editor="armed" />
+         <st id="TIME" editor="unixtime" />
       </sts>
       <cmds>
          <sends>
+            <cmd id="DON" /> 
+            <cmd id="DOF" /> 
          </sends>
          <accepts>
             <cmd id="UPDATE" /> 

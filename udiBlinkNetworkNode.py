@@ -37,11 +37,13 @@ class blink_network_node(udi_interface.Node):
         self.blink = blinkSys
         self.primary = primary
         self.address = address
+
         self.sync_node_camera_list = []
         self.n_queue = []  
         self.poly = polyglot
         self._camera_list = []
         self._sync_list = []
+        self.hb = 0
         #self.Parameters = Custom(polyglot, 'customparams')
         # subscribe to the events we want
         #polyglot.subscribe(polyglot.CUSTOMPARAMS, self.parameterHandler)
@@ -152,6 +154,8 @@ class blink_network_node(udi_interface.Node):
     def updateISYdrivers(self):
         if self.nodeDefineDone:
             logging.info('Network updateISYdrivers - {}'.format(self.network_id))
+            # Timestamp reflects the last successful network data refresh.
+            self.BLINK_setDriver('TIME', int(time.time()), 151)
             self.BLINK_setDriver('GV0', self.bool2isy(self.blink.get_network_arm_state(self.network_id)))
 
                          
@@ -159,6 +163,13 @@ class blink_network_node(udi_interface.Node):
         #self.BLINK_setDriver('GV2', self.bool2isy(tmp))
 
   
+    def heartbeat(self):
+        logging.debug('heartbeat')        
+        self.reportCmd('DON',2)
+        time.sleep(5)
+        self.reportCmd('DOF',2)
+
+
     def ISYupdate(self, command=None):
         logging.info('Sync ISYupdate')
         self.blink.refresh()
@@ -210,8 +221,9 @@ class blink_network_node(udi_interface.Node):
                 }
 
     drivers= [ 
-                {'driver': 'ST', 'value': 1, 'uom': 25},
-                {'driver': 'GV0', 'value':0, 'uom':25} # Armed
+            {'driver': 'ST', 'value': 1, 'uom': 25},
+            {'driver': 'GV0', 'value':0, 'uom':25}, # Armed
+            {'driver': 'TIME', 'value':0, 'uom':151}
         ]
  
 

@@ -371,7 +371,7 @@ class blink_system:
         if camera_name not in self.cameras: return 'default'
         temp = getattr(self.cameras[camera_name], 'product_type', 'default')
         logging.debug('get_camera_type_info: {} {}'.format(camera_name, temp))
-        if temp == 'owl': return 'mini'
+        if temp in ['owl']  : return 'mini'
         elif temp in ['catalina']: return 'gen2'
         elif temp in ['lotus', 'galapagos']: return 'doorbell'
         elif temp in ['xt2']: return 'XT-2'

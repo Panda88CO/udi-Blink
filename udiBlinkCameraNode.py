@@ -58,11 +58,12 @@ class blink_camera_node(udi_interface.Node):
         self.cameraType= {  'mini' : 0, #mini/owl
                             'doorbell': 1, #doorbell/lotus
                             'Blink Outdoor':2, #outdoor/catalena
-                            'wiredFloodLight':4,
                             'XT-2':3,
+                            'wiredFloodLight':4,
                             'gen3':5,
                             'outdoor4' : 6, #outdoor v4
                             'mini2' : 7, #hawk
+                            'gen2' : 8, #hawk
                             'default':99,
                              }
 

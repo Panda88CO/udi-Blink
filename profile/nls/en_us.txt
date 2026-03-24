@@ -59,10 +59,10 @@ cameratype-1 = DoorBell
 cameratype-2 = Blink Outdoor
 cameratype-3 = XT-2
 cameratype-4 = Wired Flood Light
-cameratype-5 = IndoorOutdoor gen3
+cameratype-5 = Indoor/Outdoor gen3
 cameratype-6 = Outdoor v4
 cameratype-7 = Mini 2
-
+cameratype-2 = Indoor/Outdoor gen2
 cameratype-99 = Unknown
 
 motionen-0 = Disabled

@@ -63,6 +63,8 @@ cameratype-5 = Indoor/Outdoor gen3
 cameratype-6 = Outdoor v4
 cameratype-7 = Mini 2
 cameratype-8 = Indoor/Outdoor gen2
+cameratype-9 = Indoor v4
+cameratype-10 = Mini 2K+
 cameratype-99 = Unknown
 
 motionen-0 = Disabled

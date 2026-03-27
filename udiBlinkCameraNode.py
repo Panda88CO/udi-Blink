@@ -64,6 +64,8 @@ class blink_camera_node(udi_interface.Node):
                             'outdoor4' : 6, #outdoor v4
                             'mini2' : 7, #hawk
                             'gen2' : 8, #hawk
+                            'floodlight' : 9, #trogon
+                            'mini2K+' : 10, #chickade
                             'default':99,
                              }
 

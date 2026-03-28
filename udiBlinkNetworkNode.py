@@ -96,10 +96,10 @@ class blink_network_node(udi_interface.Node):
         self.sync_list = self.blink.get_sync_modules_on_network(self.network_id)
         logging.debug('Sync list : {}'.format(self.sync_list))
         for indx, sync in enumerate(self.sync_list):
-            logging.debug('Sync: {}'.format(sync))
+            logging.debug('Sync: {}'.format(sync.name))
             nodeName = self.poly.getValidName(str(sync.name))
             nodeAdr = self.poly.getValidAddress(str(sync.sync_id))
-            logging.info('Adding Camera {} {} {}'.format(self.address, nodeAdr, nodeName))
+            logging.info('Adding SYNC unit  {} {} {}'.format(self.address, nodeAdr, nodeName))
             blink_sync_node(self.poly, self.primary, nodeAdr, nodeName, sync, self.blink)
             self._sync_list.append(nodeAdr)
         self.nodeDefineDone = True
@@ -107,8 +107,8 @@ class blink_network_node(udi_interface.Node):
         self.setDriver('ST', 1)
         #tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
         #self.BLINK_setDriver('GV2', self.bool2isy(tmp))
-        logging.debug('_camera_list {}'.format(self._camera_list))
-        logging.debug('_sync_list {}'.format(self._sync_list))        
+        #logging.debug('_camera_list {}'.format(self._camera_list))
+        #logging.debug('_sync_list {}'.format(self._sync_list))        
 
         nodes_in_db = self.poly.getNodesFromDb()
         nodes = self.poly.getNodes()

@@ -303,6 +303,8 @@ class blink_system:
 
     def get_sync_modules_on_network(self, network_id):
         sync_list = []
+        logging.debug('Finding sync modules for network_id: {}'.format(network_id))
+        logging.debug('Available sync modules: {} {}'.format(list(self.sync.keys()), list(self.sync.items())))
         for name, sync in self.sync.items():
             if str(getattr(sync, 'network_id', '')) == str(network_id):
                 sync_list.append(sync)

@@ -128,27 +128,7 @@ class blink_network_node(udi_interface.Node):
     def stop(self):
         logging.info('stop {} - Cleaning up'.format(self.name))
 
-
-    def poll(self, polltype):
-        if self.nodeDefineDone:
-
-            if 'longPoll' in polltype:
-                logging.info('System Poll executing: {}'.format(polltype))
-                #Keep token current
-                #self.node.setDriver('GV0', self.temp_unit, True, True)
-                try:
-                    pass
-                    #self.updateISYdrivers()
-                except Exception as e:
-                    logging.error('Exeption occcured : {}'.format(e))
-   
-                
-            if 'shortPoll' in polltype:
-                pass
-                #logging.info('Currently no function for shortPoll')
-        else:
-            logging.info('System Poll - Waiting for all nodes to be added')
-
+    
     def set_connection_status(self, connected):
         logging.info('set_connection_status {} - {}'.format(self.name, connected))
         self.setDriver('ST', 1 if connected else 0)

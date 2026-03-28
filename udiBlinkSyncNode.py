@@ -101,27 +101,6 @@ class blink_sync_node(udi_interface.Node):
         self.updateISYdrivers()
 
 
-    def poll(self, polltype):
-        if self.nodeDefineDone:
-
-            if 'longPoll' in polltype:
-                logging.info('System Poll executing: {}'.format(polltype))
-                #Keep token current
-                #self.node.setDriver('GV0', self.temp_unit, True, True)
-                try:
-                    pass
-                    #self.updateISYdrivers()
-                except Exception as e:
-                    logging.error('Exeption occcured : {}'.format(e))
-   
-                
-            if 'shortPoll' in polltype:
-                pass
-                #logging.info('Currently no function for shortPoll')
-        else:
-            logging.info('System Poll - Waiting for all nodes to be added')        
-
-
     id = 'blinksync'
 
     commands = { 'UPDATE'   : ISYupdate,

@@ -108,18 +108,18 @@ class blink_camera_node(udi_interface.Node):
 
     def updateISYdrivers(self):
         if self.drivers != [] and self.nodeDefineDone:
+            self.blink.refresh()
             self.BLINK_setDriver('TIME', int(time.time()), 151 )
             #logging.debug('self.camera {}'.format(self.camera.listAttr()))
             logging.info('Camera updateISYdrivers - {}'.format(self.camera.name))
             temp = str(self.blink.get_camera_status(self.camera.name))
             logging.debug('get_camera_info: {}'.format(temp))
-   
 
             self.BLINK_setDriver('ST', self.connection2isy(temp))
             temp = self.blink.get_camera_arm_info(self.camera.name)
             logging.debug('GV0 : {}'.format(temp))
             self.BLINK_setDriver('GV0', self.bool2isy(temp))
-                
+
             temp = self.blink.get_camera_battery_info(self.camera.name)
             logging.debug('GV1 : {}'.format(temp))          
             self.BLINK_setDriver('GV1', self.bat2isy(temp))
@@ -211,25 +211,6 @@ class blink_camera_node(udi_interface.Node):
         logging.info(' enable_email_video: {} - {}'.format(self.camera.name, status ))
         self.pic_email_enabled = (status)
 
-    def poll(self, polltype):
-        if self.nodeDefineDone:
-
-            if 'longPoll' in polltype:
-                logging.info('System Poll executing: {}'.format(polltype))
-                #Keep token current
-                #self.node.setDriver('GV0', self.temp_unit, True, True)
-                try:
-                    pass
-                    #self.updateISYdrivers()
-                except Exception as e:
-                    logging.error('Exeption occcured : {}'.format(e))
-   
-                
-            if 'shortPoll' in polltype:
-                pass
-                #logging.info('Currently no function for shortPoll')
-        else:
-            logging.info('System Poll - Waiting for all nodes to be added')
 
 
 

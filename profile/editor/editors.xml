@@ -6,7 +6,7 @@
      <range  uom="25" subset="0-1,99" nls="online"  />
 </editor>
   <editor id = "armed" > 
-     <range  uom="25" subset="0-1,99" nls="armed" />
+     <range  uom="25" subset="0-2,99" nls="armed" />
 </editor>
   <editor id = "doarm" > 
      <range  uom="25" subset="0-1" nls="doarm" />

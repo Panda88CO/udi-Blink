@@ -415,8 +415,8 @@ class blink_system:
                 if arm is not None:
                     return arm
 
-        # Final fallback: no usable sync/homescreen arm value; derive from cameras.
-        return self._derive_network_arm_from_cameras(network_id)
+        # No sync unit: always return 2 (Individual Camera Assigned)
+        return 2
 
     def _derive_network_arm_from_cameras(self, network_id):
         """Derive network arm state using cameras in the network."""
@@ -520,7 +520,8 @@ class blink_system:
     @async_to_sync
     async def set_network_arm_state(self, network_id, arm):
 
-        if not self._blink: return False
+        if not self._blink:
+            return False
 
         # Find the sync module for this network
         for name, sync_module in self.sync.items():
@@ -536,21 +537,25 @@ class blink_system:
                 await self._blink.refresh()
                 return True
 
-        # Fallback: no sync module (or camera-backed sync) — arm each camera directly.
+        # No sync unit: set motion detection on all cameras, but do not change arm state
         cameras_on_network = self.get_cameras_on_network(network_id)
         if cameras_on_network:
             logging.debug(
-                'set_network_arm_state: direct camera arm for network %s; '
-                'arming %d cameras individually',
-                network_id, len(cameras_on_network)
+                'set_network_arm_state: no sync unit, setting motion detection for %d cameras in network %s to %s',
+                len(cameras_on_network), network_id, arm
             )
             success_count = 0
             for camera in cameras_on_network:
                 try:
-                    await camera.async_arm(arm)
+                    # Only set motion detection, not arm state
+                    if hasattr(camera, 'async_set_motion_detect'):
+                        await camera.async_set_motion_detect(arm)
+                    else:
+                        # Fallback: use async_arm if that's the only way
+                        await camera.async_arm(arm)
                     success_count += 1
                 except Exception as e:
-                    logging.error('set_network_arm_state: failed to arm camera %s: %s',
+                    logging.error('set_network_arm_state: failed to set motion detect for camera %s: %s',
                                   getattr(camera, 'name', '?'), e)
             await self._blink.refresh()
             return success_count > 0

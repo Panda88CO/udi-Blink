@@ -400,11 +400,13 @@ class blink_system:
 
                 value = self._normalize_arm_value(getattr(sync_module, 'arm', None))
                 if value is not None:
+                    logging.debug('get_network_arm_state: found sync module arm value %r for network %s', value, network_id)
                     return value
 
         if matched_camera_backed_sync:
             camera_value = self._derive_network_arm_from_cameras(network_id)
             if camera_value is not None:
+                logging.debug('get_network_arm_state: derived camera-backed arm value %r for network %s', camera_value, network_id)
                 return camera_value
 
         # Fallback to homescreen if sync module not found (legacy)
@@ -413,10 +415,17 @@ class blink_system:
             if str(network.get('id', '')) == str(network_id):
                 arm = self._normalize_arm_value(network.get('armed'))
                 if arm is not None:
+                    logging.debug('get_network_arm_state: found homescreen arm value %r for network %s', arm, network_id)
                     return arm
 
-        # No sync unit: always return 2 (Individual Camera Assigned)
-        return 2
+        # No sync unit: check if there are cameras on this network
+        cameras_on_network = self.get_cameras_on_network(network_id)
+        if cameras_on_network:
+            logging.info('get_network_arm_state: No sync unit found for network %s, but cameras exist. Returning 2 (Individually camera assigned).', network_id)
+            return 2
+        else:
+            logging.info('get_network_arm_state: No sync unit and no cameras found for network %s. Returning None.', network_id)
+            return None
 
     def _derive_network_arm_from_cameras(self, network_id):
         """Derive network arm state using cameras in the network."""

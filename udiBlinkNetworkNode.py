@@ -105,7 +105,15 @@ class blink_network_node(udi_interface.Node):
             blink_sync_node(self.poly, self.primary, nodeAdr, nodeName, sync, self.blink)
             self._sync_list.append(nodeAdr)
         self.nodeDefineDone = True
-        self.BLINK_setDriver('GV0', self.bool2isy(self.blink.get_network_arm_state(self.network_id)))
+        gv0_val = self.blink.get_network_arm_state(self.network_id)
+        if gv0_val == 2:
+            logging.info('Network %s: No sync unit, cameras only. Setting GV0 to 2 (Individually camera assigned).', self.network_id)
+            self.BLINK_setDriver('GV0', 2)
+        elif gv0_val is not None:
+            self.BLINK_setDriver('GV0', self.bool2isy(gv0_val))
+        else:
+            logging.info('Network %s: No sync unit and no cameras. Setting GV0 to 99 (Unknown).', self.network_id)
+            self.BLINK_setDriver('GV0', 99)
         self.setDriver('ST', 1)
         #tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
         #self.BLINK_setDriver('GV2', self.bool2isy(tmp))
@@ -138,7 +146,15 @@ class blink_network_node(udi_interface.Node):
             logging.info('Network updateISYdrivers - {}'.format(self.network_id))
             # Timestamp reflects the last successful network data refresh.
             self.BLINK_setDriver('TIME', int(time.time()), 151)
-            self.BLINK_setDriver('GV0', self.bool2isy(self.blink.get_network_arm_state(self.network_id)))
+            gv0_val = self.blink.get_network_arm_state(self.network_id)
+            if gv0_val == 2:
+                logging.info('Network %s: No sync unit, cameras only. Setting GV0 to 2 (Individually camera assigned).', self.network_id)
+                self.BLINK_setDriver('GV0', 2)
+            elif gv0_val is not None:
+                self.BLINK_setDriver('GV0', self.bool2isy(gv0_val))
+            else:
+                logging.info('Network %s: No sync unit and no cameras. Setting GV0 to 99 (Unknown).', self.network_id)
+                self.BLINK_setDriver('GV0', 99)
 
                          
         #tmp = self.blink.get_sync_arm_info(self.sync_unit.name)

@@ -80,6 +80,7 @@ class blink_network_node(udi_interface.Node):
             self.camera_list = self.blink.get_sync_camera_list(self.sync_unit )
         '''
         self.camera_list = self.blink.get_cameras_on_network(self.network_id)
+        camera_ids = {str(camera.camera_id) for camera in self.camera_list}
 
         logging.debug('Adding Cameras in list: {}'.format(self.camera_list))             
         for indx, camera in enumerate(self.camera_list):
@@ -89,13 +90,16 @@ class blink_network_node(udi_interface.Node):
             #cameraName = str(name)#.replace(' ','')
             nodeAdr = self.poly.getValidAddress(str(camera.camera_id))
             #nodeAdr = str(name).replace(' ','')[:14]
-            logging.info('Adding Camera {} {} {}'.format(self.address,nodeAdr, nodeName))
+            logging.info('Adding Camera {} {} {}'.format(self.address, nodeAdr, nodeName))
             blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
             self._camera_list.append(nodeAdr)
             
         self.sync_list = self.blink.get_sync_modules_on_network(self.network_id)
         logging.debug('Sync list : {}'.format(self.sync_list))
         for indx, sync in enumerate(self.sync_list):
+            if str(sync.sync_id) in camera_ids:
+                logging.info('Skipping SYNC unit {} on network {} because sync_id matches a camera_id'.format(sync.name, self.network_id))
+                continue
             logging.debug('Sync: {}'.format(sync.name))
             nodeName = self.poly.getValidName(str(sync.name))
             nodeAdr = self.poly.getValidAddress(str(sync.sync_id))

@@ -247,8 +247,31 @@ class blink_system:
     async def refresh(self):
         if self._blink:
             await self._blink.refresh()
+            self._debug_camera_data()
             return True
         return False
+    
+    def _debug_camera_data(self):
+        """Log debug buffer with all camera data after refresh"""
+        if not self._blink or not self.cameras:
+            logging.debug('No cameras available after refresh')
+            return
+        
+        debug_buffer = ['=== Camera Data After Refresh ===']
+        for camera_name, camera in self.cameras.items():
+            debug_buffer.append(f'Camera: {camera_name}')
+            debug_buffer.append(f'  ID: {getattr(camera, "camera_id", "N/A")}')
+            debug_buffer.append(f'  Name: {getattr(camera, "name", "N/A")}')
+            debug_buffer.append(f'  Type: {getattr(camera, "product_type", "N/A")}')
+            debug_buffer.append(f'  Enabled: {getattr(camera, "enabled", "N/A")}')
+            debug_buffer.append(f'  Armed: {getattr(camera, "arm", "N/A")}')
+            debug_buffer.append(f'  Online: {getattr(camera, "online", "N/A")}')
+            debug_buffer.append(f'  Battery: {getattr(camera, "battery_level", getattr(camera, "battery", "N/A"))}')
+            debug_buffer.append(f'  Battery Voltage: {getattr(camera, "battery_voltage", "N/A")}')
+            debug_buffer.append(f'  Status: {getattr(camera, "status", "N/A")}')
+            debug_buffer.append(f'  Thumbnail: {getattr(camera, "thumbnail", "N/A")}')
+        
+        logging.debug('\n'.join(debug_buffer))
         
     def refresh_sys(self):
         return self.refresh()

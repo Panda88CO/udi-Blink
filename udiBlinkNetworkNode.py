@@ -103,6 +103,9 @@ class blink_network_node(udi_interface.Node):
             logging.debug('Sync: {}'.format(sync.name))
             nodeName = self.poly.getValidName(str(sync.name))
             nodeAdr = self.poly.getValidAddress(str(sync.sync_id))
+            if nodeAdr in self._camera_list:
+                logging.info('Skipping SYNC unit {} on network {} because normalized address {} collides with a camera address'.format(sync.name, self.network_id, nodeAdr))
+                continue
             logging.info('Adding SYNC unit  {} {} {}'.format(self.address, nodeAdr, nodeName))
             blink_sync_node(self.poly, self.primary, nodeAdr, nodeName, sync, self.blink)
             self._sync_list.append(nodeAdr)

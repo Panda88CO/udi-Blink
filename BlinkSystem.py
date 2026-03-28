@@ -259,8 +259,12 @@ class blink_system:
         
         debug_buffer = ['=== Camera Data After Refresh ===']
         for camera_name, camera in self.cameras.items():
+            camera_id = getattr(camera, 'camera_id', 'N/A')
+            sync = getattr(camera, 'sync', None)
+            sync_id = getattr(sync, 'sync_id', None) if sync else getattr(camera, 'network_id', 'N/A')
+            is_own_sync = sync and str(getattr(sync, 'sync_id', '')) == str(camera_id)
             debug_buffer.append(f'Camera: {camera_name}')
-            debug_buffer.append(f'  ID: {getattr(camera, "camera_id", "N/A")}')
+            debug_buffer.append(f'  ID: {camera_id}')
             debug_buffer.append(f'  Name: {getattr(camera, "name", "N/A")}')
             debug_buffer.append(f'  Type: {getattr(camera, "product_type", "N/A")}')
             debug_buffer.append(f'  Enabled: {getattr(camera, "enabled", "N/A")}')
@@ -270,6 +274,8 @@ class blink_system:
             debug_buffer.append(f'  Battery Voltage: {getattr(camera, "battery_voltage", "N/A")}')
             debug_buffer.append(f'  Status: {getattr(camera, "status", "N/A")}')
             debug_buffer.append(f'  Thumbnail: {getattr(camera, "thumbnail", "N/A")}')
+            debug_buffer.append(f'  Sync ID: {sync_id} {"(camera IS its own sync module)" if is_own_sync else ""}')
+            debug_buffer.append(f'  Network ID (via sync): {getattr(sync, "network_id", "N/A") if sync else getattr(camera, "network_id", "N/A")}')
         
         logging.debug('\n'.join(debug_buffer))
         
@@ -318,10 +324,15 @@ class blink_system:
     def get_cameras_on_network(self, network_id):
         camera_list = []
         for name, camera in self.cameras.items():
-            # Use getattr for safety on sync and network_id
             sync = getattr(camera, 'sync', None)
             if sync and str(getattr(sync, 'network_id', '')) == str(network_id):
                 camera_list.append(camera)
+            elif not sync or not getattr(sync, 'network_id', None):
+                # Camera may be its own sync module — check network_id directly on the camera
+                cam_network_id = getattr(camera, 'network_id', None)
+                if cam_network_id and str(cam_network_id) == str(network_id):
+                    logging.debug('Camera {} has no sync reference; using camera.network_id directly'.format(name))
+                    camera_list.append(camera)
         return camera_list
 
     def get_sync_modules_on_network(self, network_id):
@@ -441,11 +452,15 @@ class blink_system:
     def get_camera_status(self, camera_name):
         if camera_name in self.cameras:
             camera = self.cameras[camera_name]
-            # New blinkpy Camera object doesn't have status/online attribute
-            # Use sync module status as proxy
-            if camera.sync and hasattr(camera.sync, 'online'):
-                return 'online' if camera.sync.online else 'offline'
-            return 'online' # Default assumption
+            # Safely get sync reference (may not exist for standalone cameras)
+            sync = getattr(camera, 'sync', None)
+            if sync and hasattr(sync, 'online'):
+                return 'online' if sync.online else 'offline'
+            # Fallback: check camera's own online attribute (e.g. Owl/mini cameras)
+            online = getattr(camera, 'online', None)
+            if online is not None:
+                return 'online' if online else 'offline'
+            return 'online'  # Default assumption
         return None
 
     @async_to_sync

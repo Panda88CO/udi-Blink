@@ -173,7 +173,7 @@ class blink_network_node(udi_interface.Node):
 
 
     def ISYupdate(self, command=None):
-        logging.info('Sync ISYupdate')
+        logging.info('Network ISYupdate')
         self.blink.refresh()
         
         self.updateISYdrivers()
@@ -182,7 +182,7 @@ class blink_network_node(udi_interface.Node):
     # NEEDS UPDATE
     def arm_all_cameras (self, command):
         arm_enable = (1 == int(command.get('value')) )
-        logging.info('Sync arm_all_cameras:{} - {}'.format(self.network_id, arm_enable ))
+        logging.info('Network arm_all_cameras:{} - {}'.format(self.network_id, arm_enable ))
         
         #if self.sync_unit != None:
         #    self.BLINK_setDriver('GV2', self.bool2isy(arm_enable))
@@ -216,7 +216,6 @@ class blink_network_node(udi_interface.Node):
     id = 'blinknetwork'
 
     commands = { 'UPDATE'   : ISYupdate,
-
                  'ARMALL'   : arm_all_cameras
             
 

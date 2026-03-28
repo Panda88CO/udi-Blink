@@ -349,11 +349,26 @@ class blink_system:
         camera_list = []
         for name, camera in self.cameras.items():
             sync = getattr(camera, 'sync', None)
+            cam_network_id = getattr(camera, 'network_id', None)
+            cam_attrs = getattr(camera, 'attributes', None)
+            if isinstance(cam_attrs, dict) and cam_network_id is None:
+                cam_network_id = cam_attrs.get('network_id')
+
+            sync_network_id = getattr(sync, 'network_id', None) if sync else None
             if sync and str(getattr(sync, 'network_id', '')) == str(network_id):
+                camera_list.append(camera)
+            elif cam_network_id is not None and str(cam_network_id) == str(network_id):
+                # Some camera-only networks still expose a sync object that does not map
+                # correctly, so prefer an explicit camera-level network_id match.
+                if sync and str(sync_network_id) != str(network_id):
+                    logging.debug(
+                        'Camera %s sync.network_id (%s) mismatches target network_id (%s); '
+                        'using camera.network_id instead',
+                        name, sync_network_id, network_id
+                    )
                 camera_list.append(camera)
             elif not sync or not getattr(sync, 'network_id', None):
                 # Camera may be its own sync module — check network_id directly on the camera
-                cam_network_id = getattr(camera, 'network_id', None)
                 if cam_network_id and str(cam_network_id) == str(network_id):
                     logging.debug('Camera {} has no sync reference; using camera.network_id directly'.format(name))
                     camera_list.append(camera)
@@ -372,13 +387,15 @@ class blink_system:
         # Try to find sync module for this network and return its arm state
         for name, sync_module in self.sync.items():
             if str(getattr(sync_module, 'network_id', '')) == str(network_id):
-                return getattr(sync_module, 'arm', None)
+                value = self._normalize_arm_value(getattr(sync_module, 'arm', None))
+                if value is not None:
+                    return value
 
         # Fallback to homescreen if sync module not found (legacy)
         networks = self.homescreen.get('networks', [])
         for network in networks:
             if str(network.get('id', '')) == str(network_id):
-                arm = network.get('armed')
+                arm = self._normalize_arm_value(network.get('armed'))
                 if arm is not None:
                     return arm
 
@@ -386,15 +403,50 @@ class blink_system:
         # Return True only if every camera on the network is armed; False if at least one is not.
         cameras_on_network = self.get_cameras_on_network(network_id)
         if cameras_on_network:
-            arm_states = [getattr(c, 'arm', None) for c in cameras_on_network]
+            arm_states = []
+            for camera in cameras_on_network:
+                value = self._normalize_arm_value(getattr(camera, 'arm', None))
+                if value is None:
+                    attrs = getattr(camera, 'attributes', None)
+                    if isinstance(attrs, dict):
+                        for key in ('armed', 'arm', 'motion_enabled', 'enabled'):
+                            value = self._normalize_arm_value(attrs.get(key))
+                            if value is not None:
+                                break
+                if value is not None:
+                    arm_states.append(value)
+
             valid = [s for s in arm_states if s is not None]
             if valid:
                 logging.debug(
-                    'get_network_arm_state: no sync module for network %s; '  
+                    'get_network_arm_state: no sync module for network %s; '
                     'deriving arm state from %d cameras: %s',
                     network_id, len(valid), valid
                 )
                 return all(valid)
+
+            logging.debug(
+                'get_network_arm_state: no usable arm values found for %d cameras on network %s',
+                len(cameras_on_network), network_id
+            )
+        return None
+
+    def _normalize_arm_value(self, value):
+        """Normalize mixed arm/disarm payloads to bool/None."""
+        if isinstance(value, bool):
+            return value
+        if value is None:
+            return None
+        if isinstance(value, (int, float)):
+            return bool(value)
+
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in ('armed', 'arm', 'on', 'true', '1', 'enabled', 'yes'):
+                return True
+            if normalized in ('disarmed', 'disarm', 'off', 'false', '0', 'disabled', 'no'):
+                return False
+
         return None
 
     @async_to_sync

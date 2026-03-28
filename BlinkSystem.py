@@ -373,27 +373,57 @@ class blink_system:
         for name, sync_module in self.sync.items():
             if str(getattr(sync_module, 'network_id', '')) == str(network_id):
                 return getattr(sync_module, 'arm', None)
-        
+
         # Fallback to homescreen if sync module not found (legacy)
         networks = self.homescreen.get('networks', [])
         for network in networks:
             if str(network.get('id', '')) == str(network_id):
-                return network.get('armed')
+                arm = network.get('armed')
+                if arm is not None:
+                    return arm
+
+        # Final fallback: no sync module on this network — derive arm state from cameras.
+        # Return True only if every camera on the network is armed; False if at least one is not.
+        cameras_on_network = self.get_cameras_on_network(network_id)
+        if cameras_on_network:
+            arm_states = [getattr(c, 'arm', None) for c in cameras_on_network]
+            valid = [s for s in arm_states if s is not None]
+            if valid:
+                logging.debug(
+                    'get_network_arm_state: no sync module for network %s; '  
+                    'deriving arm state from %d cameras: %s',
+                    network_id, len(valid), valid
+                )
+                return all(valid)
         return None
 
     @async_to_sync
     async def set_network_arm_state(self, network_id, arm):
-        
+
         if not self._blink: return False
-        
+
         # Find the sync module for this network
         for name, sync_module in self.sync.items():
-            if str(sync_module.network_id) == str(network_id):
+            if str(getattr(sync_module, 'network_id', '')) == str(network_id):
                 await sync_module.async_arm(arm)
                 return True
-                
-        # Fallback: try to find by iterating networks if sync module not found
-        # (Though usually sync modules cover all networks)
+
+        # Fallback: no sync module — arm each camera on this network individually.
+        cameras_on_network = self.get_cameras_on_network(network_id)
+        if cameras_on_network:
+            logging.debug(
+                'set_network_arm_state: no sync module for network %s; '
+                'arming %d cameras individually',
+                network_id, len(cameras_on_network)
+            )
+            for camera in cameras_on_network:
+                try:
+                    await camera.async_arm(arm)
+                except Exception as e:
+                    logging.error('set_network_arm_state: failed to arm camera %s: %s',
+                                  getattr(camera, 'name', '?'), e)
+            return True
+
         return False
 
     def get_camera_data(self, camera_name):
@@ -440,7 +470,7 @@ class blink_system:
         elif temp in ['hawk']: return 'mini2'
         elif temp in ['pigeon']: return 'wiredFloodLight'   
         elif temp in ['trogon']: return 'floodlight'    
-        elif temp in ['chickade']: return 'mini2K+'     
+        elif temp in ['chickadee']: return 'mini2K+'     
         else: return 'default'
 
     def get_camera_motion_enabled_info(self, camera_name):

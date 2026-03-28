@@ -29,7 +29,7 @@ class blink_network_node(udi_interface.Node):
 
     def __init__(self, polyglot, primary, address, name, network_id, blinkSys  ):
         super().__init__( polyglot, primary, address, name)   
-        logging.debug('blink SYNC INIT- {}'.format(name))
+        logging.debug('New Blink Network INIT- {}'.format(name))
         self.nodeDefineDone = False
         self.networkNodeReady = False
         self.network_id = network_id
@@ -59,7 +59,7 @@ class blink_network_node(udi_interface.Node):
         self.poly.addNode(self)
         self.wait_for_node_done()
         self.node = self.poly.getNode(address)
-        logging.info('Start {} sync module Node'.format(self.name))  
+        logging.info('Start {} network Node'.format(self.name))  
         time.sleep(1)
         self.nodeDefineDone = True
 
@@ -67,18 +67,13 @@ class blink_network_node(udi_interface.Node):
 
 
     def start(self):        
-        logging.debug('Sync module Start {}'.format(self.name))
+        logging.debug('Network module Start {}'.format(self.name))
         time.sleep(2)
         while not self.nodeDefineDone or self.node == None or self.drivers == None:
             time.sleep(2)
             logging.info('Waiting for nodes to be created')
 
-        '''
-        if self.sync_unit == None: #no sync units used
-            self.camera_list = self.blink.get_camera_list()
-        else:
-            self.camera_list = self.blink.get_sync_camera_list(self.sync_unit )
-        '''
+ 
         self.camera_list = self.blink.get_cameras_on_network(self.network_id)
         camera_ids = {str(camera.camera_id) for camera in self.camera_list}
 

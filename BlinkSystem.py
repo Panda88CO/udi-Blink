@@ -384,12 +384,28 @@ class blink_system:
         return sync_list
 
     def get_network_arm_state(self, network_id):
+        matched_camera_backed_sync = False
+
         # Try to find sync module for this network and return its arm state
         for name, sync_module in self.sync.items():
             if str(getattr(sync_module, 'network_id', '')) == str(network_id):
+                if self._is_camera_backed_sync(sync_module, network_id):
+                    matched_camera_backed_sync = True
+                    logging.debug(
+                        'get_network_arm_state: sync %s on network %s is camera-backed; '
+                        'using camera-derived arm state',
+                        getattr(sync_module, 'name', name), network_id
+                    )
+                    break
+
                 value = self._normalize_arm_value(getattr(sync_module, 'arm', None))
                 if value is not None:
                     return value
+
+        if matched_camera_backed_sync:
+            camera_value = self._derive_network_arm_from_cameras(network_id)
+            if camera_value is not None:
+                return camera_value
 
         # Fallback to homescreen if sync module not found (legacy)
         networks = self.homescreen.get('networks', [])
@@ -399,37 +415,62 @@ class blink_system:
                 if arm is not None:
                     return arm
 
-        # Final fallback: no sync module on this network — derive arm state from cameras.
-        # Return True only if every camera on the network is armed; False if at least one is not.
+        # Final fallback: no usable sync/homescreen arm value; derive from cameras.
+        return self._derive_network_arm_from_cameras(network_id)
+
+    def _derive_network_arm_from_cameras(self, network_id):
+        """Derive network arm state using cameras in the network."""
         cameras_on_network = self.get_cameras_on_network(network_id)
-        if cameras_on_network:
-            arm_states = []
-            for camera in cameras_on_network:
-                value = self._normalize_arm_value(getattr(camera, 'arm', None))
-                if value is None:
-                    attrs = getattr(camera, 'attributes', None)
-                    if isinstance(attrs, dict):
-                        for key in ('armed', 'arm', 'motion_enabled', 'enabled'):
-                            value = self._normalize_arm_value(attrs.get(key))
-                            if value is not None:
-                                break
-                if value is not None:
-                    arm_states.append(value)
+        if not cameras_on_network:
+            return None
 
-            valid = [s for s in arm_states if s is not None]
-            if valid:
-                logging.debug(
-                    'get_network_arm_state: no sync module for network %s; '
-                    'deriving arm state from %d cameras: %s',
-                    network_id, len(valid), valid
-                )
-                return all(valid)
+        arm_states = []
+        for camera in cameras_on_network:
+            value = self._normalize_arm_value(getattr(camera, 'arm', None))
+            if value is None:
+                attrs = getattr(camera, 'attributes', None)
+                if isinstance(attrs, dict):
+                    for key in ('armed', 'arm', 'motion_enabled', 'enabled'):
+                        value = self._normalize_arm_value(attrs.get(key))
+                        if value is not None:
+                            break
+            if value is not None:
+                arm_states.append(value)
 
+        if arm_states:
             logging.debug(
-                'get_network_arm_state: no usable arm values found for %d cameras on network %s',
-                len(cameras_on_network), network_id
+                'get_network_arm_state: deriving arm state from %d cameras on network %s: %s',
+                len(arm_states), network_id, arm_states
             )
+            return all(arm_states)
+
+        logging.debug(
+            'get_network_arm_state: no usable arm values found for %d cameras on network %s',
+            len(cameras_on_network), network_id
+        )
         return None
+
+    def _is_camera_backed_sync(self, sync_module, network_id):
+        """True if a sync entry represents a camera-backed/standalone network."""
+        sync_id = getattr(sync_module, 'sync_id', None)
+        if sync_id is None:
+            sync_id = getattr(sync_module, 'id', None)
+        attrs = getattr(sync_module, 'attributes', None)
+        if sync_id is None and isinstance(attrs, dict):
+            sync_id = attrs.get('id')
+
+        if sync_id is None:
+            return False
+
+        for camera in self.get_cameras_on_network(network_id):
+            cam_id = getattr(camera, 'camera_id', None)
+            if cam_id is None:
+                cam_attrs = getattr(camera, 'attributes', None)
+                if isinstance(cam_attrs, dict):
+                    cam_id = cam_attrs.get('id')
+            if cam_id is not None and str(cam_id) == str(sync_id):
+                return True
+        return False
 
     def _normalize_arm_value(self, value):
         """Normalize mixed arm/disarm payloads to bool/None."""
@@ -457,24 +498,35 @@ class blink_system:
         # Find the sync module for this network
         for name, sync_module in self.sync.items():
             if str(getattr(sync_module, 'network_id', '')) == str(network_id):
+                if self._is_camera_backed_sync(sync_module, network_id):
+                    logging.debug(
+                        'set_network_arm_state: sync %s on network %s is camera-backed; '
+                        'arming cameras directly',
+                        getattr(sync_module, 'name', name), network_id
+                    )
+                    break
                 await sync_module.async_arm(arm)
+                await self._blink.refresh()
                 return True
 
-        # Fallback: no sync module — arm each camera on this network individually.
+        # Fallback: no sync module (or camera-backed sync) — arm each camera directly.
         cameras_on_network = self.get_cameras_on_network(network_id)
         if cameras_on_network:
             logging.debug(
-                'set_network_arm_state: no sync module for network %s; '
+                'set_network_arm_state: direct camera arm for network %s; '
                 'arming %d cameras individually',
                 network_id, len(cameras_on_network)
             )
+            success_count = 0
             for camera in cameras_on_network:
                 try:
                     await camera.async_arm(arm)
+                    success_count += 1
                 except Exception as e:
                     logging.error('set_network_arm_state: failed to arm camera %s: %s',
                                   getattr(camera, 'name', '?'), e)
-            return True
+            await self._blink.refresh()
+            return success_count > 0
 
         return False
 

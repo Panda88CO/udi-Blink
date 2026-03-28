@@ -33,7 +33,7 @@ except ImportError:
 
 
  
-VERSION = '0.6.13' 
+VERSION = '0.6.14' 
 
 class BlinkSetup (udi_interface.Node):
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done, gen_uid

@@ -317,8 +317,32 @@ class blink_system:
         return False
 
     def get_sync_online(self, sync_name):
-        if sync_name in self.sync:
-            return getattr(self.sync[sync_name], 'online', None)
+        if sync_name not in self.sync:
+            return None
+
+        sync_obj = self.sync[sync_name]
+        logging.debug(
+            "get_sync_online raw values for %s: status=%r enabled=%r attributes=%r",
+            sync_name,
+            getattr(sync_obj, 'status', None),
+            getattr(sync_obj, 'enabled', None),
+            getattr(sync_obj, 'attributes', None),
+        )
+
+        # Prefer raw status fields and avoid sync.online, which can emit
+        # "Unknown sync module status" with some blinkpy payloads.
+        for attr in ('status', 'enabled'):
+            value = self._normalize_online_value(getattr(sync_obj, attr, None))
+            if value is not None:
+                return value
+
+        attrs = getattr(sync_obj, 'attributes', None)
+        if isinstance(attrs, dict):
+            for key in ('status', 'online', 'enabled'):
+                value = self._normalize_online_value(attrs.get(key))
+                if value is not None:
+                    return value
+
         return None
 
     def get_cameras_on_network(self, network_id):
@@ -452,15 +476,46 @@ class blink_system:
     def get_camera_status(self, camera_name):
         if camera_name in self.cameras:
             camera = self.cameras[camera_name]
-            # Safely get sync reference (may not exist for standalone cameras)
-            sync = getattr(camera, 'sync', None)
-            if sync and hasattr(sync, 'online'):
-                return 'online' if sync.online else 'offline'
-            # Fallback: check camera's own online attribute (e.g. Owl/mini cameras)
-            online = getattr(camera, 'online', None)
+
+            # Camera-level data is usually the most reliable source.
+            online = self._normalize_online_value(getattr(camera, 'online', None))
             if online is not None:
                 return 'online' if online else 'offline'
+
+            status = self._normalize_online_value(getattr(camera, 'status', None))
+            if status is not None:
+                return 'online' if status else 'offline'
+
+            # Fallback to associated sync module status.
+            sync = getattr(camera, 'sync', None)
+            if sync:
+                sync_name = getattr(sync, 'name', None)
+                if sync_name:
+                    sync_online = self.get_sync_online(sync_name)
+                else:
+                    sync_online = self._normalize_online_value(getattr(sync, 'status', None))
+                if sync_online is not None:
+                    return 'online' if sync_online else 'offline'
+
             return 'online'  # Default assumption
+        return None
+
+    def _normalize_online_value(self, value):
+        """Normalize mixed online/offline payloads to bool/None."""
+        if isinstance(value, bool):
+            return value
+        if value is None:
+            return None
+        if isinstance(value, (int, float)):
+            return bool(value)
+
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in ('online', 'on', 'true', '1', 'connected', 'ok'):
+                return True
+            if normalized in ('offline', 'off', 'false', '0', 'disconnected', 'unavailable'):
+                return False
+
         return None
 
     @async_to_sync

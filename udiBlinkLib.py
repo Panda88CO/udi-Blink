@@ -42,7 +42,7 @@ def connection2isy(self, connection):
     elif connection == 'done': # Not sure how to detect state for older cameras
         state = 98
     else:
-        logging.error('Unknown status returned : {}'.format(state))
+        logging.error('Unknown status returned : {}'.format(connection))
         state = None
     return(state)
 

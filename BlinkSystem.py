@@ -426,16 +426,43 @@ class blink_system:
 
         arm_states = []
         for camera in cameras_on_network:
-            value = self._normalize_arm_value(getattr(camera, 'arm', None))
-            if value is None:
-                attrs = getattr(camera, 'attributes', None)
-                if isinstance(attrs, dict):
-                    for key in ('armed', 'arm', 'motion_enabled', 'enabled'):
-                        value = self._normalize_arm_value(attrs.get(key))
-                        if value is not None:
-                            break
-            if value is not None:
-                arm_states.append(value)
+            # Default to disarmed unless all conditions are met
+            is_armed = False
+            is_motion_enabled = False
+            is_motion_active = True  # Assume true if not present
+
+            # Check direct camera attributes
+            attrs = getattr(camera, 'attributes', None)
+            if attrs and isinstance(attrs, dict):
+                # Check for armed/arm/enabled
+                for key in ('armed', 'arm', 'enabled'):
+                    val = self._normalize_arm_value(attrs.get(key))
+                    if val is not None:
+                        is_armed = val
+                        break
+                # Check for motion_enabled
+                motion_val = self._normalize_arm_value(attrs.get('motion_enabled'))
+                if motion_val is not None:
+                    is_motion_enabled = motion_val
+                # Check for motion_active (if present)
+                if 'motion_active' in attrs:
+                    is_motion_active = self._normalize_arm_value(attrs.get('motion_active'))
+            else:
+                # Fallback to direct camera properties
+                is_armed = self._normalize_arm_value(getattr(camera, 'arm', None))
+                if is_armed is None:
+                    is_armed = self._normalize_arm_value(getattr(camera, 'enabled', None))
+                is_motion_enabled = self._normalize_arm_value(getattr(camera, 'motion_enabled', None))
+                if hasattr(camera, 'motion_active'):
+                    is_motion_active = self._normalize_arm_value(getattr(camera, 'motion_active', None))
+
+            # Treat as disarmed if motion_enabled is True but not active
+            if is_motion_enabled and not is_motion_active:
+                is_armed = False
+
+            # Only consider camera armed if both armed and motion_enabled are True and motion_active is True
+            camera_fully_armed = bool(is_armed and is_motion_enabled and is_motion_active)
+            arm_states.append(camera_fully_armed)
 
         if arm_states:
             logging.debug(

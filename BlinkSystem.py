@@ -386,30 +386,55 @@ class blink_system:
         sync_list = []
         logging.debug('Finding sync modules for network_id: {}'.format(network_id))
         logging.debug('Available sync modules: {} {}'.format(list(self.sync.keys()), list(self.sync.items())))
+        # Collect all camera IDs for this network
+        camera_ids = set()
+        for name, camera in self.cameras.items():
+            cam_network_id = getattr(camera, 'network_id', None)
+            cam_attrs = getattr(camera, 'attributes', None)
+            if isinstance(cam_attrs, dict) and cam_network_id is None:
+                cam_network_id = cam_attrs.get('network_id')
+            if cam_network_id is not None and str(cam_network_id) == str(network_id):
+                camera_id = getattr(camera, 'camera_id', None)
+                if camera_id is not None:
+                    camera_ids.add(str(camera_id))
+
         for name, sync in self.sync.items():
+            sync_id = getattr(sync, 'sync_id', None)
             if str(getattr(sync, 'network_id', '')) == str(network_id):
+                # Skip fake sync units (where sync_id matches a camera_id)
+                if sync_id is not None and str(sync_id) in camera_ids:
+                    logging.debug('Skipping fake sync unit %s (sync_id %s matches a camera_id) for network %s', name, sync_id, network_id)
+                    continue
                 sync_list.append(sync)
         return sync_list
 
     def get_network_arm_state(self, network_id):
         matched_camera_backed_sync = False
+        only_camera_backed_sync = True
+        found_sync = False
 
         # Try to find sync module for this network and return its arm state
         for name, sync_module in self.sync.items():
             if str(getattr(sync_module, 'network_id', '')) == str(network_id):
+                found_sync = True
                 if self._is_camera_backed_sync(sync_module, network_id):
                     matched_camera_backed_sync = True
                     logging.debug(
                         'get_network_arm_state: sync %s on network %s is camera-backed; '
-                        'using camera-derived arm state',
+                        'will check if all syncs are camera-backed',
                         getattr(sync_module, 'name', name), network_id
                     )
-                    break
+                else:
+                    only_camera_backed_sync = False
+                    value = self._normalize_arm_value(getattr(sync_module, 'arm', None))
+                    if value is not None:
+                        logging.debug('get_network_arm_state: found sync module arm value %r for network %s', value, network_id)
+                        return value
 
-                value = self._normalize_arm_value(getattr(sync_module, 'arm', None))
-                if value is not None:
-                    logging.debug('get_network_arm_state: found sync module arm value %r for network %s', value, network_id)
-                    return value
+        # If all syncs for this network are camera-backed, treat as camera-only and return 2
+        if found_sync and matched_camera_backed_sync and only_camera_backed_sync:
+            logging.info('get_network_arm_state: All syncs for network %s are camera-backed. Returning 2 (Individually camera assigned).', network_id)
+            return 2
 
         if matched_camera_backed_sync:
             camera_value = self._derive_network_arm_from_cameras(network_id)

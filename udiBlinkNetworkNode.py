@@ -109,8 +109,10 @@ class blink_network_node(udi_interface.Node):
         if gv0_val == 2:
             logging.info('Network %s: No sync unit, cameras only. Setting GV0 to 2 (Individually camera assigned).', self.network_id)
             self.BLINK_setDriver('GV0', 2)
-        elif gv0_val is not None:
-            self.BLINK_setDriver('GV0', self.bool2isy(gv0_val))
+        elif gv0_val is True:
+            self.BLINK_setDriver('GV0', 1)
+        elif gv0_val is False:
+            self.BLINK_setDriver('GV0', 0)
         else:
             logging.info('Network %s: No sync unit and no cameras. Setting GV0 to 99 (Unknown).', self.network_id)
             self.BLINK_setDriver('GV0', 99)
@@ -150,8 +152,10 @@ class blink_network_node(udi_interface.Node):
             if gv0_val == 2:
                 logging.info('Network %s: No sync unit, cameras only. Setting GV0 to 2 (Individually camera assigned).', self.network_id)
                 self.BLINK_setDriver('GV0', 2)
-            elif gv0_val is not None:
-                self.BLINK_setDriver('GV0', self.bool2isy(gv0_val))
+            elif gv0_val is True:
+                self.BLINK_setDriver('GV0', 1)
+            elif gv0_val is False:
+                self.BLINK_setDriver('GV0', 0)
             else:
                 logging.info('Network %s: No sync unit and no cameras. Setting GV0 to 99 (Unknown).', self.network_id)
                 self.BLINK_setDriver('GV0', 99)

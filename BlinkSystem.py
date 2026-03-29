@@ -354,23 +354,31 @@ class blink_system:
             if isinstance(cam_attrs, dict) and cam_network_id is None:
                 cam_network_id = cam_attrs.get('network_id')
 
+            # Detect if sync is not a real sync unit (e.g., camera is its own sync)
+            is_fake_sync = False
+            if sync is not None:
+                sync_id = getattr(sync, 'sync_id', None)
+                camera_id = getattr(camera, 'camera_id', None)
+                if sync is camera or (sync_id is not None and camera_id is not None and str(sync_id) == str(camera_id)):
+                    is_fake_sync = True
+
             sync_network_id = getattr(sync, 'network_id', None) if sync else None
-            if sync and str(getattr(sync, 'network_id', '')) == str(network_id):
+            if sync and not is_fake_sync and str(getattr(sync, 'network_id', '')) == str(network_id):
                 camera_list.append(camera)
             elif cam_network_id is not None and str(cam_network_id) == str(network_id):
                 # Some camera-only networks still expose a sync object that does not map
                 # correctly, so prefer an explicit camera-level network_id match.
-                if sync and str(sync_network_id) != str(network_id):
+                if sync and not is_fake_sync and str(sync_network_id) != str(network_id):
                     logging.debug(
                         'Camera %s sync.network_id (%s) mismatches target network_id (%s); '
                         'using camera.network_id instead',
                         name, sync_network_id, network_id
                     )
                 camera_list.append(camera)
-            elif not sync or not getattr(sync, 'network_id', None):
-                # Camera may be its own sync module — check network_id directly on the camera
+            elif not sync or is_fake_sync or not getattr(sync, 'network_id', None):
+                # Camera may be its own sync module or have no sync — check network_id directly on the camera
                 if cam_network_id and str(cam_network_id) == str(network_id):
-                    logging.debug('Camera {} has no sync reference; using camera.network_id directly'.format(name))
+                    logging.debug('Camera {} has no real sync reference; using camera.network_id directly'.format(name))
                     camera_list.append(camera)
         return camera_list
 

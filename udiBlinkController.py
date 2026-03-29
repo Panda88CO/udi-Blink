@@ -42,7 +42,7 @@ class BlinkSetup (udi_interface.Node):
     def  __init__(self, polyglot, primary, address, name):
         super().__init__( polyglot, primary, address, name)  
         
-        logging.setLevel(10)
+        #logging.setLevel(10)
         
         self.blink = blink_system()
         self.nodeDefineDone = False
@@ -147,7 +147,7 @@ class BlinkSetup (udi_interface.Node):
             while not self.paramsProcessed or not self.nodeDefineDone:
                 logging.info('Waiting for setup to complete param:{} nodes:{}'.format(self.paramsProcessed, self.nodeDefineDone ))
                 time.sleep(2)
-            logging.setLevel(10)
+            #logging.setLevel(10)
             #logging.debug('syncUnits / syncString: {} - {}'.format(self.syncUnits, self.syncUnitString))
             #self.BLINK_setDriver('ST', 1)
             #time.sleep(5)

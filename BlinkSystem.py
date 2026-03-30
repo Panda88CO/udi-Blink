@@ -587,6 +587,7 @@ class blink_system:
                 len(cameras_on_network), network_id, arm
             )
             success_count = 0
+            import asyncio
             for camera in cameras_on_network:
                 try:
                     # Only set motion detection, not arm state
@@ -596,6 +597,7 @@ class blink_system:
                         # Fallback: use async_arm if that's the only way
                         await camera.async_arm(arm)
                     success_count += 1
+                    await asyncio.sleep(0.5)  # Throttle requests to avoid API/camera overload
                 except Exception as e:
                     logging.error('set_network_arm_state: failed to set motion detect for camera %s: %s',
                                   getattr(camera, 'name', '?'), e)

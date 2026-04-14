@@ -648,7 +648,7 @@ class blink_system:
         elif temp in ['clownfish']: return 'gen3'
         elif temp in ['sedona']: return 'outdoor4'                
         elif temp in ['hawk']: return 'mini2'
-        elif temp in ['pigeon']: return 'wiredFloodLight'   
+        elif temp in ['pigeon', 'superior']: return 'wiredFloodLight'   
         elif temp in ['trogon']: return 'floodlight'    
         elif temp in ['chickadee']: return 'mini2K+'     
         else: return 'default'

@@ -650,7 +650,8 @@ class blink_system:
         elif temp in ['hawk']: return 'mini2'
         elif temp in ['pigeon', 'superior']: return 'wiredFloodLight'   
         elif temp in ['trogon']: return 'floodlight'    
-        elif temp in ['chickadee']: return 'mini2K+'     
+        elif temp in ['chickadee']: return 'mini2K+'   
+        elif temp in ['sonoran']: return 'outdoor2K+'   
         else: return 'default'
 
     def get_camera_motion_enabled_info(self, camera_name):

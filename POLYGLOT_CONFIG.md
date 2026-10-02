@@ -1,31 +1,32 @@
 # udi-blink
-This node server is mostly targeted to arm and disarm cameras from within IoP/ISY (e.g. follow arming of alarm system)
-It does provide ability to snap a picture based on e.g. a trigger motion sensor - this picture does replace the existing thumbnail in the Blink app.  Similar videos can also be triggered.  Camera reports motion, but it needs to be polled which cannot happen too often or the system will throttle. 
-An option to have pictures emailed to you is added - may add video email support as well later, but they can currently be viewed in app
 
-## Installation
-ShortPoll has no functionality at present, LongPoll updates data.  Do not run update too often, as system may get throttled by Blink. 
+This node server is mostly targeted to arm and disarm cameras from within IoP/ISY (e.g. follow arming of alarm system).
+It provides the ability to snap pictures and trigger videos based on events (e.g. motion sensor triggers). Snapping a picture replaces the existing thumbnail in the Blink app. Cameras report motion, but state needs to be polled; polling should not happen too frequently or Blink servers may throttle requests.
+An option to have snapped pictures emailed to you is also available.
 
-Configuration requires the following paramteres: 
-TEMP_UNIT   : Temperature unit (C/F)
-USERNAME    : Blink login ID
-PASSWORD    : Blink password
-AUTH_KEY    : Authentication code 2FA from app (enter when received and then SAVE - do not restart)
+## Installation & Configuration
 
-EMAIL_ENABLED   : Enable emailing of pictures snapped (True/False)
-SMTP            : Address of SMTP server used to send mail e.g. smtp-mail.outlook.com
-SMTP_PORT       : SMTP port - default is 587
-SMTP_EMAIL      : Email account on SMTP server account
-SMTP_PASSWORD   : Password on SMTP aserver account
-EMAIL_RECEPIENT : Email where pictures are sent
+- **ShortPoll**: Currently not used.
+- **LongPoll**: Updates data. Do not set interval too short to avoid being throttled by Blink (suggested: 60s or more, default is 180s).
 
-The networks defined in Blibk will be added here after first run.  Select te ones that are desired by enterning ENABLED (DISABLED to disbale)
+### Configuration Parameters:
+- **TEMP_UNIT**: Temperature unit (`C` or `F`).
+- **USERNAME**: Blink login email address.
+- **PASSWORD**: Blink account password.
+- **AUTH_KEY**: Two-factor authentication (2FA) PIN code received from Blink. Enter this code when requested on initial setup or re-auth, then click **Save** (do not restart). Once authenticated, tokens are saved persistently and subsequent reboots/restarts will bypass 2FA automatically.
 
-### Polisy
+### Email Notification Parameters (Optional):
+- **EMAIL_ENABLED**: Enable emailing of snapped pictures (`True`/`False`).
+- **SMTP**: Address of SMTP server used to send email (e.g. `smtp-mail.outlook.com`).
+- **SMTP_PORT**: SMTP port (default is `587`).
+- **SMTP_EMAIL**: Email address used to authenticate on SMTP server.
+- **SMTP_PASSWORD**: Password for SMTP account.
+- **EMAIL_RECEPIENT**: Recipient email address where pictures are sent.
 
-## Notes 
-Note - one cannot enable a camera if system is disarmed - If system is armed, the individual cameras can be disabled
+### Network Configuration:
+The networks defined in your Blink account will be discovered after the initial run. Add or configure each network parameter in Custom Parameters with value `ENABLED` (or `DISABLED` to ignore), then save.
 
-For mail server setup - a possible way is to create an mail account at www.outlook.com
-The SMTP is smtp-mail.outlook.com, SMTP_PORT is 587, SMTP_EMAIL and SMTP_PASSWORD are the ones you select when d=creating the account.  
-I did try to use the build in ISY mail server, but it does not seem to support attachments
+## Notes
+- **Armed / Disarmed State**: You cannot enable an individual camera if the system/network is disarmed. If the system is armed, individual cameras can be enabled or disabled.
+- **Mail Server Setup**: For Outlook/Hotmail, SMTP is `smtp-mail.outlook.com`, port is `587`, and SMTP_EMAIL / SMTP_PASSWORD are your account credentials (or app password if 2FA is enabled on your email account).
+- **Authentication Across Reboots**: Authentication tokens are stored locally and in Polyglot storage. On system reboots or node server restarts, the node server will reuse existing tokens so you do not have to re-enter a 2FA PIN. If tokens expire or credentials change, the node server will start over and prompt for a new 2FA PIN via `AUTH_KEY`.

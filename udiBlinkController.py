@@ -8,6 +8,7 @@ import time
 import re
 import os
 import threading
+import json
 
 
 try:
@@ -33,7 +34,7 @@ except ImportError:
 
 
  
-VERSION = '0.6.19' 
+VERSION = '0.6.20' 
 
 class BlinkSetup (udi_interface.Node):
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done, gen_uid
@@ -115,7 +116,75 @@ class BlinkSetup (udi_interface.Node):
         return(unitList)
 
 
-    def prepare_login_data(self):
+    def load_saved_tokens(self):
+        tokens = None
+        # Try customData first
+        try:
+            if 'auth_tokens' in self.customData and self.customData['auth_tokens']:
+                tokens = self.customData['auth_tokens']
+                logging.debug('Found auth_tokens in customData')
+        except Exception as e:
+            logging.debug(f'Could not load auth_tokens from customData: {e}')
+
+        # If not in customData, try local file
+        if not tokens or not isinstance(tokens, dict) or not tokens.get('refresh_token'):
+            if os.path.exists('blink_tokens.json'):
+                try:
+                    with open('blink_tokens.json', 'r') as f:
+                        file_tokens = json.load(f)
+                    if isinstance(file_tokens, dict) and file_tokens.get('refresh_token'):
+                        tokens = file_tokens
+                        logging.debug('Loaded auth_tokens from blink_tokens.json')
+                        try:
+                            self.customData['auth_tokens'] = tokens
+                        except Exception:
+                            pass
+                except Exception as e:
+                    logging.error(f'Error reading blink_tokens.json: {e}')
+
+        if tokens and isinstance(tokens, dict):
+            # Check if username matches current username
+            token_user = tokens.get('username')
+            if token_user and self.userName and token_user.lower() != self.userName.lower():
+                logging.warning(f'Stored tokens belong to {token_user}, but configured username is {self.userName}. Clearing tokens.')
+                self.clear_saved_tokens()
+                return None
+            return tokens
+        return None
+
+    def save_saved_tokens(self, auth_data):
+        if not auth_data or not isinstance(auth_data, dict):
+            return
+        if not auth_data.get('refresh_token'):
+            return
+        logging.info('Saving updated Blink authentication tokens...')
+        if not auth_data.get('username') and self.userName:
+            auth_data['username'] = self.userName
+        try:
+            self.customData['auth_tokens'] = auth_data
+        except Exception as e:
+            logging.error(f'Error storing auth_tokens in customData: {e}')
+        try:
+            with open('blink_tokens.json', 'w') as f:
+                json.dump(auth_data, f, indent=2)
+            os.chmod('blink_tokens.json', 0o600)
+            logging.debug('Auth tokens saved to blink_tokens.json')
+        except Exception as e:
+            logging.error(f'Failed to save blink_tokens.json: {e}')
+
+    def clear_saved_tokens(self):
+        logging.info('Clearing stored Blink authentication tokens')
+        try:
+            self.customData['auth_tokens'] = None
+        except Exception as e:
+            logging.error(f'Error clearing auth_tokens from customData: {e}')
+        try:
+            if os.path.exists('blink_tokens.json'):
+                os.remove('blink_tokens.json')
+        except Exception as e:
+            logging.error(f'Error removing blink_tokens.json: {e}')
+
+    def prepare_login_data(self, auth_tokens=None):
         logging.debug('prepare_login_data')
         login_data = {}
         login_data['username'] = self.userName
@@ -135,6 +204,24 @@ class BlinkSetup (udi_interface.Node):
             login_data['unique_id'] = self.gen_uid(16, True)
             self.customData['unique_id'] = login_data['unique_id']
             logging.debug('uid created: {}'.format(self.customData['unique_id']))
+
+        if auth_tokens and isinstance(auth_tokens, dict):
+            for k in [
+                'token',
+                'refresh_token',
+                'hardware_id',
+                'client_id',
+                'account_id',
+                'user_id',
+                'region_id',
+                'host',
+                'expires_in',
+                'expiration_date',
+            ]:
+                if k in auth_tokens and auth_tokens[k] is not None:
+                    login_data[k] = auth_tokens[k]
+            logging.debug('prepare_login_data included stored auth tokens and hardware_id')
+
         #logging.debug('prepare_login_data {}'.format(login_data))
         return(login_data)
 
@@ -160,20 +247,59 @@ class BlinkSetup (udi_interface.Node):
                 exit()
             else:
                 logging.debug('STARTING BLINK SYSTEM')
-                login_data = self.prepare_login_data()
-                #logging.debug('Login Data : {}'.format(login_data))
-                #self.blink = blink_system()
+                saved_tokens = self.load_saved_tokens()
+                attempt_with_tokens = (saved_tokens is not None and bool(saved_tokens.get('refresh_token')))
+
+                if attempt_with_tokens:
+                    logging.info('Found saved tokens. Attempting to start Blink with saved tokens...')
+                    login_data = self.prepare_login_data(saved_tokens)
+                else:
+                    logging.info('No saved tokens found. Starting fresh Blink login...')
+                    login_data = self.prepare_login_data()
+
+                self.blink.set_token_refresh_callback(self.save_saved_tokens)
                 self.blink.start_blink(login_data, True)
                 self.blink.set_temp_unit(self.temp_unit) 
-                #try:
-                ok = self.blink.start()
-                if not ok:
+
+                ok = False
+                try:
+                    ok = self.blink.start()
+                except Exception as e:
+                    logging.error(f'Exception during blink start: {e}')
+                    ok = False
+
+                auth_needed = self.blink.key_required
+                logging.debug(f'Auth step 1: ok={ok}, 2FA required={auth_needed}')
+
+                # If starting with saved tokens failed (not ok and not waiting for 2FA),
+                # clear tokens and start over from scratch!
+                if attempt_with_tokens and not ok and not auth_needed:
+                    logging.warning('Starting with saved tokens failed. Clearing tokens and restarting fresh login...')
+                    self.clear_saved_tokens()
+                    try:
+                        self.blink.stop()
+                    except Exception as e:
+                        logging.debug(f'Error stopping blink: {e}')
+
+                    self.blink = blink_system()
+                    self.blink.set_token_refresh_callback(self.save_saved_tokens)
+                    login_data = self.prepare_login_data()
+                    self.blink.start_blink(login_data, True)
+                    self.blink.set_temp_unit(self.temp_unit)
+                    try:
+                        ok = self.blink.start()
+                    except Exception as e:
+                        logging.error(f'Exception during fresh blink start: {e}')
+                        ok = False
+                    auth_needed = self.blink.key_required
+                    logging.debug(f'Fresh start: ok={ok}, 2FA required={auth_needed}')
+
+                if not ok and not auth_needed:
                     self.customData['unique_id'] = None
+                    self.clear_saved_tokens()
                     self.poly.Notices['LOGIN'] = 'Login Failed - Try again'
                     exit()
-                #except LoginError as 
-                auth_needed = self.blink.key_required
-                logging.debug('Auth setp 1: auth finished  - 2FA required: {}'.format(auth_needed))
+
                 if auth_needed:
                     logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 
                     self.poly.Notices['PIN'] = 'Enter 2FA PIN (message) in AUTH_KEY field and save'
@@ -186,16 +312,11 @@ class BlinkSetup (udi_interface.Node):
 
                 self.blink.finalize_auth()
 
-                '''
-                if 'AuthKey' == success:
-                    logging.error('AuthKey required - please add to config')
-                    self.poly.Notices['ak'] = 'username and password must be provided to start node server'
-                elif 'no login' == success:
-                    logging.error('Login Failed')
-                    self.poly.Notices['un'] = 'please check username and password - do not seem to work '   
-                else:
-                    logging.info('Accessing Blink completed ')
-                '''
+                # Save tokens now that startup/2FA and post-verify are complete
+                current_auth = self.blink.get_auth_data()
+                if current_auth and current_auth.get('refresh_token'):
+                    self.save_saved_tokens(current_auth)
+
                 self.poly.Notices.clear()
                 #self.add_sync_nodes()
                 self.add_network_nodes()
@@ -252,7 +373,7 @@ class BlinkSetup (udi_interface.Node):
 
     def stop(self):
         logging.info('Stop Called:')
-        self.blink.logout()
+        self.blink.stop()
         #should I reset the unique_id when logging out - self.customData['unique_id'] = None
         #if 'self.node' in locals():
         #    time.sleep(2)
@@ -281,6 +402,10 @@ class BlinkSetup (udi_interface.Node):
                 #self.node.setDriver('GV0', self.temp_unit, True, True)
                 try:
                     success = self.blink.refresh()
+                    if success:
+                        current_auth = self.blink.get_auth_data()
+                        if current_auth and current_auth.get('refresh_token'):
+                            self.save_saved_tokens(current_auth)
                     nodes = self.poly.getNodes()
                     for nde in nodes:
                         if nde != 'setup':   # but not the setup node
@@ -375,13 +500,21 @@ class BlinkSetup (udi_interface.Node):
                         self.poly.Notices.delete('TEMP_UNIT')
 
             if 'USERNAME' in customParams:
-                self.userName = customParams['USERNAME']
+                new_user = customParams['USERNAME']
+                if self.userName is not None and self.userName != '' and self.userName != new_user:
+                    logging.info('Username changed in parameters, clearing saved tokens')
+                    self.clear_saved_tokens()
+                self.userName = new_user
             else:
                 self.poly.Notices['userName'] = 'Missing USERNAME parameter'
                 self.userName = ''
             
             if 'PASSWORD' in customParams:
-                self.password = customParams['PASSWORD']
+                new_pass = customParams['PASSWORD']
+                if self.password is not None and self.password != '' and self.password != new_pass:
+                    logging.info('Password changed in parameters, clearing saved tokens')
+                    self.clear_saved_tokens()
+                self.password = new_pass
             else:
                 self.poly.Notices['password'] = 'Missing PASSWORD parameter'
                 self.password = ''
@@ -390,7 +523,6 @@ class BlinkSetup (udi_interface.Node):
                 self.authKey = customParams['AUTH_KEY']
                 self.auth_key_updated = True
             else:
-                self.poly.Notices['auth_key'] = 'Missing AUTH_KEY parameter'
                 self.authKey = ''
 
             #if 'NETWORKS_UNITS' in customParams:

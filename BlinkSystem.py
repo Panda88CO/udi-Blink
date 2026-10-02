@@ -82,6 +82,22 @@ class blink_system:
         self.email_password = None
         self.email_recepient = None
         self._key_required = False
+        self._token_refresh_callback = None
+
+    def set_token_refresh_callback(self, callback):
+        """Set callback to be called when tokens are refreshed"""
+        self._token_refresh_callback = callback
+
+    def _handle_token_refresh(self):
+        """Called by blinkpy Auth when tokens are refreshed during queries"""
+        logging.info("Blink tokens were refreshed by background query")
+        if self._token_refresh_callback:
+            try:
+                auth_data = self.get_auth_data()
+                if auth_data:
+                    self._token_refresh_callback(auth_data)
+            except Exception as e:
+                logging.error(f"Error executing token refresh callback: {e}")
 
     def _start_event_loop(self):
         """Start the asyncio event loop in a separate thread"""
@@ -148,9 +164,28 @@ class blink_system:
             "username": login_data.get("username"),
             "password": login_data.get("password"),
         }
-        
-        # Create Auth with data and session
-        self._blink.auth = Auth(auth_data, no_prompt=no_prompt, session=self._session)
+        for key in [
+            "token",
+            "refresh_token",
+            "hardware_id",
+            "client_id",
+            "account_id",
+            "user_id",
+            "region_id",
+            "host",
+            "expires_in",
+            "expiration_date",
+        ]:
+            if key in login_data and login_data[key] is not None:
+                auth_data[key] = login_data[key]
+
+        # Create Auth with data, session, and callback
+        self._blink.auth = Auth(
+            auth_data,
+            no_prompt=no_prompt,
+            session=self._session,
+            callback=self._handle_token_refresh,
+        )
         
         if "device_id" in login_data:
             self._blink.auth.device_id = login_data["device_id"]
@@ -227,6 +262,37 @@ class blink_system:
         await asyncio.sleep(2)
         await self._blink.refresh()
         return 'ok'
+
+    def stop(self):
+        """Stop event loop and session without invalidating Blink server session"""
+        logging.info('Stopping Blink system event loop')
+        self._stop_event_loop()
+
+    def get_auth_data(self):
+        """Retrieve current auth attributes from blink instance (synchronous, thread-safe)"""
+        if self._blink and self._blink.auth:
+            try:
+                attrs = dict(self._blink.auth.login_attributes)
+                username = attrs.get("username")
+                if not username and self.login_data:
+                    username = self.login_data.get("username")
+                hardware_id = getattr(self._blink.auth, "hardware_id", None) or attrs.get("hardware_id")
+                return {
+                    "username": username,
+                    "token": attrs.get("token"),
+                    "refresh_token": attrs.get("refresh_token"),
+                    "hardware_id": hardware_id,
+                    "client_id": attrs.get("client_id"),
+                    "account_id": attrs.get("account_id"),
+                    "user_id": attrs.get("user_id"),
+                    "region_id": attrs.get("region_id"),
+                    "host": attrs.get("host"),
+                    "expires_in": attrs.get("expires_in"),
+                    "expiration_date": attrs.get("expiration_date"),
+                }
+            except Exception as e:
+                logging.error(f"Error getting auth data: {e}")
+        return None
 
     @async_to_sync
     async def logout(self):

@@ -17,4 +17,4 @@ __pycache__/BlinkSystem.cpython-310.pyc
 *.pyc
 *.pyc
 *.pyc
-*.pyc
+blink_tokens.json

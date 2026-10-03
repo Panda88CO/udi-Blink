@@ -1,14 +1,39 @@
 #!/usr/bin/env python3
 
+import sys
+import os
+import time 
+import re
+import threading
+import json
+import subprocess
+import site
+
+# Ensure user site-packages are added to sys.path
+try:
+    user_site = site.getusersitepackages()
+    if user_site and user_site not in sys.path and os.path.exists(user_site):
+        sys.path.insert(0, user_site)
+except Exception:
+    pass
+
+# Ensure blinkpy is available, or attempt auto-install if missing on clean install
+try:
+    import blinkpy
+except ImportError:
+    try:
+        req_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'requirements.txt')
+        if os.path.exists(req_file):
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', req_file, '--user'])
+            user_site = site.getusersitepackages()
+            if user_site and user_site not in sys.path:
+                sys.path.insert(0, user_site)
+            import blinkpy
+    except Exception:
+        pass
 
 from udiBlinkNetworkNode import blink_network_node
 from BlinkSystem import blink_system
-import sys
-import time 
-import re
-import os
-import threading
-import json
 
 
 try:

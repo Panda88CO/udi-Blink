@@ -1,6 +1,7 @@
 
 blinkTest.py
 debug1.log
+*.log
 blinkTestV2.py
 blinkTestV2.py
 blinkTestV2.py

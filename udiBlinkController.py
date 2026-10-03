@@ -71,14 +71,15 @@ except ImportError:
 
 
  
-VERSION = '0.6.22' 
+VERSION = '0.6.23' 
 
-class BlinkSetup (udi_interface.Node):
+class BlinkSetup:
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done, gen_uid
-    id = 'SETUP'
-    drivers = [{'driver': 'ST', 'value': 0, 'uom': 25}]
     def  __init__(self, polyglot, primary, address, name):
-        super().__init__( polyglot, primary, address, name)  
+        self.poly = polyglot
+        self.primary = primary
+        self.address = address
+        self.name = name
         
         #logging.setLevel(10)
         
@@ -631,13 +632,14 @@ class BlinkSetup (udi_interface.Node):
     def update(self, command = None):
         self.systemPoll(['longPoll'])
 
+    def reportCmd(self, command, value=None):
+        pass
+
     def heartbeat(self):
         # logging.debug('Controller heartbeat: {}'.format(self.hb))
         if self.hb == 0:
-            self.reportCmd('DON', 2)
             self.hb = 1
         else:
-            self.reportCmd('DOF', 2)
             self.hb = 0
    
     '''

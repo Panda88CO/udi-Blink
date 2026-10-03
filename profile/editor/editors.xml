@@ -2,9 +2,6 @@
    <editor id="ONLINE">
       <range uom="25" subset="0,1,98,99" nls="ONLINE" />
    </editor>
-   <editor id="NODE">
-      <range uom="25" subset="0,1,99" nls="NODE" />
-   </editor>
    <editor id="ARMED">
       <range uom="25" subset="0,1,2,99" nls="ARMED" />
    </editor>

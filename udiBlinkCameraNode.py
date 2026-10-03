@@ -106,6 +106,11 @@ class blink_camera_node(udi_interface.Node):
                     logging.warning('Camera %s not found in Blink system - skipping TIME update', self.camera.name)
                     return
 
+                camera_data = self.blink.get_camera_data(self.camera.name)
+                if not camera_data:
+                    logging.warning('Camera %s: No data/attributes received from Blink - skipping TIME update', self.camera.name)
+                    return
+
                 temp = self.blink.get_camera_status(self.camera.name)
                 if temp is None:
                     logging.warning('Camera %s status is None - skipping TIME update', self.camera.name)
@@ -149,8 +154,9 @@ class blink_camera_node(udi_interface.Node):
     
     def ISYupdate (self, command = None):
         logging.info(' ISYupdate: {}'.format(self.camera.name ))
-        self.blink.refresh()
-        # logging.debug('Camera {} data: {}'.format(self.camera.name,  self.blink.get_camera_data(self.camera.name )))
+        if not self.blink.refresh():
+            logging.warning('Blink refresh failed for camera %s - skipping driver update', self.camera.name)
+            return
         self.updateISYdrivers()
     
     def snap_pitcure (self, command=None):

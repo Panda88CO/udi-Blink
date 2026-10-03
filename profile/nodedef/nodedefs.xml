@@ -1,13 +1,4 @@
 <nodeDefs>
-   <nodeDef id="SETUP" nls="NLSSETUP">
-      <editors />
-      <sts>
-         <st id="ST" editor="NODE" />
-      </sts>
-      <cmds>
-         <sends />
-      </cmds>
-   </nodeDef>
 
    <nodeDef id="BLINKSYNC" nls="NLSBLINKSYNC">
       <editors />

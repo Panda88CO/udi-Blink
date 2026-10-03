@@ -136,8 +136,10 @@ class blink_network_node(udi_interface.Node):
             logging.info('Network updateISYdrivers - {}'.format(self.network_id))
             try:
                 gv0_val = self.blink.get_network_arm_state(self.network_id)
-                if gv0_val is None:
-                    logging.warning('Network %s: Could not retrieve arm state - skipping TIME update', self.network_id)
+                if gv0_val is None or gv0_val == 99:
+                    logging.warning('Network %s: Could not retrieve valid arm state (%s) - skipping TIME update', self.network_id, gv0_val)
+                    if gv0_val == 99:
+                        self.BLINK_setDriver('GV0', 99)
                     return
 
                 if gv0_val == 2:
@@ -147,9 +149,16 @@ class blink_network_node(udi_interface.Node):
                     self.BLINK_setDriver('GV0', 1)
                 elif gv0_val is False:
                     self.BLINK_setDriver('GV0', 0)
-                else:
-                    logging.info('Network %s: Setting GV0 to 99 (Unknown).', self.network_id)
-                    self.BLINK_setDriver('GV0', 99)
+
+                # Verify network is present in Blink system data
+                network_found = False
+                for net in self.blink.get_network_list():
+                    if str(net.get('id', '')) == str(self.network_id):
+                        network_found = True
+                        break
+                if not network_found and not any(str(getattr(s, 'network_id', '')) == str(self.network_id) for s in self.blink.sync.values()):
+                    logging.warning('Network %s not found in Blink system data - skipping TIME update', self.network_id)
+                    return
 
                 # Timestamp reflects the last successful network data refresh without errors
                 self.BLINK_setDriver('TIME', int(time.time()), 151)
@@ -170,8 +179,9 @@ class blink_network_node(udi_interface.Node):
 
     def ISYupdate(self, command=None):
         logging.info('Network ISYupdate')
-        self.blink.refresh()
-        
+        if not self.blink.refresh():
+            logging.warning('Blink refresh failed for network %s - skipping driver update', self.network_id)
+            return
         self.updateISYdrivers()
 
         
@@ -201,12 +211,15 @@ class blink_network_node(udi_interface.Node):
         #        self.blink.set_camera_arm(camera, arm_enable)
         # logging.debug('_camera_list {}'.format(self._camera_list))
         time.sleep(3)
-        self.blink.refresh()
+        if not self.blink.refresh():
+            logging.warning('Blink refresh failed after arm_all_cameras for network %s - skipping driver update', self.network_id)
+            return
         self.updateISYdrivers()
         nodes = self.poly.getNodes()
         for nde in self._camera_list:
             # logging.debug('updating node {} data'.format(nde))    
-            nodes[nde].updateISYdrivers()
+            if nde in nodes and hasattr(nodes[nde], 'updateISYdrivers'):
+                nodes[nde].updateISYdrivers()
 
 
     id = 'BLINKNETWORK'

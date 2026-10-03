@@ -36,7 +36,6 @@ except ImportError:
             env['FROZENLIST_NO_EXTENSIONS'] = '1'
             env['MULTIDICT_NO_EXTENSIONS'] = '1'
             env['YARL_NO_EXTENSIONS'] = '1'
-            subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'aiohttp', '--no-binary=aiohttp', '--user'], env=env)
             subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', req_file, '--user'], env=env)
             user_site = site.getusersitepackages()
             if user_site and user_site not in sys.path and os.path.exists(user_site):
@@ -72,7 +71,7 @@ except ImportError:
 
 
  
-VERSION = '0.6.20' 
+VERSION = '0.6.21' 
 
 class BlinkSetup (udi_interface.Node):
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done, gen_uid

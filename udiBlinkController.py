@@ -289,6 +289,7 @@ class BlinkSetup (udi_interface.Node):
 
                 if attempt_with_tokens:
                     logging.info('Found saved tokens. Attempting to start Blink with saved tokens...')
+                    self.poly.Notices['TOKEN_INIT'] = 'Starting with stored tokens - this step will take a while...'
                     login_data = self.prepare_login_data(saved_tokens)
                 else:
                     logging.info('No saved tokens found. Starting fresh Blink login...')
@@ -312,6 +313,8 @@ class BlinkSetup (udi_interface.Node):
                 # clear tokens and start over from scratch!
                 if attempt_with_tokens and not ok and not auth_needed:
                     logging.warning('Starting with saved tokens failed. Clearing tokens and restarting fresh login...')
+                    if 'TOKEN_INIT' in self.poly.Notices:
+                        self.poly.Notices.delete('TOKEN_INIT')
                     self.clear_saved_tokens()
                     try:
                         self.blink.stop()
@@ -334,10 +337,14 @@ class BlinkSetup (udi_interface.Node):
                 if not ok and not auth_needed:
                     self.customData['unique_id'] = None
                     self.clear_saved_tokens()
+                    if 'TOKEN_INIT' in self.poly.Notices:
+                        self.poly.Notices.delete('TOKEN_INIT')
                     self.poly.Notices['LOGIN'] = 'Login Failed - Try again'
                     exit()
 
                 if auth_needed:
+                    if 'TOKEN_INIT' in self.poly.Notices:
+                        self.poly.Notices.delete('TOKEN_INIT')
                     logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 
                     self.poly.Notices['PIN'] = 'Enter 2FA PIN (message) in AUTH_KEY field and save'
                     self.auth_key_updated = False
@@ -354,12 +361,16 @@ class BlinkSetup (udi_interface.Node):
                 if current_auth and current_auth.get('refresh_token'):
                     self.save_saved_tokens(current_auth)
 
-                self.poly.Notices.clear()
+                for n in ['PIN', 'INIT', 'LOGIN', 'un']:
+                    if n in self.poly.Notices:
+                        self.poly.Notices.delete(n)
                 #self.add_sync_nodes()
                 self.add_network_nodes()
 
         except Exception as e:
             logging.error('Blink Start Exception: {}'.format(e))
+            if 'TOKEN_INIT' in self.poly.Notices:
+                self.poly.Notices.delete('TOKEN_INIT')
             #self.BLINK_setDriver('ST', 0)
 
     def add_network_nodes (self):
@@ -407,9 +418,13 @@ class BlinkSetup (udi_interface.Node):
                 self.poly.delNode(node['address'])
 
         self.connected = True
+        if 'TOKEN_INIT' in self.poly.Notices:
+            self.poly.Notices.delete('TOKEN_INIT')
 
     def stop(self):
         logging.info('Stop Called:')
+        if 'TOKEN_INIT' in self.poly.Notices:
+            self.poly.Notices.delete('TOKEN_INIT')
         self.blink.stop()
         #should I reset the unique_id when logging out - self.customData['unique_id'] = None
         #if 'self.node' in locals():
@@ -431,6 +446,8 @@ class BlinkSetup (udi_interface.Node):
 
 
     def systemPoll (self, polltype):
+        if 'TOKEN_INIT' in self.poly.Notices:
+            self.poly.Notices.delete('TOKEN_INIT')
         if self.nodeDefineDone:
 
             if 'longPoll' in polltype:

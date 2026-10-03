@@ -1,30 +1,30 @@
 <editors>
    <editor id="ONLINE">
-      <range uom="25" subset="0-1,98-99" nls="ONLINE" />
+      <range uom="25" subset="0,1,98,99" nls="ONLINE" />
    </editor>
    <editor id="NODE">
-      <range uom="25" subset="0-1,99" nls="NODE" />
+      <range uom="25" subset="0,1,99" nls="NODE" />
    </editor>
    <editor id="ARMED">
-      <range uom="25" subset="0-2,99" nls="ARMED" />
+      <range uom="25" subset="0,1,2,99" nls="ARMED" />
    </editor>
    <editor id="DOARM">
-      <range uom="25" subset="0-1" nls="DOARM" />
+      <range uom="25" subset="0,1" nls="DOARM" />
    </editor>
    <editor id="DOMOTION">
-      <range uom="25" subset="0-1" nls="DOMOTION" />
+      <range uom="25" subset="0,1" nls="DOMOTION" />
    </editor>
    <editor id="BATTERY">
-      <range uom="25" subset="0-2,10,99" nls="BATTERY" />
+      <range uom="25" subset="0,1,2,10,99" nls="BATTERY" />
    </editor>
    <editor id="CAMERATYPE">
-      <range uom="25" subset="0-11,99" nls="CAMERATYPE" />
+      <range uom="25" subset="0,1,2,3,4,5,6,7,8,9,10,11,99" nls="CAMERATYPE" />
    </editor>
    <editor id="MOTIONEN">
-      <range uom="25" subset="0-1,99" nls="MOTIONEN" />
+      <range uom="25" subset="0,1,99" nls="MOTIONEN" />
    </editor>
    <editor id="MOTIONDETC">
-      <range uom="25" subset="0-1,99" nls="MOTIONDETC" />
+      <range uom="25" subset="0,1,99" nls="MOTIONDETC" />
    </editor>
    <editor id="TEMPF">
       <range uom="17" min="-40" max="221" prec="1" />

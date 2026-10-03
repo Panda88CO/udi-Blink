@@ -25,10 +25,12 @@ from  udiBlinkSyncNode import blink_sync_node
                
 class blink_network_node(udi_interface.Node):
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done
+    _started = False
 
 
     def __init__(self, polyglot, primary, address, name, network_id, blinkSys  ):
         super().__init__( polyglot, primary, address, name)   
+        self._started = False
         # logging.debug('New Blink Network INIT- {}'.format(name))
         self.nodeDefineDone = False
         self.networkNodeReady = False
@@ -59,13 +61,12 @@ class blink_network_node(udi_interface.Node):
         self.node = self.poly.getNode(address)
         logging.info('Start {} network Node'.format(self.name))  
         self.nodeDefineDone = True
-        self._started = False
 
 
 
 
     def start(self):        
-        if self._started:
+        if getattr(self, '_started', False):
             return
         self._started = True
         # logging.debug('Network module Start {}'.format(self.name))

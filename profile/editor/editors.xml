@@ -1,57 +1,40 @@
-<editors> 
-  <editor id = "online" > 
-     <range  uom="25" subset="0-1,98-99" nls="online"  />
-</editor>
-  <editor id = "node" > 
-     <range  uom="25" subset="0-1,99" nls="online"  />
-</editor>
-  <editor id = "armed" > 
-     <range  uom="25" subset="0-2,99" nls="armed" />
-</editor>
-  <editor id = "doarm" > 
-     <range  uom="25" subset="0-1" nls="doarm" />
-</editor>
-  <editor id = "domotion" > 
-     <range  uom="25" subset="0-1" nls="domotion" />
-</editor>
-  <editor id = "enable" > 
-     <range  uom="25" subset="0-1" nls="enable" />
-</editor>
-  <editor id = "status" > 
-     <range  uom="2" subset="0-1" />
-</editor>
-  <editor id = "battery" > 
-     <range  uom="25" subset="0-2,10,99" nls="battery" />
-</editor>
-  <editor id = "bat_volt" > 
-    <range  uom="25" subset="98,99" nls="bat_voltage" />
-    <range  uom="72" min=" 0" max="500"  prec="0" />
-</editor>
-  <editor id = "cameratype" > 
-     <range  uom="25" subset="0-11,99" nls="cameratype" />
-</editor>
-  <editor id = "motionen" > 
-     <range  uom="25" subset="0-1,99" nls="motionen" />
-</editor>
-  <editor id = "motiondetc" > 
-     <range  uom="25" subset="0-1,99" nls="motiondetc" />
-</editor>
-  <editor id = "tempF" > 
-        <range uom="17" min="-40" max="221"  prec="1"/>
-        <range uom="25" subset="0,99"  nls="error"/>
-  </editor>
-  <editor id = "tempC" > 
-        <range uom="4" min="-40" max="105"  prec="1"/>
-        <range uom="25" subset="0,99"  nls="error"/>
-  </editor>
-
-  <editor id = "unixtime" > 
-     <range  uom="151" min="0" max="9999999999" prec="0" />
-</editor>
-  <editor id = "record" > 
-     <range  uom="25" subset="0-1,99" nls="record" />
-</editor>
-  <editor id = "emailpic" > 
-     <range  uom="25" subset="0-1" nls="emailpic" />
-</editor>
-</editors> 
+<editors>
+   <editor id="ONLINE">
+      <range uom="25" subset="0-1,98-99" nls="ONLINE" />
+   </editor>
+   <editor id="NODE">
+      <range uom="25" subset="0-1,99" nls="NODE" />
+   </editor>
+   <editor id="ARMED">
+      <range uom="25" subset="0-2,99" nls="ARMED" />
+   </editor>
+   <editor id="DOARM">
+      <range uom="25" subset="0-1" nls="DOARM" />
+   </editor>
+   <editor id="DOMOTION">
+      <range uom="25" subset="0-1" nls="DOMOTION" />
+   </editor>
+   <editor id="BATTERY">
+      <range uom="25" subset="0-2,10,99" nls="BATTERY" />
+   </editor>
+   <editor id="CAMERATYPE">
+      <range uom="25" subset="0-11,99" nls="CAMERATYPE" />
+   </editor>
+   <editor id="MOTIONEN">
+      <range uom="25" subset="0-1,99" nls="MOTIONEN" />
+   </editor>
+   <editor id="MOTIONDETC">
+      <range uom="25" subset="0-1,99" nls="MOTIONDETC" />
+   </editor>
+   <editor id="TEMPF">
+      <range uom="17" min="-40" max="221" prec="1" />
+      <range uom="25" subset="0,99" nls="ERROR" />
+   </editor>
+   <editor id="TEMPC">
+      <range uom="4" min="-40" max="105" prec="1" />
+      <range uom="25" subset="0,99" nls="ERROR" />
+   </editor>
+   <editor id="UNIXTIME">
+      <range uom="151" min="0" max="9999999999" prec="0" />
+   </editor>
+</editors>

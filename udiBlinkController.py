@@ -75,7 +75,7 @@ VERSION = '0.6.21'
 
 class BlinkSetup (udi_interface.Node):
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done, gen_uid
-    id = 'setup'
+    id = 'SETUP'
     drivers = [{'driver': 'ST', 'value': 0, 'uom': 25}]
     def  __init__(self, polyglot, primary, address, name):
         super().__init__( polyglot, primary, address, name)  
@@ -460,13 +460,13 @@ class BlinkSetup (udi_interface.Node):
                     nodes = self.poly.getNodes()
                     for nde in nodes:
                         if nde != 'setup':   # but not the setup node
-                            if nodes[nde].id == 'blinknetwork' and hasattr(nodes[nde], 'set_connection_status'):
+                            if nodes[nde].id in ('BLINKNETWORK', 'blinknetwork') and hasattr(nodes[nde], 'set_connection_status'):
                                 # logging.debug('Updating connection status for node {} to {}'.format(nde, success))
                                 nodes[nde].set_connection_status(True if success else False)
                                 if success:
                                     # logging.debug('Updating heartbeat for node {}'.format(nde))
                                     heartbeat_cb = getattr(nodes[nde], 'heartbeat', None)
-                                    if nodes[nde].id == 'blinknetwork' and callable(heartbeat_cb):
+                                    if nodes[nde].id in ('BLINKNETWORK', 'blinknetwork') and callable(heartbeat_cb):
                                         heartbeat_thread = self._heartbeat_threads.get(nde)
                                         if heartbeat_thread and heartbeat_thread.is_alive():
                                             # logging.debug('Heartbeat already running for node {}'.format(nde))
@@ -481,7 +481,7 @@ class BlinkSetup (udi_interface.Node):
                                             )
                                             self._heartbeat_threads[nde] = heartbeat_thread
                                             heartbeat_thread.start()
-                                    elif nodes[nde].id == 'blinknetwork':
+                                    elif nodes[nde].id in ('BLINKNETWORK', 'blinknetwork'):
                                         logging.warning('Node {} is missing callable heartbeat'.format(nde))
 
                             if success:

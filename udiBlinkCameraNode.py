@@ -25,7 +25,7 @@ except ImportError:
 class blink_camera_node(udi_interface.Node):
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, connection2isy, bat_V2isy, node_queue, wait_for_node_done
 
-    id = 'blinkcameraC' 
+    id = 'BLINKCAMERAC' 
     drivers= [  {'driver': 'ST' , 'value':0,  'uom':25},
                 {'driver': 'GV0', 'value':99, 'uom':25},  #Arm status
                 {'driver': 'GV1', 'value':99, 'uom':25}, # Battery
@@ -50,7 +50,7 @@ class blink_camera_node(udi_interface.Node):
         self.blink = blinkSys
         self.temp_unit = self.blink.get_temp_unit()           
         if self.temp_unit == 'F':
-            self.id = 'blinkcameraF' 
+            self.id = 'BLINKCAMERAF' 
 
         self.pic_email_enabled = False
         self.nodeDefineDone = False

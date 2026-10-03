@@ -92,7 +92,7 @@ class blink_sync_node(udi_interface.Node):
         self.updateISYdrivers()
 
 
-    id = 'blinksync'
+    id = 'BLINKSYNC'
 
     commands = { 'UPDATE'   : ISYupdate,
 

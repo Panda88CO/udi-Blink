@@ -84,7 +84,9 @@ class blink_camera_node(udi_interface.Node):
         self.updateISYdrivers()
 
     def start(self):   
-        logging.info('Start {} camera module Node'.format(self.name))               
+        logging.info('Start {} camera module Node'.format(self.name))
+        while not self.nodeDefineDone:
+            time.sleep(0.1)
         self.updateISYdrivers()
 
 

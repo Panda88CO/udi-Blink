@@ -69,10 +69,10 @@ class blink_network_node(udi_interface.Node):
         if getattr(self, '_started', False):
             return
         self._started = True
-        # logging.debug('Network module Start {}'.format(self.name))
-        while not self.nodeDefineDone or self.node == None or self.drivers == None:
-            time.sleep(0.2)
-            logging.info('Waiting for nodes to be created')
+        while not self.nodeDefineDone:
+            time.sleep(0.1)
+        if getattr(self, 'node', None) is None:
+            self.node = self.poly.getNode(self.address) or self
 
  
         self.camera_list = self.blink.get_cameras_on_network(self.network_id)

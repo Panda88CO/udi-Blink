@@ -71,6 +71,8 @@ class blink_sync_node(udi_interface.Node):
 
     def start(self):        
         # logging.debug('Sync module Start {}'.format(self.name))
+        while not self.nodeDefineDone:
+            time.sleep(0.1)
         self.updateISYdrivers()
 
 
@@ -79,10 +81,14 @@ class blink_sync_node(udi_interface.Node):
 
 
     def updateISYdrivers(self):
-        
         if self.nodeDefineDone:
-            logging.info('Sync updateISYdrivers - {}'.format(self.sync_unit.name))
-            self.BLINK_setDriver('ST', self.bool2isy(self.blink.get_sync_online(self.sync_unit.name)))
+            try:
+                sync_name = getattr(self.sync_unit, 'name', self.name)
+                logging.info('Sync updateISYdrivers - {}'.format(sync_name))
+                online = self.blink.get_sync_online(sync_name)
+                self.BLINK_setDriver('ST', self.bool2isy(online))
+            except Exception as e:
+                logging.error('Error updating ISY drivers for sync %s: %s', self.name, e)
 
 
   

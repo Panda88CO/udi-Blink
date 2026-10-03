@@ -391,9 +391,7 @@ class BlinkSetup (udi_interface.Node):
                     logging.info('Adding {} network'.format(node_name))
                     node_adr_list.append(node_address)
                     net_node = blink_network_node(self.poly, node_address, node_address, node_name, network['id'], self.blink)
-                    if net_node:
-                        net_node.start()
-                    else:
+                    if not net_node:
                         logging.error('Failed to create network node for {} '.format(node_name))
             else:
                 logging.warning('Network {} not in parameters - adding with default ENABLED value'.format(name))

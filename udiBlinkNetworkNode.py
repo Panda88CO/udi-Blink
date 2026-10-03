@@ -21,6 +21,8 @@ except ImportError:
     )
 from  udiBlinkCameraNode import blink_camera_node, blink_camera_no_temp_node
 from  udiBlinkSyncNode import blink_sync_node
+from  udiBlinkLib import parse_enable_state, get_camera_param_info
+
 
                
 class blink_network_node(udi_interface.Node):
@@ -28,7 +30,7 @@ class blink_network_node(udi_interface.Node):
     _started = False
 
 
-    def __init__(self, polyglot, primary, address, name, network_id, blinkSys  ):
+    def __init__(self, polyglot, primary, address, name, network_id, blinkSys, controller=None):
         super().__init__( polyglot, primary, address, name)   
         self._started = False
         # logging.debug('New Blink Network INIT- {}'.format(name))
@@ -43,10 +45,11 @@ class blink_network_node(udi_interface.Node):
         self.sync_node_camera_list = []
         self.n_queue = []  
         self.poly = polyglot
+        self.controller = controller or self.poly.getNode(primary) or getattr(self.poly, 'controller', None)
+        self.Parameters = getattr(self.controller, 'Parameters', None) or Custom(polyglot, 'customparams')
         self._camera_list = []
         self._sync_list = []
         self.hb = 0
-        #self.Parameters = Custom(polyglot, 'customparams')
         # subscribe to the events we want
         #polyglot.subscribe(polyglot.CUSTOMPARAMS, self.parameterHandler)
         #polyglot.subscribe(polyglot.POLL, self.poll)
@@ -83,12 +86,23 @@ class blink_network_node(udi_interface.Node):
             # logging.debug('{} cameras found in network {}'.format(len(self.camera_list), self.network_id))
             nodeName = self.poly.getValidName(str(camera.name))
             nodeAdr = self.poly.getValidAddress(str(camera.camera_id))
-            logging.info('Adding Camera {} {} {}'.format(self.address, nodeAdr, nodeName))
-            if hasattr(self.blink, 'camera_supports_temperature') and not self.blink.camera_supports_temperature(camera.name):
-                blink_camera_no_temp_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
+            key, val, state = get_camera_param_info(camera.name, self.Parameters)
+            if val is None:
+                logging.info(f"Camera {camera.name} not in parameters - setting default ENABLED/DISABLED on key {key}")
+                self.Parameters[key] = 'ENABLED/DISABLED'
+                state = 'PENDING'
+
+            if state == 'ENABLED':
+                logging.info('Adding Camera {} {} {} (ENABLED)'.format(self.address, nodeAdr, nodeName))
+                if hasattr(self.blink, 'camera_supports_temperature') and not self.blink.camera_supports_temperature(camera.name):
+                    blink_camera_no_temp_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
+                else:
+                    blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
+                self._camera_list.append(nodeAdr)
+            elif state == 'DISABLED':
+                logging.info('Skipping Camera {} {} {} (DISABLED in parameters)'.format(self.address, nodeAdr, nodeName))
             else:
-                blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
-            self._camera_list.append(nodeAdr)
+                logging.info('Skipping Camera {} {} {} (pending user selection: ENABLED/DISABLED)'.format(self.address, nodeAdr, nodeName))
             
         self.sync_list = self.blink.get_sync_modules_on_network(self.network_id)
         # logging.debug('Sync list : {}'.format(self.sync_list))
@@ -125,6 +139,44 @@ class blink_network_node(udi_interface.Node):
                 # logging.debug('Checking network nodes: {} {}'.format(node['name'], node))
                 if node['address'] not in self._camera_list and node['address'] not in self._sync_list and node['address'] != self.primary:
                     self.poly.delNode(node['address'])
+
+        if hasattr(self.controller, 'check_camera_params'):
+            self.controller.check_camera_params()
+
+    def update_cameras(self):
+        """Re-evaluate camera nodes when parameters are updated"""
+        if not getattr(self, '_started', False) or not self.nodeDefineDone:
+            return
+
+        self.camera_list = self.blink.get_cameras_on_network(self.network_id)
+        current_cam_nodes = list(self._camera_list)
+        new_cam_nodes = []
+        changed = False
+
+        for camera in self.camera_list:
+            nodeName = self.poly.getValidName(str(camera.name))
+            nodeAdr = self.poly.getValidAddress(str(camera.camera_id))
+            key, val, state = get_camera_param_info(camera.name, self.Parameters)
+
+            if state == 'ENABLED':
+                new_cam_nodes.append(nodeAdr)
+                existing = self.poly.getNode(nodeAdr)
+                if not existing or nodeAdr not in current_cam_nodes:
+                    logging.info('Adding Camera {} {} {} (ENABLED)'.format(self.address, nodeAdr, nodeName))
+                    if hasattr(self.blink, 'camera_supports_temperature') and not self.blink.camera_supports_temperature(camera.name):
+                        blink_camera_no_temp_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
+                    else:
+                        blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
+                    changed = True
+            elif state in ('DISABLED', 'PENDING'):
+                if nodeAdr in current_cam_nodes or self.poly.getNode(nodeAdr):
+                    logging.info('Removing Camera {} {} {} (state is {})'.format(self.address, nodeAdr, nodeName, state))
+                    self.poly.delNode(nodeAdr)
+                    changed = True
+
+        self._camera_list = new_cam_nodes
+        if changed and hasattr(self.controller, '_update_dynamic_profile'):
+            self.controller._update_dynamic_profile()
 
     def stop(self):
         logging.info('stop {} - Cleaning up'.format(self.name))

@@ -46,6 +46,8 @@ except ImportError:
 
 from udiBlinkNetworkNode import blink_network_node
 from BlinkSystem import blink_system
+from udiBlinkLib import parse_enable_state, get_camera_param_info
+
 
 
 try:
@@ -391,6 +393,7 @@ class BlinkSetup:
                     self.remove_notice(n)
                 #self.add_sync_nodes()
                 self.add_network_nodes()
+                self.check_camera_params()
                 self._update_dynamic_profile()
 
         except Exception as e:
@@ -407,24 +410,38 @@ class BlinkSetup:
         # logging.debug(f'Parameter list: {self.Parameters}')
         for indx, network in enumerate (network_node_list):
             name = network['name'].upper()
-            # logging.debug('Processing network {} : {}'.format(name, network))
-            if name in self.Parameters:
-                self.remove_notice(name)
-                self.remove_notice(network['name'])
-                if self.Parameters[name][0].upper() == "E":
-                    # logging.debug('Adding network {}'.format(name)) 
+            net_val = self.Parameters.get(name) or self.Parameters.get(network['name'])
+            state = parse_enable_state(net_val)
+            if net_val is not None:
+                if state == 'ENABLED':
+                    self.remove_notice(name)
+                    self.remove_notice(network['name'])
                     self.network_names.append(network['name'])
                     node_address = self.poly.getValidAddress(str(network['id']))
                     node_name = self.poly.getValidName('Blink_' + str(network['name']))
                     logging.info('Adding {} network'.format(node_name))
                     node_adr_list.append(node_address)
-                    net_node = blink_network_node(self.poly, node_address, node_address, node_name, network['id'], self.blink)
+                    net_node = blink_network_node(self.poly, node_address, node_address, node_name, network['id'], self.blink, controller=self)
                     if not net_node:
                         logging.error('Failed to create network node for {} '.format(node_name))
+                elif state == 'DISABLED':
+                    self.remove_notice(name)
+                    self.remove_notice(network['name'])
+                    logging.info('Network {} is DISABLED in configuration'.format(name))
+                else:
+                    self.poly.Notices[name] = str(name) + ' network found - Set value to ENABLED or DISABLED in Custom Parameters and save'
             else:
                 logging.warning('Network {} not in parameters - adding with default ENABLED value'.format(name))
                 self.Parameters[name] = 'ENABLED'
-                self.poly.Notices[name] = str(name) + ' network found - Add as custom Parameter with value ENABLED or DISABLED - then restart'         
+                self.remove_notice(name)
+                self.network_names.append(network['name'])
+                node_address = self.poly.getValidAddress(str(network['id']))
+                node_name = self.poly.getValidName('Blink_' + str(network['name']))
+                logging.info('Adding {} network'.format(node_name))
+                node_adr_list.append(node_address)
+                net_node = blink_network_node(self.poly, node_address, node_address, node_name, network['id'], self.blink, controller=self)
+                if not net_node:
+                    logging.error('Failed to create network node for {} '.format(node_name))
         #logging.debug('email_info  : {}'.format(self.email_info))
         self.blink.set_email_info(self.email_info)
         # logging.debug('Parameters defined :{}'.format(self.Parameters))
@@ -442,6 +459,58 @@ class BlinkSetup:
 
         self.connected = True
         self.remove_notice('TOKEN_INIT')
+
+    def check_camera_params(self):
+        """
+        Check all cameras across enabled networks.
+        Sets parameter default 'ENABLED/DISABLED' for any unconfigured cameras.
+        Displays notice 'cameras' until ALL cameras have a selected value of either ENABLED or DISABLED.
+        """
+        if not getattr(self, 'connected', False) or not self.blink or not getattr(self.blink, 'cameras', None):
+            return
+
+        pending_cameras = []
+        all_networks = self.blink.get_network_list()
+
+        # Determine enabled networks
+        enabled_network_ids = set()
+        for net in all_networks:
+            name = net.get('name', '')
+            val = self.Parameters.get(name.upper()) or self.Parameters.get(name)
+            if parse_enable_state(val) == 'ENABLED':
+                enabled_network_ids.add(str(net.get('id')))
+
+        # If no networks explicitly enabled yet, check all networks
+        if not enabled_network_ids:
+            enabled_network_ids = {str(net.get('id')) for net in all_networks}
+
+        checked_cams = set()
+        for net in all_networks:
+            net_id = str(net.get('id'))
+            if net_id not in enabled_network_ids:
+                continue
+            cams = self.blink.get_cameras_on_network(net.get('id'))
+            for cam in cams:
+                if cam.name in checked_cams:
+                    continue
+                checked_cams.add(cam.name)
+                key, val, state = get_camera_param_info(cam.name, self.Parameters)
+                if val is None:
+                    logging.info(f"Adding camera parameter {key} with default 'ENABLED/DISABLED'")
+                    self.Parameters[key] = 'ENABLED/DISABLED'
+                    state = 'PENDING'
+
+                if state == 'PENDING':
+                    pending_cameras.append(key)
+
+        if pending_cameras:
+            msg = f"New camera(s) found: {', '.join(pending_cameras)}. Please set each parameter in Configuration to either ENABLED or DISABLED and save."
+            logging.info(f"Camera notice: {msg}")
+            self.poly.Notices['cameras'] = msg
+        else:
+            logging.info("All cameras have a selected value of either ENABLED or DISABLED. Clearing camera notice.")
+            self.remove_notice('cameras')
+
 
     def stop(self):
         logging.info('Stop Called:')
@@ -607,12 +676,13 @@ class BlinkSetup:
                 self.authKey = ''
                 self.auth_key_updated = False
 
-            # Clear network notices if configured in parameters
+            # Clear network notices if configured in parameters with explicit selection
             try:
-                for key in list(customParams.keys()):
+                for key, val in list(customParams.items()):
                     if key not in ['TEMP_UNIT', 'USERNAME', 'PASSWORD', 'AUTH_KEY', 'EMAIL_ENABLED', 'SMTP', 'SMTP_PORT', 'SMTP_EMAIL', 'SMTP_PASSWORD', 'EMAIL_RECEPIENT']:
-                        self.remove_notice(key)
-                        self.remove_notice(key.upper())
+                        if parse_enable_state(val) in ('ENABLED', 'DISABLED'):
+                            self.remove_notice(key)
+                            self.remove_notice(key.upper())
             except Exception as e:
                 logging.debug(f'Error clearing network notices: {e}')
 
@@ -676,6 +746,17 @@ class BlinkSetup:
 
             #logging.debug('email_info : {}'.format(self.email_info))
             self.paramsProcessed = True
+
+            if getattr(self, 'connected', False):
+                self.check_camera_params()
+                try:
+                    nodes = self.poly.getNodes()
+                    for nde in list(nodes.keys()):
+                        node = nodes[nde]
+                        if hasattr(node, 'update_cameras'):
+                            node.update_cameras()
+                except Exception as e:
+                    logging.debug(f'Error updating network node cameras in handleParams: {e}')
 
         except Exception as e:
             logging.debug('Error: {} {}'.format(e, customParams))

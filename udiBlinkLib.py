@@ -7,6 +7,7 @@ MIT License
 """
 import time
 import secrets
+import re
 try:
     import udi_interface
     logging = udi_interface.LOGGER
@@ -85,3 +86,40 @@ def gen_uid(self, size, uid_format=False):
     else:
         token = secrets.token_hex(size)
     return token
+
+def parse_enable_state(val):
+    if val is None:
+        return 'PENDING'
+    v = str(val).strip().upper()
+    if not v or v in ('ENABLED/DISABLED', 'ENABLE/DISABLE', 'ENABLED / DISABLED', 'ENABLE / DISABLE', 'PENDING', 'NONE', 'DEFAULT'):
+        return 'PENDING'
+    if v in ('ENABLED', 'ENABLE', 'TRUE', '1', 'YES', 'ON') or (v.startswith('E') and 'DISABLE' not in v):
+        return 'ENABLED'
+    if v in ('DISABLED', 'DISABLE', 'FALSE', '0', 'NO', 'OFF') or (v.startswith('D') and 'ENABLE' not in v):
+        return 'DISABLED'
+    return 'PENDING'
+
+def get_camera_param_info(camera_name, parameters):
+    """
+    Finds existing parameter key and value for a camera, or determines the default key.
+    Returns (key, value, state) where state is 'ENABLED', 'DISABLED', or 'PENDING'.
+    """
+    clean_name = re.sub(r'[^A-Za-z0-9_]', '_', str(camera_name).strip())
+    candidates = [
+        f"CAM_{clean_name.upper()}",
+        f"CAM_{str(camera_name).strip().upper()}",
+        f"CAM_{str(camera_name).strip()}",
+        f"CAM_{clean_name}",
+        clean_name.upper(),
+        str(camera_name).strip().upper(),
+        str(camera_name).strip(),
+        clean_name,
+    ]
+    if parameters:
+        for cand in candidates:
+            if cand in parameters:
+                val = parameters[cand]
+                return cand, val, parse_enable_state(val)
+
+    default_key = f"CAM_{clean_name.upper()}"
+    return default_key, None, 'PENDING'

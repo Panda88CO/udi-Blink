@@ -19,7 +19,7 @@ except ImportError:
         logging.FileHandler("debug1.log"),
         logging.StreamHandler(sys.stdout) ]
     )
-from  udiBlinkCameraNode import blink_camera_node
+from  udiBlinkCameraNode import blink_camera_node, blink_camera_no_temp_node
 from  udiBlinkSyncNode import blink_sync_node
 
                
@@ -84,7 +84,10 @@ class blink_network_node(udi_interface.Node):
             nodeName = self.poly.getValidName(str(camera.name))
             nodeAdr = self.poly.getValidAddress(str(camera.camera_id))
             logging.info('Adding Camera {} {} {}'.format(self.address, nodeAdr, nodeName))
-            blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
+            if hasattr(self.blink, 'camera_supports_temperature') and not self.blink.camera_supports_temperature(camera.name):
+                blink_camera_no_temp_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
+            else:
+                blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
             self._camera_list.append(nodeAdr)
             
         self.sync_list = self.blink.get_sync_modules_on_network(self.network_id)

@@ -115,8 +115,8 @@ class BlinkSetup:
         self.poly.subscribe(self.poly.CUSTOMPARAMS, self.handleParams)
         self.poly.subscribe(self.poly.CUSTOMDATA, self.handleData)
         self.poly.subscribe(self.poly.POLL, self.systemPoll)
-        #self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
         self.poly.subscribe(self.poly.CONFIGDONE, self.validate_params)
+        self.poly.subscribe(self.poly.DISCOVER, self.discover)
 
         self.auth_key_updated = False
 
@@ -127,17 +127,47 @@ class BlinkSetup:
         #logging.debug('self.address : ' + str(self.address))
         #logging.debug('self.name :' + str(self.name))   
         self.poly.ready()
-        #self.poly.addNode(self, conn_status='ST')
-        #self.wait_for_node_done()
+        self.clear_notices()
 
-        #self.node = self.poly.getNode(self.address)
-        #logging.debug('node: {}'.format(self.node))
         self.nodes_in_db = self.poly.getNodesFromDb()
         # logging.debug('BlinkSetup init DONE')
         self.nodeDefineDone = True
         self.start()
 
-    
+    def clear_notices(self):
+        try:
+            if hasattr(self.poly, 'Notices') and hasattr(self.poly.Notices, 'clear'):
+                self.poly.Notices.clear()
+            if hasattr(self, 'Notices') and hasattr(self.Notices, 'clear'):
+                self.Notices.clear()
+            logging.info('Cleared notices on startup')
+        except Exception as e:
+            logging.debug(f'Error clearing notices on startup: {e}')
+
+    def remove_notice(self, key):
+        if not key:
+            return
+        keys = [str(key)]
+        if str(key).upper() != str(key):
+            keys.append(str(key).upper())
+        if str(key).lower() != str(key):
+            keys.append(str(key).lower())
+
+        for k in keys:
+            for noticelist in [getattr(self.poly, 'Notices', None), getattr(self, 'Notices', None)]:
+                if noticelist is None:
+                    continue
+                try:
+                    if hasattr(noticelist, 'delete'):
+                        noticelist.delete(k)
+                    elif k in noticelist:
+                        del noticelist[k]
+                except Exception as e:
+                    try:
+                        if k in noticelist:
+                            del noticelist[k]
+                    except Exception:
+                        pass
 
     def validate_params(self):
         # logging.debug('validate_params: {}'.format(self.Parameters.dump()))
@@ -268,7 +298,6 @@ class BlinkSetup:
         logging.info('Executing start - BlinkSetup')
         try:
 
-            self.poly.updateProfile()
             while not self.paramsProcessed or not self.nodeDefineDone:
                 logging.info('Waiting for setup to complete param:{} nodes:{}'.format(self.paramsProcessed, self.nodeDefineDone ))
                 time.sleep(2)
@@ -314,8 +343,7 @@ class BlinkSetup:
                 # clear tokens and start over from scratch!
                 if attempt_with_tokens and not ok and not auth_needed:
                     logging.warning('Starting with saved tokens failed. Clearing tokens and restarting fresh login...')
-                    if 'TOKEN_INIT' in self.poly.Notices:
-                        self.poly.Notices.delete('TOKEN_INIT')
+                    self.remove_notice('TOKEN_INIT')
                     self.clear_saved_tokens()
                     try:
                         self.blink.stop()
@@ -338,14 +366,12 @@ class BlinkSetup:
                 if not ok and not auth_needed:
                     self.customData['unique_id'] = None
                     self.clear_saved_tokens()
-                    if 'TOKEN_INIT' in self.poly.Notices:
-                        self.poly.Notices.delete('TOKEN_INIT')
+                    self.remove_notice('TOKEN_INIT')
                     self.poly.Notices['LOGIN'] = 'Login Failed - Try again'
                     exit()
 
                 if auth_needed:
-                    if 'TOKEN_INIT' in self.poly.Notices:
-                        self.poly.Notices.delete('TOKEN_INIT')
+                    self.remove_notice('TOKEN_INIT')
                     logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 
                     self.poly.Notices['PIN'] = 'Enter 2FA PIN (message) in AUTH_KEY field and save'
                     self.auth_key_updated = False
@@ -361,16 +387,15 @@ class BlinkSetup:
                 if current_auth and current_auth.get('refresh_token'):
                     self.save_saved_tokens(current_auth)
 
-                for n in ['PIN', 'INIT', 'LOGIN', 'un']:
-                    if n in self.poly.Notices:
-                        self.poly.Notices.delete(n)
+                for n in ['PIN', 'INIT', 'LOGIN', 'un', 'TOKEN_INIT', 'userName', 'password']:
+                    self.remove_notice(n)
                 #self.add_sync_nodes()
                 self.add_network_nodes()
+                self._update_dynamic_profile()
 
         except Exception as e:
             logging.error('Blink Start Exception: {}'.format(e))
-            if 'TOKEN_INIT' in self.poly.Notices:
-                self.poly.Notices.delete('TOKEN_INIT')
+            self.remove_notice('TOKEN_INIT')
             #self.BLINK_setDriver('ST', 0)
 
     def add_network_nodes (self):
@@ -384,6 +409,8 @@ class BlinkSetup:
             name = network['name'].upper()
             # logging.debug('Processing network {} : {}'.format(name, network))
             if name in self.Parameters:
+                self.remove_notice(name)
+                self.remove_notice(network['name'])
                 if self.Parameters[name][0].upper() == "E":
                     # logging.debug('Adding network {}'.format(name)) 
                     self.network_names.append(network['name'])
@@ -397,7 +424,7 @@ class BlinkSetup:
             else:
                 logging.warning('Network {} not in parameters - adding with default ENABLED value'.format(name))
                 self.Parameters[name] = 'ENABLED'
-                self.poly.Notices[name] = str(name) + 'network found - Add as custom Parameter with value ENABLED or DISABLED - then restart'         
+                self.poly.Notices[name] = str(name) + ' network found - Add as custom Parameter with value ENABLED or DISABLED - then restart'         
         #logging.debug('email_info  : {}'.format(self.email_info))
         self.blink.set_email_info(self.email_info)
         # logging.debug('Parameters defined :{}'.format(self.Parameters))
@@ -414,13 +441,11 @@ class BlinkSetup:
                 self.poly.delNode(node['address'])
 
         self.connected = True
-        if 'TOKEN_INIT' in self.poly.Notices:
-            self.poly.Notices.delete('TOKEN_INIT')
+        self.remove_notice('TOKEN_INIT')
 
     def stop(self):
         logging.info('Stop Called:')
-        if 'TOKEN_INIT' in self.poly.Notices:
-            self.poly.Notices.delete('TOKEN_INIT')
+        self.remove_notice('TOKEN_INIT')
         self.blink.stop()
         #should I reset the unique_id when logging out - self.customData['unique_id'] = None
         #if 'self.node' in locals():
@@ -442,8 +467,7 @@ class BlinkSetup:
 
 
     def systemPoll (self, polltype):
-        if 'TOKEN_INIT' in self.poly.Notices:
-            self.poly.Notices.delete('TOKEN_INIT')
+        self.remove_notice('TOKEN_INIT')
         if self.nodeDefineDone:
 
             if 'longPoll' in polltype:
@@ -535,102 +559,440 @@ class BlinkSetup:
         try:
             self.Parameters.load(customParams)
             # logging.debug('handleParams load - {}'.format(customParams))
-            if 'TEMP_UNIT' in customParams:
-                temp = customParams['TEMP_UNIT'].upper()
-                if '' == temp or None == temp:
-                    self.poly.Notices['TEMP_UNIT'] = 'Missing temp unit (C or F)'                    
+            if 'TEMP_UNIT' in customParams and customParams['TEMP_UNIT']:
+                temp = customParams['TEMP_UNIT'].strip().upper()
+                if temp and (temp[0] == 'C' or temp[0] == 'F'):
+                    self.temp_unit = temp[0]
+                    self.blink.set_temp_unit(self.temp_unit)
+                    self.remove_notice('TEMP_UNIT')
                 else:
-                    if temp[0] == 'C' or temp[0] == 'F':
-                        self.temp_unit = temp[0]
+                    self.poly.Notices['TEMP_UNIT'] = 'Invalid TEMP_UNIT parameter (must be C or F)'
+            else:
+                self.poly.Notices['TEMP_UNIT'] = 'Missing TEMP_UNIT parameter (C or F)'
 
-            
-                if 'TEMP_UNIT' in self.poly.Notices:
-                        self.poly.Notices.delete('TEMP_UNIT')
-
-            if 'USERNAME' in customParams:
-                new_user = customParams['USERNAME']
+            if 'USERNAME' in customParams and customParams['USERNAME'].strip():
+                new_user = customParams['USERNAME'].strip()
                 if self.userName is not None and self.userName != '' and self.userName != new_user:
                     logging.info('Username changed in parameters, clearing saved tokens')
                     self.clear_saved_tokens()
                 self.userName = new_user
+                self.remove_notice('userName')
             else:
                 self.poly.Notices['userName'] = 'Missing USERNAME parameter'
                 self.userName = ''
             
-            if 'PASSWORD' in customParams:
+            if 'PASSWORD' in customParams and customParams['PASSWORD']:
                 new_pass = customParams['PASSWORD']
                 if self.password is not None and self.password != '' and self.password != new_pass:
                     logging.info('Password changed in parameters, clearing saved tokens')
                     self.clear_saved_tokens()
                 self.password = new_pass
+                self.remove_notice('password')
             else:
                 self.poly.Notices['password'] = 'Missing PASSWORD parameter'
                 self.password = ''
 
+            if self.userName and self.password:
+                self.remove_notice('un')
+                self.remove_notice('LOGIN')
+
             if 'AUTH_KEY' in customParams:
-                self.authKey = customParams['AUTH_KEY']
-                self.auth_key_updated = True
+                self.authKey = str(customParams['AUTH_KEY']).strip()
+                if self.authKey:
+                    self.remove_notice('PIN')
+                    self.auth_key_updated = True
+                else:
+                    self.auth_key_updated = False
             else:
                 self.authKey = ''
+                self.auth_key_updated = False
 
-            #if 'NETWORKS_UNITS' in customParams:
-            #    self.syncUnitString = customParams['NETWORKS_UNITS']
-            #    self.networkUnits = self.strip_syncUnitStringtoList(self.networkUnitString)
-            #else:
-            #    self.poly.Notices['networks'] = 'Specify desired NETWORK_UNITS'
-            #    self.syncUnitString = ''
+            # Clear network notices if configured in parameters
+            try:
+                for key in list(customParams.keys()):
+                    if key not in ['TEMP_UNIT', 'USERNAME', 'PASSWORD', 'AUTH_KEY', 'EMAIL_ENABLED', 'SMTP', 'SMTP_PORT', 'SMTP_EMAIL', 'SMTP_PASSWORD', 'EMAIL_RECEPIENT']:
+                        self.remove_notice(key)
+                        self.remove_notice(key.upper())
+            except Exception as e:
+                logging.debug(f'Error clearing network notices: {e}')
 
-            if 'EMAIL_ENABLED' in customParams:
-                self.email_en = customParams['EMAIL_ENABLED']
-                if self.email_en.upper()[0] == 'T':
+            if 'EMAIL_ENABLED' in customParams and customParams['EMAIL_ENABLED']:
+                self.email_en = customParams['EMAIL_ENABLED'].strip()
+                if self.email_en.upper().startswith('T'):
                     self.email_en = True
                 else:
                     self.email_en = False
+                self.remove_notice('email_en')
             else:
+                self.email_en = False
                 self.poly.Notices['email_en'] = 'Missing EMAIL_ENABLED parameter (True/False)'
             self.email_info['email_en'] = self.email_en
 
             if self.email_en:
-                if 'SMTP' in customParams:
-                    self.smtp = customParams['SMTP']
+                if 'SMTP' in customParams and customParams['SMTP'].strip():
+                    self.smtp = customParams['SMTP'].strip()
+                    self.remove_notice('email_smtp')
+                    self.remove_notice('email_smpt')
                 else:
-                    self.poly.Notices['email_smpt'] = 'Missing EMAIL_SMPT parameter'
+                    self.poly.Notices['email_smtp'] = 'Missing SMTP parameter'
                 self.email_info['smtp'] = self.smtp
 
-                if 'SMTP_PORT' in customParams:
-                    self.smtp_port = customParams['SMTP_PORT']
+                if 'SMTP_PORT' in customParams and str(customParams['SMTP_PORT']).strip():
+                    try:
+                        self.smtp_port = int(customParams['SMTP_PORT'])
+                    except (ValueError, TypeError):
+                        self.smtp_port = 587
+                    self.remove_notice('email_port')
+                    self.remove_notice('email_smpt')
                 else:
-                    self.poly.Notices['email_smpt'] = 'Missing EMAIL_SMPT parameter'
                     self.smtp_port = 587
-                    self.email_info['smtp_port'] = self.smtp_port
+                    self.remove_notice('email_port')
+                    self.remove_notice('email_smpt')
+                self.email_info['smtp_port'] = self.smtp_port
 
-                if 'SMTP_EMAIL' in customParams:
-                    self.email_sender = customParams['SMTP_EMAIL']
+                if 'SMTP_EMAIL' in customParams and customParams['SMTP_EMAIL'].strip():
+                    self.email_sender = customParams['SMTP_EMAIL'].strip()
+                    self.remove_notice('email_sender')
                 else:
-                    self.poly.Notices['email_sender'] = 'Missing EMAIL_SERVER parameter'
+                    self.poly.Notices['email_sender'] = 'Missing SMTP_EMAIL parameter'
                 self.email_info['email_sender'] = self.email_sender
 
-                if 'SMTP_PASSWORD' in customParams:
+                if 'SMTP_PASSWORD' in customParams and customParams['SMTP_PASSWORD']:
                     self.email_password = customParams['SMTP_PASSWORD']
+                    self.remove_notice('email_password')
                 else:
-                    self.poly.Notices['email_password'] = 'Missing EMAIL_PASSWORD parameter'
+                    self.poly.Notices['email_password'] = 'Missing SMTP_PASSWORD parameter'
                 self.email_info['email_password'] = self.email_password
 
-                if 'EMAIL_RECEPIENT' in customParams:
-                    self.email_recepient = customParams['EMAIL_RECEPIENT']
+                if 'EMAIL_RECEPIENT' in customParams and customParams['EMAIL_RECEPIENT'].strip():
+                    self.email_recepient = customParams['EMAIL_RECEPIENT'].strip()
+                    self.remove_notice('email_recepient')
                 else:
                     self.poly.Notices['email_recepient'] = 'Missing EMAIL_RECEPIENT parameter'
                 self.email_info['email_recepient'] = self.email_recepient
+            else:
+                for email_key in ['email_smtp', 'email_smpt', 'email_port', 'email_sender', 'email_password', 'email_recepient']:
+                    self.remove_notice(email_key)
 
             #logging.debug('email_info : {}'.format(self.email_info))
             self.paramsProcessed = True
-
 
         except Exception as e:
             logging.debug('Error: {} {}'.format(e, customParams))
 
     def update(self, command = None):
+        self._update_dynamic_profile()
         self.systemPoll(['longPoll'])
+
+    def discover(self, *args, **kwargs):
+        logging.info("Discover requested - refreshing profile")
+        self._update_dynamic_profile()
+
+    def _update_dynamic_profile(self):
+        logging.info("Updating dynamic profile...")
+        updater = getattr(self.poly, "updateJsonProfile", None)
+        if callable(updater):
+            try:
+                payload = self._dynamic_profile_payload()
+                updater(payload, {"waitResponse": True})
+                logging.info("Dynamic JSON profile updated successfully via updateJsonProfile")
+                self.remove_notice("profile")
+                return
+            except Exception as e:
+                logging.warning(f"updateJsonProfile failed: {e}; falling back to updateProfile")
+        
+        try:
+            if hasattr(self.poly, "updateProfile"):
+                self.poly.updateProfile()
+                logging.info("Profile updated successfully via updateProfile")
+                self.remove_notice("profile")
+        except Exception as e:
+            logging.error(f"updateProfile failed: {e}")
+
+    def _profile_editors(self):
+        return [
+            {
+                "id": "ONLINE",
+                "ranges": [
+                    {
+                        "uom": "25",
+                        "subset": "0,1,98,99",
+                        "names": {
+                            "0": "Offline",
+                            "1": "Online",
+                            "98": "No support",
+                            "99": "Unknown",
+                        },
+                    }
+                ],
+            },
+            {
+                "id": "ARMED",
+                "ranges": [
+                    {
+                        "uom": "25",
+                        "subset": "0,1,2,99",
+                        "names": {
+                            "0": "Disarmed",
+                            "1": "Armed",
+                            "2": "Individually Camera Assigned",
+                            "99": "Unknown",
+                        },
+                    }
+                ],
+            },
+            {
+                "id": "DOARM",
+                "ranges": [
+                    {
+                        "uom": "25",
+                        "subset": "0,1",
+                        "names": {
+                            "0": "Disarm",
+                            "1": "Arm",
+                        },
+                    }
+                ],
+            },
+            {
+                "id": "DOMOTION",
+                "ranges": [
+                    {
+                        "uom": "25",
+                        "subset": "0,1",
+                        "names": {
+                            "0": "Disabled",
+                            "1": "Enabled",
+                        },
+                    }
+                ],
+            },
+            {
+                "id": "BATTERY",
+                "ranges": [
+                    {
+                        "uom": "25",
+                        "subset": "0,1,2,10,99",
+                        "names": {
+                            "0": "OK",
+                            "1": "Not OK - TBD",
+                            "2": "TBD",
+                            "10": "USB powered",
+                            "99": "Unknown",
+                        },
+                    }
+                ],
+            },
+            {
+                "id": "CAMERATYPE",
+                "ranges": [
+                    {
+                        "uom": "25",
+                        "subset": "0,1,2,3,4,5,6,7,8,9,10,11,99",
+                        "names": {
+                            "0": "Mini",
+                            "1": "DoorBell",
+                            "2": "Blink Outdoor",
+                            "3": "XT-2",
+                            "4": "Wired Flood Light",
+                            "5": "Indoor/Outdoor gen3",
+                            "6": "Outdoor v4",
+                            "7": "Mini 2",
+                            "8": "Indoor/Outdoor gen2",
+                            "9": "Indoor v4",
+                            "10": "Mini 2K+",
+                            "11": "Outdoor2K+",
+                            "99": "Unknown",
+                        },
+                    }
+                ],
+            },
+            {
+                "id": "MOTIONEN",
+                "ranges": [
+                    {
+                        "uom": "25",
+                        "subset": "0,1,99",
+                        "names": {
+                            "0": "Disabled",
+                            "1": "Enabled",
+                            "99": "Unknown",
+                        },
+                    }
+                ],
+            },
+            {
+                "id": "MOTIONDETC",
+                "ranges": [
+                    {
+                        "uom": "25",
+                        "subset": "0,1,99",
+                        "names": {
+                            "0": "No Motion",
+                            "1": "Motion Detected",
+                            "99": "Unknown",
+                        },
+                    }
+                ],
+            },
+            {
+                "id": "TEMPF",
+                "ranges": [
+                    {
+                        "uom": "17",
+                        "min": -40,
+                        "max": 221,
+                        "prec": 1,
+                    }
+                ],
+            },
+            {
+                "id": "TEMPC",
+                "ranges": [
+                    {
+                        "uom": "4",
+                        "min": -40,
+                        "max": 105,
+                        "prec": 1,
+                    }
+                ],
+            },
+            {
+                "id": "UNIXTIME",
+                "ranges": [
+                    {
+                        "uom": "151",
+                        "min": 0,
+                        "max": 9999999999,
+                        "prec": 0,
+                    }
+                ],
+            },
+        ]
+
+    def _profile_nodedefs(self):
+        camera_cmds = {
+            "sends": [],
+            "accepts": [
+                {"id": "UPDATE", "name": "Update Camera"},
+                {
+                    "id": "ARM",
+                    "name": "Set Motion Detection",
+                    "parameters": [
+                        {"id": "", "editor": "DOMOTION", "init": "GV0"},
+                    ],
+                },
+                {"id": "SNAPPIC", "name": "Take Picture"},
+                {"id": "SNAPVIDEO", "name": "Take Video"},
+            ],
+        }
+
+        return [
+            {
+                "id": "BLINKSYNC",
+                "name": "Sync Unit",
+                "icon": "GenericCtl",
+                "properties": [
+                    {"id": "ST", "editor": "ONLINE", "name": "Connected"},
+                ],
+                "cmds": {
+                    "sends": [],
+                    "accepts": [
+                        {"id": "UPDATE", "name": "Update SyncUnit"},
+                    ],
+                },
+                "links": {"ctl": [], "rsp": []},
+            },
+            {
+                "id": "BLINKNETWORK",
+                "name": "Network",
+                "icon": "GenericCtl",
+                "properties": [
+                    {"id": "ST", "editor": "ONLINE", "name": "Connected"},
+                    {"id": "GV0", "editor": "ARMED", "name": "Arm Status"},
+                    {"id": "TIME", "editor": "UNIXTIME", "name": "Last Successful Update Time"},
+                ],
+                "cmds": {
+                    "sends": [
+                        {"id": "DON", "name": "On"},
+                        {"id": "DOF", "name": "Off"},
+                    ],
+                    "accepts": [
+                        {"id": "UPDATE", "name": "Update Network"},
+                        {
+                            "id": "ARMALL",
+                            "name": "Set Arming",
+                            "parameters": [
+                                {"id": "", "editor": "DOARM", "init": "GV0"},
+                            ],
+                        },
+                    ],
+                },
+                "links": {"ctl": [], "rsp": []},
+            },
+            {
+                # Camera without temperature measurement - CLITEMP completely omitted
+                "id": "BLINKCAMERA",
+                "name": "Blink Camera",
+                "icon": "MotionSensor",
+                "properties": [
+                    {"id": "ST", "editor": "ONLINE", "name": "Connected"},
+                    {"id": "GV0", "editor": "MOTIONEN", "name": "Motion Detection Status"},
+                    {"id": "GV1", "editor": "BATTERY", "name": "Battery Status"},
+                    {"id": "GV3", "editor": "CAMERATYPE", "name": "CameraType"},
+                    {"id": "GV5", "editor": "MOTIONDETC", "name": "Motion Detected"},
+                    {"id": "TIME", "editor": "UNIXTIME", "name": "Last Update TIME"},
+                ],
+                "cmds": camera_cmds,
+                "links": {"ctl": [], "rsp": []},
+            },
+            {
+                # Camera with Celsius temperature measurement
+                "id": "BLINKCAMERAC",
+                "name": "Blink Camera",
+                "icon": "MotionSensor",
+                "properties": [
+                    {"id": "ST", "editor": "ONLINE", "name": "Connected"},
+                    {"id": "GV0", "editor": "MOTIONEN", "name": "Motion Detection Status"},
+                    {"id": "GV1", "editor": "BATTERY", "name": "Battery Status"},
+                    {"id": "GV3", "editor": "CAMERATYPE", "name": "CameraType"},
+                    {"id": "GV5", "editor": "MOTIONDETC", "name": "Motion Detected"},
+                    {"id": "CLITEMP", "editor": "TEMPC", "name": "Temperature"},
+                    {"id": "TIME", "editor": "UNIXTIME", "name": "Last Update TIME"},
+                ],
+                "cmds": camera_cmds,
+                "links": {"ctl": [], "rsp": []},
+            },
+            {
+                # Camera with Fahrenheit temperature measurement
+                "id": "BLINKCAMERAF",
+                "name": "Blink Camera",
+                "icon": "MotionSensor",
+                "properties": [
+                    {"id": "ST", "editor": "ONLINE", "name": "Connected"},
+                    {"id": "GV0", "editor": "MOTIONEN", "name": "Motion Detection Status"},
+                    {"id": "GV1", "editor": "BATTERY", "name": "Battery Status"},
+                    {"id": "GV3", "editor": "CAMERATYPE", "name": "CameraType"},
+                    {"id": "GV5", "editor": "MOTIONDETC", "name": "Motion Detected"},
+                    {"id": "CLITEMP", "editor": "TEMPF", "name": "Temperature"},
+                    {"id": "TIME", "editor": "UNIXTIME", "name": "Last Update TIME"},
+                ],
+                "cmds": camera_cmds,
+                "links": {"ctl": [], "rsp": []},
+            },
+        ]
+
+    def _dynamic_profile_payload(self):
+        return {
+            "delete": {
+                "editors": ["*"],
+                "nodedefs": ["*"],
+                "linkdefs": ["*"],
+            },
+            "editors": self._profile_editors(),
+            "nodedefs": self._profile_nodedefs(),
+            "linkdefs": [],
+        }
 
     def reportCmd(self, command, value=None):
         pass

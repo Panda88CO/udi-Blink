@@ -25,11 +25,9 @@
    </editor>
    <editor id="TEMPF">
       <range uom="17" min="-40" max="221" prec="1" />
-      <range uom="25" subset="0,99" nls="ERROR" />
    </editor>
    <editor id="TEMPC">
       <range uom="4" min="-40" max="105" prec="1" />
-      <range uom="25" subset="0,99" nls="ERROR" />
    </editor>
    <editor id="UNIXTIME">
       <range uom="151" min="0" max="9999999999" prec="0" />

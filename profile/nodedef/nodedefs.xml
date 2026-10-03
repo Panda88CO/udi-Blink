@@ -81,4 +81,27 @@
          </accepts>
       </cmds>
    </nodeDef>
+
+   <nodeDef id="BLINKCAMERA" nls="NLSBLINKCAMERA">
+      <editors />
+      <sts>
+         <st id="ST" editor="ONLINE" />
+         <st id="GV0" editor="MOTIONEN" />
+         <st id="GV1" editor="BATTERY" />
+         <st id="GV3" editor="CAMERATYPE" />
+         <st id="GV5" editor="MOTIONDETC" />
+         <st id="TIME" editor="UNIXTIME" />
+      </sts>
+      <cmds>
+         <sends />
+         <accepts>
+            <cmd id="UPDATE" />
+            <cmd id="ARM">
+               <p id="" editor="DOMOTION" init="GV0" />
+            </cmd>
+            <cmd id="SNAPPIC" />
+            <cmd id="SNAPVIDEO" />
+         </accepts>
+      </cmds>
+   </nodeDef>
 </nodeDefs>

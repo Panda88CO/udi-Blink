@@ -757,6 +757,27 @@ class blink_system:
             return getattr(self.cameras[camera_name], 'motion_detected', None)
         return None
 
+    def camera_supports_temperature(self, camera_name):
+        if camera_name in self.cameras:
+            cam = self.cameras[camera_name]
+            if getattr(cam, 'temperature_c', None) is not None:
+                return True
+            if getattr(cam, 'temperature', None) is not None:
+                return True
+            signals = getattr(cam, 'signals', None)
+            if isinstance(signals, dict) and signals.get('temp') is not None:
+                return True
+            attrs = getattr(cam, 'attributes', None)
+            if isinstance(attrs, dict) and ('temperature' in attrs or 'temp' in attrs):
+                return True
+            product_type = getattr(cam, 'product_type', '')
+            if product_type in ['owl', 'hawk', 'pigeon', 'superior', 'chickadee']:
+                return False
+            cam_type = self.get_camera_type_info(camera_name)
+            if cam_type in ['mini', 'mini2', 'mini2K+', 'wiredFloodLight']:
+                return False
+        return False
+
     def get_camera_temperatureC_info(self, camera_name):
         if camera_name in self.cameras:
             return getattr(self.cameras[camera_name], 'temperature_c', 

@@ -2,6 +2,13 @@
 
 import sys
 import os
+
+# Set environment variables for pure-Python fallback (critical on FreeBSD / Polisy / eisy without C compiler/headers)
+os.environ['AIOHTTP_NO_EXTENSIONS'] = '1'
+os.environ['FROZENLIST_NO_EXTENSIONS'] = '1'
+os.environ['MULTIDICT_NO_EXTENSIONS'] = '1'
+os.environ['YARL_NO_EXTENSIONS'] = '1'
+
 import time 
 import re
 import threading
@@ -24,9 +31,15 @@ except ImportError:
     try:
         req_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'requirements.txt')
         if os.path.exists(req_file):
-            subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', req_file, '--user'])
+            env = os.environ.copy()
+            env['AIOHTTP_NO_EXTENSIONS'] = '1'
+            env['FROZENLIST_NO_EXTENSIONS'] = '1'
+            env['MULTIDICT_NO_EXTENSIONS'] = '1'
+            env['YARL_NO_EXTENSIONS'] = '1'
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'aiohttp', '--no-binary=aiohttp', '--user'], env=env)
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', req_file, '--user'], env=env)
             user_site = site.getusersitepackages()
-            if user_site and user_site not in sys.path:
+            if user_site and user_site not in sys.path and os.path.exists(user_site):
                 sys.path.insert(0, user_site)
             import blinkpy
     except Exception:

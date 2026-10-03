@@ -770,25 +770,27 @@ class BlinkSetup:
         self._update_dynamic_profile()
 
     def _update_dynamic_profile(self):
-        logging.info("Updating dynamic profile...")
+        logging.info("Updating profile (dynamic & static)...")
+        json_ok = False
         updater = getattr(self.poly, "updateJsonProfile", None)
         if callable(updater):
             try:
                 payload = self._dynamic_profile_payload()
                 updater(payload, {"waitResponse": True})
                 logging.info("Dynamic JSON profile updated successfully via updateJsonProfile")
-                self.remove_notice("profile")
-                return
+                json_ok = True
             except Exception as e:
                 logging.warning(f"updateJsonProfile failed: {e}; falling back to updateProfile")
         
         try:
             if hasattr(self.poly, "updateProfile"):
                 self.poly.updateProfile()
-                logging.info("Profile updated successfully via updateProfile")
-                self.remove_notice("profile")
+                logging.info("Static profile updated successfully via updateProfile")
         except Exception as e:
-            logging.error(f"updateProfile failed: {e}")
+            if not json_ok:
+                logging.error(f"updateProfile failed: {e}")
+
+        self.remove_notice("profile")
 
     def _profile_editors(self):
         return [

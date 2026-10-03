@@ -33,7 +33,7 @@ class blink_camera_node(udi_interface.Node):
                 {'driver': 'GV3', 'value':99, 'uom':25}, # Camera Type 
                 #{'driver': 'GV4', 'value':99, 'uom':25}, # Motion Detection Enabled
                 {'driver': 'GV5', 'value':99, 'uom':25}, # Motion Detected
-                {'driver': 'CLITEMP', 'value':99, 'uom':25}, # Temp
+                {'driver': 'CLITEMP', 'value':0, 'uom':4}, # Temp
                 #{'driver': 'GV7', 'value':99, 'uom':25}, # Recording
                 #{'driver': 'GV8', 'value':0, 'uom':25}, # Email Picture Eanble
                 {'driver': 'TIME', 'value':0, 'uom':151},
@@ -58,7 +58,7 @@ class blink_camera_node(udi_interface.Node):
         if cls is blink_camera_node:
             cam_name = getattr(camera, 'name', str(camera))
             if hasattr(blinkSys, 'camera_supports_temperature') and not blinkSys.camera_supports_temperature(cam_name):
-                return super().__new__(blink_camera_no_temp_node)
+                return blink_camera_no_temp_node(polyglot, primary, address, name, camera, blinkSys, *args, **kwargs)
         return super().__new__(cls)
 
     def __init__(self, polyglot, primary, address, name, camera, blinkSys):
@@ -70,11 +70,16 @@ class blink_camera_node(udi_interface.Node):
         self.node = None
         self.blink = blinkSys
         self.temp_unit = self.blink.get_temp_unit()
-        if getattr(self, 'id', None) != 'BLINKCAMERA':
-            if self.temp_unit == 'F':
-                self.id = 'BLINKCAMERAF'
-            else:
-                self.id = 'BLINKCAMERAC'
+        if self.temp_unit == 'F':
+            self.id = 'BLINKCAMERAF'
+            for d in self.drivers:
+                if d['driver'] == 'CLITEMP':
+                    d['uom'] = 17
+        else:
+            self.id = 'BLINKCAMERAC'
+            for d in self.drivers:
+                if d['driver'] == 'CLITEMP':
+                    d['uom'] = 4
 
         self.pic_email_enabled = False
         self.nodeDefineDone = False

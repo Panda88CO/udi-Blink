@@ -758,24 +758,43 @@ class blink_system:
         return None
 
     def camera_supports_temperature(self, camera_name):
-        if camera_name in self.cameras:
-            cam = self.cameras[camera_name]
-            if getattr(cam, 'temperature_c', None) is not None:
-                return True
-            if getattr(cam, 'temperature', None) is not None:
-                return True
-            signals = getattr(cam, 'signals', None)
-            if isinstance(signals, dict) and signals.get('temp') is not None:
-                return True
-            attrs = getattr(cam, 'attributes', None)
-            if isinstance(attrs, dict) and ('temperature' in attrs or 'temp' in attrs):
-                return True
-            product_type = getattr(cam, 'product_type', '')
-            if product_type in ['owl', 'hawk', 'pigeon', 'superior', 'chickadee']:
-                return False
-            cam_type = self.get_camera_type_info(camera_name)
-            if cam_type in ['mini', 'mini2', 'mini2K+', 'wiredFloodLight']:
-                return False
+        if camera_name not in self.cameras:
+            return False
+        cam = self.cameras[camera_name]
+
+        # 1. Product type check - known powered / non-temperature models
+        product_type = str(getattr(cam, 'product_type', '')).lower()
+        if product_type in ['owl', 'hawk', 'pigeon', 'superior', 'chickadee', 'lotus', 'galapagos', 'tulip', 'freesia']:
+            return False
+
+        # 2. Camera category check - known models without temperature
+        cam_type = str(self.get_camera_type_info(camera_name)).lower()
+        if cam_type in ['mini', 'mini2', 'mini2k+', 'wiredfloodlight', 'doorbell']:
+            return False
+
+        # 3. Powered camera check (no battery)
+        bat_info = self.get_camera_battery_info(camera_name)
+        if bat_info == 'No Battery':
+            return False
+
+        # 4. Known battery cameras with temperature sensor
+        if cam_type in ['gen2', 'xt-2', 'gen3', 'outdoor4', 'outdoor2k+', 'floodlight', 'blink outdoor']:
+            return True
+
+        # 5. Check if actual temperature reading is available and valid
+        temp = getattr(cam, 'temperature', None)
+        if temp is not None:
+            return True
+        temp_c = getattr(cam, 'temperature_c', None)
+        if temp_c is not None:
+            return True
+        signals = getattr(cam, 'signals', None)
+        if isinstance(signals, dict) and signals.get('temp') is not None:
+            return True
+        attrs = getattr(cam, 'attributes', None)
+        if isinstance(attrs, dict) and attrs.get('temperature') is not None:
+            return True
+
         return False
 
     def get_camera_temperatureC_info(self, camera_name):

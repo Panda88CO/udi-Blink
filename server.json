@@ -8,7 +8,7 @@
     "notice": "Uses APIs from https://github.com/fronzbot/blinkpy - not official Blink APIs.",
     "shortPoll": "30",
     "longPoll": "180",
-    "profile_version": "0.7.0",
+    "profile_version": "0.7.1",
     "credits": [
         {
             "title": "A NodeServer to integrate Blink Camera Systems",

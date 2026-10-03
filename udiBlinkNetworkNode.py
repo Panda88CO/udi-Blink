@@ -81,6 +81,14 @@ class blink_network_node(udi_interface.Node):
         self.camera_list = self.blink.get_cameras_on_network(self.network_id)
         camera_ids = {str(camera.camera_id) for camera in self.camera_list}
 
+        db_nodes = {}
+        try:
+            for n in self.poly.getNodesFromDb():
+                if isinstance(n, dict) and 'address' in n:
+                    db_nodes[n['address']] = n.get('nodeDefId')
+        except Exception as e:
+            logging.debug(f'Error getting db nodes: {e}')
+
         # logging.debug('Adding Cameras in list: {}'.format(self.camera_list))             
         for indx, camera in enumerate(self.camera_list):
             # logging.debug('{} cameras found in network {}'.format(len(self.camera_list), self.network_id))
@@ -93,11 +101,26 @@ class blink_network_node(udi_interface.Node):
                 state = 'PENDING'
 
             if state == 'ENABLED':
-                logging.info('Adding Camera {} {} {} (ENABLED)'.format(self.address, nodeAdr, nodeName))
-                if hasattr(self.blink, 'camera_supports_temperature') and not self.blink.camera_supports_temperature(camera.name):
-                    blink_camera_no_temp_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
-                else:
-                    blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
+                supports_temp = hasattr(self.blink, 'camera_supports_temperature') and self.blink.camera_supports_temperature(camera.name)
+                temp_unit = getattr(self.blink, 'temp_unit', 'C')
+                target_def = 'BLINKCAMERAF' if (supports_temp and temp_unit == 'F') else ('BLINKCAMERAC' if supports_temp else 'BLINKCAMERA')
+
+                existing = self.poly.getNode(nodeAdr)
+                existing_def = getattr(existing, 'id', None) or db_nodes.get(nodeAdr)
+                if existing_def and existing_def != target_def:
+                    logging.info(f"Camera node {nodeAdr} ({nodeName}) has nodeDefId '{existing_def}', but target is '{target_def}'. Deleting old node from IoX to reload updated nodeDef...")
+                    self.poly.delNode(nodeAdr)
+                    existing = None
+                    db_nodes.pop(nodeAdr, None)
+                    time.sleep(0.5)
+
+                if not existing:
+                    if not supports_temp:
+                        logging.info('Adding Camera {} {} {} (ENABLED, no temperature - BLINKCAMERA)'.format(self.address, nodeAdr, nodeName))
+                        blink_camera_no_temp_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
+                    else:
+                        logging.info('Adding Camera {} {} {} (ENABLED, with temperature - {})'.format(self.address, nodeAdr, nodeName, target_def))
+                        blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
                 self._camera_list.append(nodeAdr)
             elif state == 'DISABLED':
                 logging.info('Skipping Camera {} {} {} (DISABLED in parameters)'.format(self.address, nodeAdr, nodeName))
@@ -148,6 +171,14 @@ class blink_network_node(udi_interface.Node):
         if not getattr(self, '_started', False) or not self.nodeDefineDone:
             return
 
+        db_nodes = {}
+        try:
+            for n in self.poly.getNodesFromDb():
+                if isinstance(n, dict) and 'address' in n:
+                    db_nodes[n['address']] = n.get('nodeDefId')
+        except Exception as e:
+            logging.debug(f'Error getting db nodes: {e}')
+
         self.camera_list = self.blink.get_cameras_on_network(self.network_id)
         current_cam_nodes = list(self._camera_list)
         new_cam_nodes = []
@@ -160,12 +191,27 @@ class blink_network_node(udi_interface.Node):
 
             if state == 'ENABLED':
                 new_cam_nodes.append(nodeAdr)
+                supports_temp = hasattr(self.blink, 'camera_supports_temperature') and self.blink.camera_supports_temperature(camera.name)
+                temp_unit = getattr(self.blink, 'temp_unit', 'C')
+                target_def = 'BLINKCAMERAF' if (supports_temp and temp_unit == 'F') else ('BLINKCAMERAC' if supports_temp else 'BLINKCAMERA')
+
                 existing = self.poly.getNode(nodeAdr)
+                existing_def = getattr(existing, 'id', None) or db_nodes.get(nodeAdr)
+
+                if existing_def and existing_def != target_def:
+                    logging.info(f"Camera node {nodeAdr} ({nodeName}) has nodeDefId '{existing_def}', but target is '{target_def}'. Deleting old node from IoX to reload updated nodeDef...")
+                    self.poly.delNode(nodeAdr)
+                    existing = None
+                    db_nodes.pop(nodeAdr, None)
+                    changed = True
+                    time.sleep(0.5)
+
                 if not existing or nodeAdr not in current_cam_nodes:
-                    logging.info('Adding Camera {} {} {} (ENABLED)'.format(self.address, nodeAdr, nodeName))
-                    if hasattr(self.blink, 'camera_supports_temperature') and not self.blink.camera_supports_temperature(camera.name):
+                    if not supports_temp:
+                        logging.info('Adding Camera {} {} {} (ENABLED, no temperature - BLINKCAMERA)'.format(self.address, nodeAdr, nodeName))
                         blink_camera_no_temp_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
                     else:
+                        logging.info('Adding Camera {} {} {} (ENABLED, with temperature - {})'.format(self.address, nodeAdr, nodeName, target_def))
                         blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
                     changed = True
             elif state in ('DISABLED', 'PENDING'):

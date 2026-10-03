@@ -122,7 +122,7 @@ class BlinkSetup (udi_interface.Node):
         self.hb = 0
         self._heartbeat_threads = {}
         self.userParam = ['TEMP_UNIT', 'USERNAME','PASSWORD', 'AUTH_KEY', 'SYNC_UNITS' ]
-        logging.debug('BlinkSetup init')
+        # logging.debug('BlinkSetup init')
         #logging.debug('self.address : ' + str(self.address))
         #logging.debug('self.name :' + str(self.name))   
         self.poly.ready()
@@ -132,14 +132,14 @@ class BlinkSetup (udi_interface.Node):
         #self.node = self.poly.getNode(self.address)
         #logging.debug('node: {}'.format(self.node))
         self.nodes_in_db = self.poly.getNodesFromDb()
-        logging.debug('BlinkSetup init DONE')
+        # logging.debug('BlinkSetup init DONE')
         self.nodeDefineDone = True
         self.start()
 
     
 
     def validate_params(self):
-        logging.debug('validate_params: {}'.format(self.Parameters.dump()))
+        # logging.debug('validate_params: {}'.format(self.Parameters.dump()))
         self.paramsProcessed = True    
 
     def strip_StringtoList(self, syncString):
@@ -222,7 +222,7 @@ class BlinkSetup (udi_interface.Node):
             logging.error(f'Error removing blink_tokens.json: {e}')
 
     def prepare_login_data(self, auth_tokens=None):
-        logging.debug('prepare_login_data')
+        # logging.debug('prepare_login_data')
         login_data = {}
         login_data['username'] = self.userName
         login_data['password'] = self.password
@@ -230,17 +230,17 @@ class BlinkSetup (udi_interface.Node):
         login_data['reauth'] = True
         #logging.debug('custom data: {}'.format(self.customData))
         if 'unique_id' in self.customData.keys():
-            logging.debug('uid found: {}'.format(self.customData['unique_id']))
+            # logging.debug('uid found: {}'.format(self.customData['unique_id']))
             if self.customData['unique_id'] is not None: 
                 login_data['unique_id'] = self.customData['unique_id']
             else:
                 login_data['unique_id'] = self.gen_uid(16, True)
                 self.customData['unique_id'] = login_data['unique_id']
-                logging.debug('uid created: {}'.format(self.customData['unique_id']))              
+                # logging.debug('uid created: {}'.format(self.customData['unique_id']))              
         else:
             login_data['unique_id'] = self.gen_uid(16, True)
             self.customData['unique_id'] = login_data['unique_id']
-            logging.debug('uid created: {}'.format(self.customData['unique_id']))
+            # logging.debug('uid created: {}'.format(self.customData['unique_id']))
 
         if auth_tokens and isinstance(auth_tokens, dict):
             for k in [
@@ -257,7 +257,7 @@ class BlinkSetup (udi_interface.Node):
             ]:
                 if k in auth_tokens and auth_tokens[k] is not None:
                     login_data[k] = auth_tokens[k]
-            logging.debug('prepare_login_data included stored auth tokens and hardware_id')
+            # logging.debug('prepare_login_data included stored auth tokens and hardware_id')
 
         #logging.debug('prepare_login_data {}'.format(login_data))
         return(login_data)
@@ -275,15 +275,15 @@ class BlinkSetup (udi_interface.Node):
             #logging.debug('syncUnits / syncString: {} - {}'.format(self.syncUnits, self.syncUnitString))
             #self.BLINK_setDriver('ST', 1)
             #time.sleep(5)
-            logging.debug('nodeDefineDone {}'.format(self.nodeDefineDone))
-            logging.debug('credentilas : {} {}'.format(self.userName, self.password))
+            # logging.debug('nodeDefineDone {}'.format(self.nodeDefineDone))
+            # logging.debug('credentilas : {} {}'.format(self.userName, self.password))
 
             if self.userName == None or self.userName == '' or self.password==None or self.password=='':
                 logging.error('username and password must be provided to start node server')
                 self.poly.Notices['un'] = 'username and password must be provided to start node server'
                 exit()
             else:
-                logging.debug('STARTING BLINK SYSTEM')
+                # logging.debug('STARTING BLINK SYSTEM')
                 saved_tokens = self.load_saved_tokens()
                 attempt_with_tokens = (saved_tokens is not None and bool(saved_tokens.get('refresh_token')))
 
@@ -353,8 +353,7 @@ class BlinkSetup (udi_interface.Node):
                         time.sleep(3)
                     self.poly.Notices['INIT'] = 'System Initializing - it may take a little while'    
                     self.blink.auth_key(str(self.authKey))
-
-                self.blink.finalize_auth()
+                    self.blink.finalize_auth()
 
                 # Save tokens now that startup/2FA and post-verify are complete
                 current_auth = self.blink.get_auth_data()
@@ -378,43 +377,41 @@ class BlinkSetup (udi_interface.Node):
         node_adr_list = [self.address]
         network_node_list = self.blink.get_network_list()
         self.network_names = []
-        logging.debug(f'Network node list: {network_node_list}')
-        logging.debug(f'Parameter list: {self.Parameters}')
+        # logging.debug(f'Network node list: {network_node_list}')
+        # logging.debug(f'Parameter list: {self.Parameters}')
         for indx, network in enumerate (network_node_list):
             name = network['name'].upper()
-            logging.debug('Processing network {} : {}'.format(name, network))
+            # logging.debug('Processing network {} : {}'.format(name, network))
             if name in self.Parameters:
                 if self.Parameters[name][0].upper() == "E":
-                    logging.debug('Adding network {}'.format(name)) 
+                    # logging.debug('Adding network {}'.format(name)) 
                     self.network_names.append(network['name'])
                     node_address = self.poly.getValidAddress(str(network['id']))
-                    node_name = self.poly.getValidName('Blink_'+str(network['name']))
+                    node_name = self.poly.getValidName('Blink_' + str(network['name']))
                     logging.info('Adding {} network'.format(node_name))
                     node_adr_list.append(node_address)
-                    if not blink_network_node(self.poly, node_address, node_address, node_name, network['id'], self.blink ):
+                    net_node = blink_network_node(self.poly, node_address, node_address, node_name, network['id'], self.blink)
+                    if net_node:
+                        net_node.start()
+                    else:
                         logging.error('Failed to create network node for {} '.format(node_name))
             else:
                 logging.warning('Network {} not in parameters - adding with default ENABLED value'.format(name))
                 self.Parameters[name] = 'ENABLED'
                 self.poly.Notices[name] = str(name) + 'network found - Add as custom Parameter with value ENABLED or DISABLED - then restart'         
-        logging.debug(f'Parameter list after loop: {self.Parameters}')
-        while not self.paramsProcessed:
-            time.sleep(5)
-            logging.info('waitng to process all parameters')
         #logging.debug('email_info  : {}'.format(self.email_info))
         self.blink.set_email_info(self.email_info)
-        self.poly.updateProfile()
-        logging.debug('Parameters defined :{}'.format(self.Parameters))
+        # logging.debug('Parameters defined :{}'.format(self.Parameters))
         nodes_in_db = self.poly.getNodesFromDb()
         nodes = self.poly.getNodes()
         
-        logging.debug('Checking for nodes not used - node list {} - {} {}'.format(node_adr_list, len(nodes_in_db), nodes_in_db))
+        # logging.debug('Checking for nodes not used - node list {} - {} {}'.format(node_adr_list, len(nodes_in_db), nodes_in_db))
 
         for nde, node in enumerate(nodes_in_db):
             #node = self.nodes_in_db[nde]
-            logging.debug('Scanning db for extra nodes : {}'.format(node))
+            # logging.debug('Scanning db for extra nodes : {}'.format(node))
             if node['primaryNode'] not in node_adr_list:
-                logging.debug('Removing primary node : {} {}'.format(node['name'], node))
+                # logging.debug('Removing primary node : {} {}'.format(node['name'], node))
                 self.poly.delNode(node['address'])
 
         self.connected = True
@@ -464,17 +461,18 @@ class BlinkSetup (udi_interface.Node):
                     for nde in nodes:
                         if nde != 'setup':   # but not the setup node
                             if nodes[nde].id == 'blinknetwork' and hasattr(nodes[nde], 'set_connection_status'):
-                                logging.debug('Updating connection status for node {} to {}'.format(nde, success))
+                                # logging.debug('Updating connection status for node {} to {}'.format(nde, success))
                                 nodes[nde].set_connection_status(True if success else False)
                                 if success:
-                                    logging.debug('Updating heartbeat for node {}'.format(nde))
+                                    # logging.debug('Updating heartbeat for node {}'.format(nde))
                                     heartbeat_cb = getattr(nodes[nde], 'heartbeat', None)
                                     if nodes[nde].id == 'blinknetwork' and callable(heartbeat_cb):
                                         heartbeat_thread = self._heartbeat_threads.get(nde)
                                         if heartbeat_thread and heartbeat_thread.is_alive():
-                                            logging.debug('Heartbeat already running for node {}'.format(nde))
+                                            # logging.debug('Heartbeat already running for node {}'.format(nde))
+                                            pass
                                         else:
-                                            logging.debug('Starting heartbeat thread for node {}'.format(nde))
+                                            # logging.debug('Starting heartbeat thread for node {}'.format(nde))
                                             heartbeat_thread = threading.Thread(
                                                 target=self._run_heartbeat,
                                                 args=(heartbeat_cb, nde),
@@ -487,7 +485,7 @@ class BlinkSetup (udi_interface.Node):
                                         logging.warning('Node {} is missing callable heartbeat'.format(nde))
 
                             if success:
-                                logging.debug('updating node {} data'.format(nde)) 
+                                # logging.debug('updating node {} data'.format(nde)) 
                                 
                                 if nodes[nde].nodeDefineDone and hasattr(nodes[nde], 'updateISYdrivers'):                         
                                     nodes[nde].updateISYdrivers()
@@ -525,22 +523,19 @@ class BlinkSetup (udi_interface.Node):
         self.blink.set_temp_unit(self.temp_unit)
 
     def handleData (self, Data ):
-        logging.debug('handleData')
+        # logging.debug('handleData')
         try:
             self.customData.load(Data)
-            logging.debug('handleData load - {}'.format(self.customData))
-    
-            self.poly.Notices.clear()
+            # logging.debug('handleData load - {}'.format(self.customData))
         except Exception as e:
             logging.error ("Exceptions : {}".format(e))
     
     
     def handleParams (self, customParams ):
-        logging.debug('handleParams')
+        # logging.debug('handleParams')
         try:
             self.Parameters.load(customParams)
-            logging.debug('handleParams load - {}'.format(customParams))
-            self.poly.Notices.clear()
+            # logging.debug('handleParams load - {}'.format(customParams))
             if 'TEMP_UNIT' in customParams:
                 temp = customParams['TEMP_UNIT'].upper()
                 if '' == temp or None == temp:
@@ -639,7 +634,7 @@ class BlinkSetup (udi_interface.Node):
         self.systemPoll(['longPoll'])
 
     def heartbeat(self):
-        logging.debug('Controller heartbeat: {}'.format(self.hb))
+        # logging.debug('Controller heartbeat: {}'.format(self.hb))
         if self.hb == 0:
             self.reportCmd('DON', 2)
             self.hb = 1

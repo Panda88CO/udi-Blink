@@ -29,7 +29,7 @@ class blink_sync_node(udi_interface.Node):
 
     def __init__(self, polyglot, primary, address, name, sync_unit, blinkSys  ):
         super().__init__( polyglot, primary, address, name)   
-        logging.debug('blink SYNC INIT- {}'.format(name))
+        # logging.debug('blink SYNC INIT- {}'.format(name))
         self.nodeDefineDone = False
         self.sync_unit = sync_unit
         self.name = name
@@ -47,14 +47,12 @@ class blink_sync_node(udi_interface.Node):
         self.poly.subscribe(self.poly.STOP, self.stop)
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
 
-        # start processing events and create add our controller node
-        polyglot.ready()
         self.poly.addNode(self)
         self.wait_for_node_done()
         self.node = self.poly.getNode(address)
         logging.info('Start {} sync module Node'.format(self.name))  
-        time.sleep(1)
         self.nodeDefineDone = True
+        self.updateISYdrivers()
 
 
 
@@ -72,15 +70,8 @@ class blink_sync_node(udi_interface.Node):
 
 
     def start(self):        
-        logging.debug('Sync module Start {}'.format(self.name))
-        time.sleep(2)
-        while not self.nodeDefineDone or self.node == None or self.drivers == None:
-            time.sleep(2)
-            logging.info('Waiting for nodes to be created')
-
-        self.sync_unit
-        self.nodeDefineDone = True
-        self.BLINK_setDriver('ST', self.bool2isy(self.blink.get_sync_online(self.sync_unit.name)))
+        # logging.debug('Sync module Start {}'.format(self.name))
+        self.updateISYdrivers()
 
 
     def stop(self):

@@ -16,9 +16,9 @@ except ImportError:
     logging.basicConfig(level=logging.INFO)
 
 def BLINK_setDriver(self, key, value, Unit=None):
-    logging.debug('BLINK_setDriver : {} {} {}'.format(key, value, Unit))
+    # logging.debug('BLINK_setDriver : {} {} {}'.format(key, value, Unit))
     if value == None:
-        logging.debug('None value passed = seting 99, UOM 25')
+        # logging.debug('None value passed = seting 99, UOM 25')
         self.node.setDriver(key, 99, True, False, 25)
     else:
         if Unit:
@@ -27,12 +27,18 @@ def BLINK_setDriver(self, key, value, Unit=None):
             self.node.setDriver(key, value, True, False)
 
 def node_queue(self, data):
-    self.n_queue.append(data['address'])
+    if data and data.get('address') == self.address:
+        self.n_queue.append(data['address'])
 
 def wait_for_node_done(self):
-    while len(self.n_queue) == 0:
-        time.sleep(0.1)
-    self.n_queue.pop()
+    start_t = time.time()
+    while self.address not in self.n_queue:
+        if time.time() - start_t > 15:
+            logging.warning('Timeout waiting for node {} to be added'.format(self.address))
+            break
+        time.sleep(0.05)
+    if self.address in self.n_queue:
+        self.n_queue.remove(self.address)
 
 def connection2isy(self, connection):
     if connection == 'online':

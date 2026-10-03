@@ -38,20 +38,29 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-def async_to_sync(func):
-    """Decorator to convert async methods to sync for thread-safe access"""
-    @wraps(func)
-    def wrapper(self, *args, **kwargs):
-        if self._loop and self._loop.is_running():
-            coro = func(self, *args, **kwargs)
-            try:
-                future = asyncio.run_coroutine_threadsafe(coro, self._loop)
-                return future.result(timeout=30)
-            except Exception as e:
-                logging.error(f"Error executing async method {func.__name__}: {e}")
-                return None
-        return None
-    return wrapper
+def async_to_sync(timeout_or_func=60):
+    """Decorator to convert async methods to sync for thread-safe access with configurable timeout"""
+    def decorator(func, timeout=60):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            if self._loop and self._loop.is_running():
+                coro = func(self, *args, **kwargs)
+                try:
+                    future = asyncio.run_coroutine_threadsafe(coro, self._loop)
+                    return future.result(timeout=timeout)
+                except Exception as e:
+                    err_msg = f"{type(e).__name__}: {e}" if str(e) else type(e).__name__
+                    logging.error(f"Error executing async method {func.__name__}: {err_msg}")
+                    return None
+            return None
+        return wrapper
+
+    if callable(timeout_or_func):
+        # Used as @async_to_sync without arguments
+        return decorator(timeout_or_func, timeout=60)
+    else:
+        # Used as @async_to_sync(timeout=90) or @async_to_sync(90)
+        return lambda func: decorator(func, timeout=timeout_or_func)
 
 class blink_system:
     def __init__(self,
@@ -255,11 +264,12 @@ class blink_system:
         logging.debug(f'Auth key result: {result}')
         return result
 
-    @async_to_sync
+    @async_to_sync(90)
     async def finalize_auth(self):
         logging.debug('finalize_auth')
-        await self._blink.setup_post_verify()
-        await asyncio.sleep(2)
+        if not getattr(self._blink, 'available', False):
+            await self._blink.setup_post_verify()
+            await asyncio.sleep(1)
         await self._blink.refresh()
         return 'ok'
 
@@ -312,15 +322,19 @@ class blink_system:
     @async_to_sync
     async def refresh(self):
         if self._blink:
-            await self._blink.refresh()
-            self._debug_camera_data()
-            return True
+            try:
+                await self._blink.refresh()
+                # self._debug_camera_data()
+                return True
+            except Exception as e:
+                logging.error(f"Error during refresh: {e}")
+                return False
         return False
     
     def _debug_camera_data(self):
         """Log debug buffer with all camera data after refresh"""
         if not self._blink or not self.cameras:
-            logging.debug('No cameras available after refresh')
+            # logging.debug('No cameras available after refresh')
             return
         
         debug_buffer = ['=== Camera Data After Refresh ===']
@@ -343,7 +357,8 @@ class blink_system:
             debug_buffer.append(f'  Sync ID: {sync_id} {"(camera is its own sync module)" if is_own_sync else ""}')
             debug_buffer.append(f'  Network ID (via sync): {getattr(sync, "network_id", "N/A") if sync else getattr(camera, "network_id", "N/A")}')
         
-        logging.debug('\n'.join(debug_buffer))
+        # logging.debug('\n'.join(debug_buffer))
+        pass
         
     def refresh_sys(self):
         return self.refresh()
@@ -387,13 +402,13 @@ class blink_system:
             return None
 
         sync_obj = self.sync[sync_name]
-        logging.debug(
-            "get_sync_online raw values for %s: status=%r enabled=%r attributes=%r",
-            sync_name,
-            getattr(sync_obj, 'status', None),
-            getattr(sync_obj, 'enabled', None),
-            getattr(sync_obj, 'attributes', None),
-        )
+        # logging.debug(
+        #     "get_sync_online raw values for %s: status=%r enabled=%r attributes=%r",
+        #     sync_name,
+        #     getattr(sync_obj, 'status', None),
+        #     getattr(sync_obj, 'enabled', None),
+        #     getattr(sync_obj, 'attributes', None),
+        # )
 
         # Prefer raw status fields and avoid sync.online, which can emit
         # "Unknown sync module status" with some blinkpy payloads.
@@ -435,23 +450,24 @@ class blink_system:
                 # Some camera-only networks still expose a sync object that does not map
                 # correctly, so prefer an explicit camera-level network_id match.
                 if sync and not is_fake_sync and str(sync_network_id) != str(network_id):
-                    logging.debug(
-                        'Camera %s sync.network_id (%s) mismatches target network_id (%s); '
-                        'using camera.network_id instead',
-                        name, sync_network_id, network_id
-                    )
+                    # logging.debug(
+                    #     'Camera %s sync.network_id (%s) mismatches target network_id (%s); '
+                    #     'using camera.network_id instead',
+                    #     name, sync_network_id, network_id
+                    # )
+                    pass
                 camera_list.append(camera)
             elif not sync or is_fake_sync or not getattr(sync, 'network_id', None):
                 # Camera may be its own sync module or have no sync — check network_id directly on the camera
                 if cam_network_id and str(cam_network_id) == str(network_id):
-                    logging.debug('Camera {} has no real sync reference; using camera.network_id directly'.format(name))
+                    # logging.debug('Camera {} has no real sync reference; using camera.network_id directly'.format(name))
                     camera_list.append(camera)
         return camera_list
 
     def get_sync_modules_on_network(self, network_id):
         sync_list = []
-        logging.debug('Finding sync modules for network_id: {}'.format(network_id))
-        logging.debug('Available sync modules: {} {}'.format(list(self.sync.keys()), list(self.sync.items())))
+        # logging.debug('Finding sync modules for network_id: {}'.format(network_id))
+        # logging.debug('Available sync modules: {} {}'.format(list(self.sync.keys()), list(self.sync.items())))
         # Collect all camera IDs for this network
         camera_ids = set()
         for name, camera in self.cameras.items():
@@ -469,7 +485,7 @@ class blink_system:
             if str(getattr(sync, 'network_id', '')) == str(network_id):
                 # Skip fake sync units (where sync_id matches a camera_id)
                 if sync_id is not None and str(sync_id) in camera_ids:
-                    logging.debug('Skipping fake sync unit %s (sync_id %s matches a camera_id) for network %s', name, sync_id, network_id)
+                    # logging.debug('Skipping fake sync unit %s (sync_id %s matches a camera_id) for network %s', name, sync_id, network_id)
                     continue
                 sync_list.append(sync)
         return sync_list
@@ -485,16 +501,16 @@ class blink_system:
                 found_sync = True
                 if self._is_camera_backed_sync(sync_module, network_id):
                     matched_camera_backed_sync = True
-                    logging.debug(
-                        'get_network_arm_state: sync %s on network %s is camera-backed; '
-                        'will check if all syncs are camera-backed',
-                        getattr(sync_module, 'name', name), network_id
-                    )
+                    # logging.debug(
+                    #     'get_network_arm_state: sync %s on network %s is camera-backed; '
+                    #     'will check if all syncs are camera-backed',
+                    #     getattr(sync_module, 'name', name), network_id
+                    # )
                 else:
                     only_camera_backed_sync = False
                     value = self._normalize_arm_value(getattr(sync_module, 'arm', None))
                     if value is not None:
-                        logging.debug('get_network_arm_state: found sync module arm value %r for network %s', value, network_id)
+                        # logging.debug('get_network_arm_state: found sync module arm value %r for network %s', value, network_id)
                         return value
 
         # If all syncs for this network are camera-backed, treat as camera-only and return 2
@@ -505,7 +521,7 @@ class blink_system:
         if matched_camera_backed_sync:
             camera_value = self._derive_network_arm_from_cameras(network_id)
             if camera_value is not None:
-                logging.debug('get_network_arm_state: derived camera-backed arm value %r for network %s', camera_value, network_id)
+                # logging.debug('get_network_arm_state: derived camera-backed arm value %r for network %s', camera_value, network_id)
                 return camera_value
 
         # Fallback to homescreen if sync module not found (legacy)
@@ -514,7 +530,7 @@ class blink_system:
             if str(network.get('id', '')) == str(network_id):
                 arm = self._normalize_arm_value(network.get('armed'))
                 if arm is not None:
-                    logging.debug('get_network_arm_state: found homescreen arm value %r for network %s', arm, network_id)
+                    # logging.debug('get_network_arm_state: found homescreen arm value %r for network %s', arm, network_id)
                     return arm
 
         # No sync unit: check if there are cameras on this network
@@ -573,16 +589,16 @@ class blink_system:
             arm_states.append(camera_fully_armed)
 
         if arm_states:
-            logging.debug(
-                'get_network_arm_state: deriving arm state from %d cameras on network %s: %s',
-                len(arm_states), network_id, arm_states
-            )
+            # logging.debug(
+            #     'get_network_arm_state: deriving arm state from %d cameras on network %s: %s',
+            #     len(arm_states), network_id, arm_states
+            # )
             return all(arm_states)
 
-        logging.debug(
-            'get_network_arm_state: no usable arm values found for %d cameras on network %s',
-            len(cameras_on_network), network_id
-        )
+        # logging.debug(
+        #     'get_network_arm_state: no usable arm values found for %d cameras on network %s',
+        #     len(cameras_on_network), network_id
+        # )
         return None
 
     def _is_camera_backed_sync(self, sync_module, network_id):
@@ -635,11 +651,11 @@ class blink_system:
         for name, sync_module in self.sync.items():
             if str(getattr(sync_module, 'network_id', '')) == str(network_id):
                 if self._is_camera_backed_sync(sync_module, network_id):
-                    logging.debug(
-                        'set_network_arm_state: sync %s on network %s is camera-backed; '
-                        'arming cameras directly',
-                        getattr(sync_module, 'name', name), network_id
-                    )
+                    # logging.debug(
+                    #     'set_network_arm_state: sync %s on network %s is camera-backed; '
+                    #     'arming cameras directly',
+                    #     getattr(sync_module, 'name', name), network_id
+                    # )
                     break
                 await sync_module.async_arm(arm)
                 await self._blink.refresh()
@@ -648,10 +664,10 @@ class blink_system:
         # No sync unit: set motion detection on all cameras, but do not change arm state
         cameras_on_network = self.get_cameras_on_network(network_id)
         if cameras_on_network:
-            logging.debug(
-                'set_network_arm_state: no sync unit, setting motion detection for %d cameras in network %s to %s',
-                len(cameras_on_network), network_id, arm
-            )
+            # logging.debug(
+            #     'set_network_arm_state: no sync unit, setting motion detection for %d cameras in network %s to %s',
+            #     len(cameras_on_network), network_id, arm
+            # )
             success_count = 0
             import asyncio
             for camera in cameras_on_network:
@@ -706,10 +722,10 @@ class blink_system:
     def get_camera_type_info(self, camera_name):
         if camera_name not in self.cameras: return 'default'
         temp = getattr(self.cameras[camera_name], 'product_type', 'default')
-        logging.debug('get_camera_type_info: {} {}'.format(camera_name, temp))
+        # logging.debug('get_camera_type_info: {} {}'.format(camera_name, temp))
         if temp in ['owl']  : return 'mini'
         elif temp in ['catalina']: return 'gen2'
-        elif temp in ['lotus', 'galapagos']: return 'doorbell'
+        elif temp in ['lotus', 'galapagos', 'tulip', 'freesia']: return 'doorbell'
         elif temp in ['xt2']: return 'XT-2'
         elif temp in ['clownfish']: return 'gen3'
         elif temp in ['sedona']: return 'outdoor4'                
@@ -737,7 +753,7 @@ class blink_system:
 
         if camera_name in self.cameras:
             # Use getattr to be safe, or check attributes dict
-            logging.debug('get_camera_motion_detected_info: {} {}'.format(camera_name, getattr(self.cameras[camera_name], 'motion_detected', None)))    
+            # logging.debug('get_camera_motion_detected_info: {} {}'.format(camera_name, getattr(self.cameras[camera_name], 'motion_detected', None)))    
             return getattr(self.cameras[camera_name], 'motion_detected', None)
         return None
 

@@ -42,7 +42,7 @@ class blink_camera_node(udi_interface.Node):
 
     def __init__(self, polyglot, primary, address, name, camera, blinkSys):
         super().__init__( polyglot, primary, address, name)   
-        logging.debug('blink INIT- {}'.format(name))
+        # logging.debug('blink INIT- {}'.format(name))
 
         self.camera = camera
         self.name = name
@@ -56,7 +56,7 @@ class blink_camera_node(udi_interface.Node):
         self.nodeDefineDone = False
         self.poly = polyglot
         self.cameraType= {  'mini' : 0, #mini/owl
-                            'doorbell': 1, #doorbell/lotus
+                            'doorbell': 1, #doorbell/lotus/tulip/freesia
                             'Blink Outdoor':2, #outdoor/catalena
                             'XT-2':3,
                             'wiredFloodLight':4,
@@ -77,26 +77,14 @@ class blink_camera_node(udi_interface.Node):
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
            
 
-        # start processing events and create add our controller node
-        polyglot.ready()
         self.poly.addNode(self)
         self.wait_for_node_done()
-        time.sleep(1)
         self.node = self.poly.getNode(address)
         self.nodeDefineDone = True
-        
-        self.BLINK_setDriver('ST', 98, 25)
-        
-    
-
+        self.updateISYdrivers()
 
     def start(self):   
-        time.sleep(2)
         logging.info('Start {} camera module Node'.format(self.name))               
-        while not self.nodeDefineDone or self.node == None or self.drivers == None:
-            logging.debug('camera - wait to node completed')
-            time.sleep(2)
-        
         self.updateISYdrivers()
 
 
@@ -105,61 +93,62 @@ class blink_camera_node(udi_interface.Node):
 
     def getCameraData(self):
         #data is updated 
-        logging.debug('Node getCameraData')
+        # logging.debug('Node getCameraData')
+        pass
 
     def updateISYdrivers(self):
         if self.drivers != [] and self.nodeDefineDone:
-            self.blink.refresh()
-            self.BLINK_setDriver('TIME', int(time.time()), 151 )
-            #logging.debug('self.camera {}'.format(self.camera.listAttr()))
-            logging.info('Camera updateISYdrivers - {}'.format(self.camera.name))
-            temp = str(self.blink.get_camera_status(self.camera.name))
-            logging.debug('get_camera_info: {}'.format(temp))
+            try:
+                logging.info('Camera updateISYdrivers - {}'.format(self.camera.name))
+                if self.camera.name not in self.blink.cameras:
+                    logging.warning('Camera %s not found in Blink system - skipping TIME update', self.camera.name)
+                    return
 
-            self.BLINK_setDriver('ST', self.connection2isy(temp))
-            temp = self.blink.get_camera_arm_info(self.camera.name)
-            logging.debug('GV0 : {}'.format(temp))
-            self.BLINK_setDriver('GV0', self.bool2isy(temp))
+                temp = self.blink.get_camera_status(self.camera.name)
+                if temp is None:
+                    logging.warning('Camera %s status is None - skipping TIME update', self.camera.name)
+                    return
+                # logging.debug('get_camera_info: {}'.format(temp))
+                self.BLINK_setDriver('ST', self.connection2isy(str(temp)))
 
-            temp = self.blink.get_camera_battery_info(self.camera.name)
-            logging.debug('GV1 : {}'.format(temp))          
-            self.BLINK_setDriver('GV1', self.bat2isy(temp))
+                temp = self.blink.get_camera_arm_info(self.camera.name)
+                # logging.debug('GV0 : {}'.format(temp))
+                self.BLINK_setDriver('GV0', self.bool2isy(temp))
 
-            '''
-            temp = self.blink.get_camera_battery_voltage_info(self.camera.name)
-            logging.debug('GV2 : {}'.format(temp))
-            if isinstance(temp, int):
-                self.BLINK_setDriver('GV2', self.bat_V2isy(temp), 72)
-            else:
-                self.BLINK_setDriver('GV2', self.bat_V2isy(temp), 25)
-            '''
-            temp = int(self.cameraType[self.blink.get_camera_type_info(self.camera.name)])
-            logging.debug('GV3 : {}'.format(temp))
-            self.BLINK_setDriver('GV3', temp)
-                #self.BLINK_setDriver('GV3', self.cameraType[self.blink.get_camera_type_info(self.camera.name)])
-            #self.BLINK_setDriver('GV4', self.bool2isy(self.blink.get_camera_motion_enabled_info(self.camera.name)), True, True)
+                temp = self.blink.get_camera_battery_info(self.camera.name)
+                # logging.debug('GV1 : {}'.format(temp))          
+                self.BLINK_setDriver('GV1', self.bat2isy(temp))
 
-            temp = self.blink.get_camera_motion_detected_info(self.camera.name)
-            logging.debug('GV5 : {}'.format(temp))            
-            self.BLINK_setDriver('GV5', self.bool2isy(temp))
+                cam_type = self.blink.get_camera_type_info(self.camera.name)
+                temp = int(self.cameraType.get(cam_type, 99))
+                # logging.debug('GV3 : {}'.format(temp))
+                self.BLINK_setDriver('GV3', temp)
 
-            temp_info = self.blink.get_camera_temperatureC_info(self.camera.name)
-            logging.debug('CLITEMP : {}'.format(temp_info))
-            if  None ==  temp_info:
-                self.BLINK_setDriver('CLITEMP', 0, 25)
-            elif 'F' == self.blink.temp_unit or 'f' == self.blink.temp_unit:
-                self.BLINK_setDriver('CLITEMP', (temp_info*9/5)+32, 17)
-            else:
-                self.BLINK_setDriver('CLITEMP', temp_info, 4)
-            #self.BLINK_setDriver('GV7', self.blink.get_camera_recording_info(self.camera.name))
-            #self.BLINK_setDriver('GV8', self.bool2isy(self.pic_email_enabled))
+                temp = self.blink.get_camera_motion_detected_info(self.camera.name)
+                # logging.debug('GV5 : {}'.format(temp))            
+                self.BLINK_setDriver('GV5', self.bool2isy(temp))
+
+                temp_info = self.blink.get_camera_temperatureC_info(self.camera.name)
+                # logging.debug('CLITEMP : {}'.format(temp_info))
+                if None == temp_info:
+                    self.BLINK_setDriver('CLITEMP', 0, 25)
+                elif 'F' == self.blink.temp_unit or 'f' == self.blink.temp_unit:
+                    self.BLINK_setDriver('CLITEMP', (temp_info*9/5)+32, 17)
+                else:
+                    self.BLINK_setDriver('CLITEMP', temp_info, 4)
+
+                # Only update TIME if all camera data was received and drivers updated with no errors
+                self.BLINK_setDriver('TIME', int(time.time()), 151)
+            except Exception as e:
+                logging.error('Error updating ISY drivers for camera %s: %s', self.camera.name, e)
         else:
-            logging.debug('Drivers not ready')
+            # logging.debug('Drivers not ready')
+            pass
     
     def ISYupdate (self, command = None):
         logging.info(' ISYupdate: {}'.format(self.camera.name ))
         self.blink.refresh()
-        logging.debug('Camera {} data: {}'.format(self.camera.name,  self.blink.get_camera_data(self.camera.name )))
+        # logging.debug('Camera {} data: {}'.format(self.camera.name,  self.blink.get_camera_data(self.camera.name )))
         self.updateISYdrivers()
     
     def snap_pitcure (self, command=None):

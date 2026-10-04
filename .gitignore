@@ -18,3 +18,4 @@ __pycache__/BlinkSystem.cpython-310.pyc
 *.pyc
 *.pyc
 *.pyc
+*.log

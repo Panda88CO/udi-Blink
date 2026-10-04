@@ -499,6 +499,8 @@ class BlinkSetup:
                         current_auth = self.blink.get_auth_data()
                         if current_auth and current_auth.get('refresh_token'):
                             self.save_saved_tokens(current_auth)
+                    else:
+                        logging.warning('Blink System refresh failed - skipping driver updates')
                     nodes = self.poly.getNodes()
                     for nde in nodes:
                         if nde != 'setup':   # but not the setup node
@@ -531,8 +533,6 @@ class BlinkSetup:
                                 
                                 if nodes[nde].nodeDefineDone and hasattr(nodes[nde], 'updateISYdrivers'):                         
                                     nodes[nde].updateISYdrivers()
-                            else:
-                                logging.warning('Blink System refresh failed - skipping update drivers for node {}'.format(nde))
                          
                 except Exception as e:
                     logging.error('Exception occcured : {}'.format(e))

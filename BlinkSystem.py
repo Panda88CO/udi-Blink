@@ -24,6 +24,7 @@ import smtplib
 import ssl
 import datetime
 from functools import wraps
+import concurrent.futures
 from concurrent.futures import Future
 
 # Import the new async blinkpy
@@ -33,6 +34,15 @@ from blinkpy.helpers.constants import (
     DEFAULT_MOTION_INTERVAL,
     DEFAULT_REFRESH,
 )
+
+try:
+    from blinkpy.sync_module import BlinkSyncModule
+    async def _safe_update_local_storage_manifest(self):
+        """Skip local storage manifest updates since udi-Blink does not manage USB video clips."""
+        return True
+    BlinkSyncModule.update_local_storage_manifest = _safe_update_local_storage_manifest
+except Exception as e:
+    logging.debug(f"Could not patch BlinkSyncModule.update_local_storage_manifest: {e}")
 
 from email import encoders
 from email.mime.base import MIMEBase
@@ -46,9 +56,24 @@ def async_to_sync(timeout_or_func=60):
         def wrapper(self, *args, **kwargs):
             if self._loop and self._loop.is_running():
                 coro = func(self, *args, **kwargs)
+                future = None
                 try:
                     future = asyncio.run_coroutine_threadsafe(coro, self._loop)
                     return future.result(timeout=timeout)
+                except (concurrent.futures.CancelledError, asyncio.CancelledError):
+                    logging.info(f"Async method {func.__name__} was cancelled")
+                    return None
+                except (concurrent.futures.TimeoutError, TimeoutError):
+                    if future:
+                        try:
+                            future.cancel()
+                        except Exception:
+                            pass
+                    logging.warning(f"Async method {func.__name__} timed out after {timeout}s - cancelling task")
+                    return None
+                except RuntimeError as e:
+                    logging.warning(f"Async method {func.__name__} could not execute (loop inactive): {e}")
+                    return None
                 except Exception as e:
                     err_msg = f"{type(e).__name__}: {e}" if str(e) else type(e).__name__
                     logging.error(f"Error executing async method {func.__name__}: {err_msg}")
@@ -156,7 +181,8 @@ class blink_system:
         """Create Blink instance and session in the event loop"""
         import aiohttp
         connector = aiohttp.TCPConnector(force_close=True)
-        self._session = aiohttp.ClientSession(connector=connector)
+        timeout = aiohttp.ClientTimeout(total=30, connect=10, sock_read=15)
+        self._session = aiohttp.ClientSession(connector=connector, timeout=timeout)
         self._blink = Blink(
             session=self._session,
             refresh_rate=self._refresh_rate,
@@ -216,7 +242,7 @@ class blink_system:
         if login_data:
             self._setup_auth(login_data, no_prompt)
 
-    @async_to_sync
+    @async_to_sync(120)
     async def start(self):
         """Start Blink (login/refresh)"""
         self._key_required = False
@@ -228,6 +254,9 @@ class blink_system:
             logging.info("Two-Factor Authentication required")
             self._key_required = True
             return True
+        except (asyncio.CancelledError, concurrent.futures.CancelledError):
+            logging.info("Blink start was cancelled")
+            return False
         except Exception as e:
             logging.error(f"Start error: {e}")
             return False
@@ -266,7 +295,7 @@ class blink_system:
         logging.debug(f'Auth key result: {result}')
         return result
 
-    @async_to_sync(90)
+    @async_to_sync(120)
     async def finalize_auth(self):
         logging.debug('finalize_auth')
         if not getattr(self._blink, 'available', False):
@@ -343,6 +372,8 @@ class blink_system:
     def _log_api_return_structure(self, context="API"):
         """Log full return structure from Blink API calls nicely formatted to debug log."""
         try:
+            if hasattr(logging, 'isEnabledFor') and not logging.isEnabledFor(10):
+                return
             if not self._blink:
                 logging.debug("Blink API [%s]: No blink instance available", context)
                 return
@@ -423,13 +454,16 @@ class blink_system:
         except Exception as e:
             logging.error("Error logging Blink API return structure: %s", e)
 
-    @async_to_sync
+    @async_to_sync(120)
     async def refresh(self):
         if self._blink:
             try:
                 await self._blink.refresh()
                 self._log_api_return_structure("refresh")
                 return True
+            except (asyncio.CancelledError, concurrent.futures.CancelledError):
+                logging.info("Blink refresh was cancelled")
+                return False
             except Exception as e:
                 logging.error(f"Error during refresh: {e}")
                 return False

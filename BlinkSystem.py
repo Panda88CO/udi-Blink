@@ -19,6 +19,7 @@ import threading
 import time
 import re
 import os
+import json
 import smtplib
 import ssl
 import datetime
@@ -221,6 +222,7 @@ class blink_system:
         self._key_required = False
         try:
             await self._blink.start()
+            self._log_api_return_structure("start")
             return True
         except BlinkTwoFARequiredError:
             logging.info("Two-Factor Authentication required")
@@ -271,6 +273,7 @@ class blink_system:
             await self._blink.setup_post_verify()
             await asyncio.sleep(1)
         await self._blink.refresh()
+        self._log_api_return_structure("finalize_auth")
         return 'ok'
 
     def stop(self):
@@ -319,12 +322,75 @@ class blink_system:
     def get_temp_unit(self):
         return self.temp_unit
 
+    def _log_api_return_structure(self, context="API"):
+        """Log full return structure from Blink API calls to debug log."""
+        try:
+            if not self._blink:
+                logging.debug("Blink API [%s]: No blink instance available", context)
+                return
+
+            # 1. Homescreen response
+            hs = getattr(self._blink, 'homescreen', None)
+            if hs:
+                logging.debug("Blink API [%s] Homescreen Response: %s", context, json.dumps(hs, default=str))
+            else:
+                logging.debug("Blink API [%s] Homescreen Response: None or empty", context)
+
+            # 2. Networks response
+            nets = getattr(self._blink, 'networks', None)
+            if nets:
+                logging.debug("Blink API [%s] Networks Response: %s", context, json.dumps(nets, default=str))
+
+            # 3. Sync modules
+            if self.sync:
+                for s_name, s_obj in self.sync.items():
+                    s_attrs = getattr(s_obj, 'attributes', {})
+                    s_summary = getattr(s_obj, 'summary', {})
+                    s_net_info = getattr(s_obj, 'network_info', {})
+                    logging.debug("Blink API [%s] Sync Module '%s': attributes=%s summary=%s network_info=%s",
+                                  context, s_name,
+                                  json.dumps(s_attrs, default=str),
+                                  json.dumps(s_summary, default=str),
+                                  json.dumps(s_net_info, default=str))
+
+            # 4. Cameras
+            if self.cameras:
+                for c_name, c_obj in self.cameras.items():
+                    c_attrs = getattr(c_obj, 'attributes', {})
+                    c_props = {
+                        "name": getattr(c_obj, 'name', None),
+                        "camera_id": getattr(c_obj, 'camera_id', None),
+                        "network_id": getattr(c_obj, 'network_id', None),
+                        "product_type": getattr(c_obj, 'product_type', None),
+                        "camera_type": getattr(c_obj, 'camera_type', None),
+                        "status": getattr(c_obj, 'status', None),
+                        "online": getattr(c_obj, 'online', None),
+                        "temperature": getattr(c_obj, 'temperature', None),
+                        "temperature_c": getattr(c_obj, 'temperature_c', None),
+                        "temperature_calibrated": getattr(c_obj, 'temperature_calibrated', None),
+                        "battery": getattr(c_obj, 'battery', None),
+                        "battery_level": getattr(c_obj, 'battery_level', None),
+                        "battery_voltage": getattr(c_obj, 'battery_voltage', None),
+                        "arm": getattr(c_obj, 'arm', None),
+                        "motion_enabled": getattr(c_obj, 'motion_enabled', None),
+                        "motion_detected": getattr(c_obj, 'motion_detected', None),
+                        "wifi_strength": getattr(c_obj, 'wifi_strength', None),
+                        "sync_signal_strength": getattr(c_obj, 'sync_signal_strength', None),
+                        "last_record": getattr(c_obj, 'last_record', None),
+                    }
+                    logging.debug("Blink API [%s] Camera '%s': attributes=%s properties=%s",
+                                  context, c_name,
+                                  json.dumps(c_attrs, default=str),
+                                  json.dumps(c_props, default=str))
+        except Exception as e:
+            logging.error("Error logging Blink API return structure: %s", e)
+
     @async_to_sync
     async def refresh(self):
         if self._blink:
             try:
                 await self._blink.refresh()
-                # self._debug_camera_data()
+                self._log_api_return_structure("refresh")
                 return True
             except Exception as e:
                 logging.error(f"Error during refresh: {e}")
@@ -333,32 +399,7 @@ class blink_system:
     
     def _debug_camera_data(self):
         """Log debug buffer with all camera data after refresh"""
-        if not self._blink or not self.cameras:
-            # logging.debug('No cameras available after refresh')
-            return
-        
-        debug_buffer = ['=== Camera Data After Refresh ===']
-        for camera_name, camera in self.cameras.items():
-            camera_id = getattr(camera, 'camera_id', 'N/A')
-            sync = getattr(camera, 'sync', None)
-            sync_id = getattr(sync, 'sync_id', None) if sync else getattr(camera, 'network_id', 'N/A')
-            is_own_sync = sync and str(getattr(sync, 'sync_id', '')) == str(camera_id)
-            debug_buffer.append(f'Camera: {camera_name}')
-            debug_buffer.append(f'  ID: {camera_id}')
-            #debug_buffer.append(f'  Name: {getattr(camera, "name", "N/A")}')
-            debug_buffer.append(f'  Type: {getattr(camera, "product_type", "N/A")}')
-            #debug_buffer.append(f'  Enabled: {getattr(camera, "enabled", "N/A")}')
-            debug_buffer.append(f'  Armed: {getattr(camera, "arm", "N/A")}')
-            debug_buffer.append(f'  Online: {getattr(camera, "online", "N/A")}')
-            #debug_buffer.append(f'  Battery: {getattr(camera, "battery_level", getattr(camera, "battery", "N/A"))}')
-            #debug_buffer.append(f'  Battery Voltage: {getattr(camera, "battery_voltage", "N/A")}')
-            #debug_buffer.append(f'  Status: {getattr(camera, "status", "N/A")}')
-            #debug_buffer.append(f'  Thumbnail: {getattr(camera, "thumbnail", "N/A")}')
-            debug_buffer.append(f'  Sync ID: {sync_id} {"(camera is its own sync module)" if is_own_sync else ""}')
-            debug_buffer.append(f'  Network ID (via sync): {getattr(sync, "network_id", "N/A") if sync else getattr(camera, "network_id", "N/A")}')
-        
-        # logging.debug('\n'.join(debug_buffer))
-        pass
+        self._log_api_return_structure("debug_camera_data")
         
     def refresh_sys(self):
         return self.refresh()
@@ -696,13 +737,23 @@ class blink_system:
     def get_camera_battery_info(self, camera_name):
         if camera_name in self.cameras:
             camera = self.cameras[camera_name]
-            val = getattr(camera, 'battery_level', getattr(camera, 'battery', None))
+            val = getattr(camera, 'battery', None)
+            if val is None:
+                val = getattr(camera, 'battery_level', None)
+            if val is None:
+                attrs = getattr(camera, 'attributes', {})
+                if isinstance(attrs, dict):
+                    val = attrs.get('battery') or attrs.get('battery_level')
             return val if val is not None else 'No Battery'
         return None
 
     def get_camera_battery_voltage_info(self, camera_name):
         if camera_name in self.cameras:
             val = getattr(self.cameras[camera_name], 'battery_voltage', None)
+            if val is None:
+                attrs = getattr(self.cameras[camera_name], 'attributes', {})
+                if isinstance(attrs, dict):
+                    val = attrs.get('battery_voltage')
             return val if val is not None else 'No Battery'
         return None
 
@@ -723,7 +774,7 @@ class blink_system:
         if camera_name not in self.cameras: return 'default'
         temp = getattr(self.cameras[camera_name], 'product_type', 'default')
         # logging.debug('get_camera_type_info: {} {}'.format(camera_name, temp))
-        if temp in ['owl']  : return 'mini'
+        if temp in ['owl']: return 'mini'
         elif temp in ['catalina']: return 'gen2'
         elif temp in ['lotus', 'galapagos', 'tulip', 'freesia']: return 'doorbell'
         elif temp in ['xt2']: return 'XT-2'
@@ -734,7 +785,11 @@ class blink_system:
         elif temp in ['trogon']: return 'floodlight'    
         elif temp in ['chickadee']: return 'mini2K+'   
         elif temp in ['sonoran']: return 'outdoor2K+'   
-        else: return 'default'
+        else:
+            ct = getattr(self.cameras[camera_name], 'camera_type', '')
+            if ct in ['mini', 'doorbell']:
+                return ct
+            return 'default'
 
     def get_camera_motion_enabled_info(self, camera_name):
         if camera_name in self.cameras:
@@ -762,45 +817,96 @@ class blink_system:
             return False
         cam = self.cameras[camera_name]
 
-        # 1. Product type check - known powered / non-temperature models
+        # 1. If an actual temperature reading is available, it definitely supports temperature
+        temp_c = self.get_camera_temperatureC_info(camera_name)
+        if temp_c is not None:
+            logging.debug("camera_supports_temperature: '%s' reports temperature %s C -> True", camera_name, temp_c)
+            return True
+
+        # 2. Known models without temperature sensor
         product_type = str(getattr(cam, 'product_type', '')).lower()
         if product_type in ['owl', 'hawk', 'pigeon', 'superior', 'chickadee', 'lotus', 'galapagos', 'tulip', 'freesia']:
+            logging.debug("camera_supports_temperature: '%s' (product_type='%s') does not support temperature -> False", camera_name, product_type)
             return False
 
-        # 2. Camera category check - known models without temperature
         cam_type = str(self.get_camera_type_info(camera_name)).lower()
         if cam_type in ['mini', 'mini2', 'mini2k+', 'wiredfloodlight', 'doorbell']:
+            logging.debug("camera_supports_temperature: '%s' (cam_type='%s') does not support temperature -> False", camera_name, cam_type)
             return False
 
-        # 3. Powered camera check (no battery)
-        bat_info = self.get_camera_battery_info(camera_name)
-        if bat_info == 'No Battery':
-            return False
-
-        # 4. Known battery cameras with temperature sensor
+        # 3. Known battery cameras with built-in temperature sensor
         if cam_type in ['gen2', 'xt-2', 'gen3', 'outdoor4', 'outdoor2k+', 'floodlight', 'blink outdoor']:
+            logging.debug("camera_supports_temperature: '%s' is known temp-capable cam_type '%s' -> True", camera_name, cam_type)
+            return True
+        if product_type in ['catalina', 'xt2', 'clownfish', 'sedona', 'sonoran', 'trogon']:
+            logging.debug("camera_supports_temperature: '%s' is known temp-capable product_type '%s' -> True", camera_name, product_type)
             return True
 
-        # 5. Check if actual temperature reading is available and valid
-        temp = getattr(cam, 'temperature', None)
-        if temp is not None:
-            return True
-        temp_c = getattr(cam, 'temperature_c', None)
-        if temp_c is not None:
-            return True
+        # 4. Check camera attributes/signals for temperature keys
+        for attr in ('temperature', 'temperature_c', 'temperature_calibrated'):
+            if getattr(cam, attr, None) is not None:
+                logging.debug("camera_supports_temperature: '%s' has attribute '%s' -> True", camera_name, attr)
+                return True
+
+        attrs = getattr(cam, 'attributes', None)
+        if isinstance(attrs, dict):
+            for k in ('temperature', 'temperature_c', 'temperature_calibrated'):
+                if attrs.get(k) is not None:
+                    logging.debug("camera_supports_temperature: '%s' has attrs['%s'] -> True", camera_name, k)
+                    return True
+
         signals = getattr(cam, 'signals', None)
         if isinstance(signals, dict) and signals.get('temp') is not None:
-            return True
-        attrs = getattr(cam, 'attributes', None)
-        if isinstance(attrs, dict) and attrs.get('temperature') is not None:
+            logging.debug("camera_supports_temperature: '%s' has signals['temp'] -> True", camera_name)
             return True
 
+        logging.debug("camera_supports_temperature: '%s' does not report or support temperature -> False", camera_name)
         return False
 
     def get_camera_temperatureC_info(self, camera_name):
-        if camera_name in self.cameras:
-            return getattr(self.cameras[camera_name], 'temperature_c', 
-                   getattr(self.cameras[camera_name], 'temperature', None))
+        if camera_name not in self.cameras:
+            return None
+        cam = self.cameras[camera_name]
+        # 1. Direct temperature_c property
+        temp_c = getattr(cam, 'temperature_c', None)
+        if temp_c is not None:
+            return temp_c
+        # 2. temperature_calibrated (Fahrenheit from sensors endpoint)
+        temp_cal = getattr(cam, 'temperature_calibrated', None)
+        if temp_cal is not None:
+            try:
+                return round((float(temp_cal) - 32.0) * 5.0 / 9.0, 1)
+            except (ValueError, TypeError):
+                pass
+        # 3. temperature property (Fahrenheit in blinkpy)
+        temp = getattr(cam, 'temperature', None)
+        if temp is not None:
+            try:
+                return round((float(temp) - 32.0) * 5.0 / 9.0, 1)
+            except (ValueError, TypeError):
+                pass
+        # 4. Check attributes dictionary
+        attrs = getattr(cam, 'attributes', None)
+        if isinstance(attrs, dict):
+            if attrs.get('temperature_c') is not None:
+                return attrs['temperature_c']
+            if attrs.get('temperature_calibrated') is not None:
+                try:
+                    return round((float(attrs['temperature_calibrated']) - 32.0) * 5.0 / 9.0, 1)
+                except (ValueError, TypeError):
+                    pass
+            if attrs.get('temperature') is not None:
+                try:
+                    return round((float(attrs['temperature']) - 32.0) * 5.0 / 9.0, 1)
+                except (ValueError, TypeError):
+                    pass
+        # 5. Check signals dictionary
+        signals = getattr(cam, 'signals', None)
+        if isinstance(signals, dict) and signals.get('temp') is not None:
+            try:
+                return round((float(signals['temp']) - 32.0) * 5.0 / 9.0, 1)
+            except (ValueError, TypeError):
+                pass
         return None
 
     def get_camera_recording_info(self, camera_name):

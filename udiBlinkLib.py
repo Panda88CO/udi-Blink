@@ -56,12 +56,25 @@ def connection2isy(self, connection):
 
 
 def bat2isy(self, bat_status):
-    if 'ok'  == bat_status:
-        return (0)
-    elif 'No Battery' == bat_status:
-        return(10)
+    if bat_status is None:
+        return None
+    if isinstance(bat_status, (int, float)):
+        if bat_status in (2, 3):
+            return 0
+        elif bat_status in (0, 1):
+            return 1
+        elif bat_status == 10:
+            return 10
+        return None
+    s = str(bat_status).strip().lower()
+    if s == 'ok':
+        return 0
+    elif s in ('low', 'warning', 'bad'):
+        return 1
+    elif 'no battery' in s or 'usb powered' in s or s == 'none':
+        return 10
     else:
-        return(None)
+        return None
 
 def bat_V2isy (self, bat_status):
     if isinstance(bat_status, int):

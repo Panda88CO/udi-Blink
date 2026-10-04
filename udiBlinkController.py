@@ -552,6 +552,11 @@ class BlinkSetup:
     def handleLevelChange(self, level):
         logging.info('New log level: {}'.format(level))
         logging.setLevel(level['level'])
+        try:
+            import logging as std_logging
+            std_logging.getLogger('blinkpy').setLevel(level['level'])
+        except Exception:
+            pass
 
     def convert_temp_unit(self, unitS):
         if unitS == '':

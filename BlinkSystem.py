@@ -322,41 +322,72 @@ class blink_system:
     def get_temp_unit(self):
         return self.temp_unit
 
+    def get_device_homescreen_data(self, camera_name):
+        """Retrieve raw homescreen dictionary for a camera or doorbell by name or id."""
+        if not self._blink or not hasattr(self._blink, 'homescreen') or not isinstance(self._blink.homescreen, dict):
+            return {}
+        cam = self.cameras.get(camera_name) if hasattr(self, 'cameras') and self.cameras else None
+        cam_id = str(getattr(cam, 'camera_id', '')) if cam else ''
+        hs = self._blink.homescreen
+        for category in ('doorbells', 'cameras', 'owls', 'devices'):
+            items = hs.get(category, [])
+            if isinstance(items, list):
+                for item in items:
+                    if isinstance(item, dict):
+                        if item.get('name') == camera_name:
+                            return item
+                        if cam_id and str(item.get('id', '')) == cam_id:
+                            return item
+        return {}
+
     def _log_api_return_structure(self, context="API"):
-        """Log full return structure from Blink API calls to debug log."""
+        """Log full return structure from Blink API calls nicely formatted to debug log."""
         try:
             if not self._blink:
                 logging.debug("Blink API [%s]: No blink instance available", context)
                 return
 
-            # 1. Homescreen response
-            hs = getattr(self._blink, 'homescreen', None)
-            if hs:
-                logging.debug("Blink API [%s] Homescreen Response: %s", context, json.dumps(hs, default=str))
-            else:
-                logging.debug("Blink API [%s] Homescreen Response: None or empty", context)
+            logging.debug("=================== BEGIN BLINK API DATA DUMP [%s] ===================", context)
 
-            # 2. Networks response
+            # 1. Homescreen
+            hs = getattr(self._blink, 'homescreen', None)
+            if hs and isinstance(hs, dict):
+                logging.debug("--- HOMESCREEN SUMMARY --- Keys: %s", list(hs.keys()))
+                for section in ('networks', 'doorbells', 'owls', 'cameras', 'sync_modules', 'device_status'):
+                    data = hs.get(section)
+                    if data:
+                        logging.debug("--- HOMESCREEN [%s] (%d items) ---\n%s",
+                                      section.upper(), len(data) if isinstance(data, list) else 1,
+                                      json.dumps(data, indent=2, default=str))
+                other_keys = [k for k in hs.keys() if k not in ('networks', 'doorbells', 'owls', 'cameras', 'sync_modules', 'device_status', 'media')]
+                if other_keys:
+                    other_data = {k: hs[k] for k in other_keys}
+                    logging.debug("--- HOMESCREEN OTHER DATA ---\n%s", json.dumps(other_data, indent=2, default=str))
+            else:
+                logging.debug("--- HOMESCREEN: %s ---", hs)
+
+            # 2. Networks
             nets = getattr(self._blink, 'networks', None)
             if nets:
-                logging.debug("Blink API [%s] Networks Response: %s", context, json.dumps(nets, default=str))
+                logging.debug("--- BLINK NETWORKS ---\n%s", json.dumps(nets, indent=2, default=str))
 
             # 3. Sync modules
             if self.sync:
+                logging.debug("--- SYNC MODULES (%d) ---", len(self.sync))
                 for s_name, s_obj in self.sync.items():
                     s_attrs = getattr(s_obj, 'attributes', {})
                     s_summary = getattr(s_obj, 'summary', {})
                     s_net_info = getattr(s_obj, 'network_info', {})
-                    logging.debug("Blink API [%s] Sync Module '%s': attributes=%s summary=%s network_info=%s",
-                                  context, s_name,
-                                  json.dumps(s_attrs, default=str),
-                                  json.dumps(s_summary, default=str),
-                                  json.dumps(s_net_info, default=str))
+                    logging.debug("Sync Module '%s':\n  attributes: %s\n  summary: %s\n  network_info: %s",
+                                  s_name,
+                                  json.dumps(s_attrs, indent=2, default=str),
+                                  json.dumps(s_summary, indent=2, default=str),
+                                  json.dumps(s_net_info, indent=2, default=str))
 
             # 4. Cameras
             if self.cameras:
+                logging.debug("--- CAMERAS (%d) ---", len(self.cameras))
                 for c_name, c_obj in self.cameras.items():
-                    c_attrs = getattr(c_obj, 'attributes', {})
                     c_props = {
                         "name": getattr(c_obj, 'name', None),
                         "camera_id": getattr(c_obj, 'camera_id', None),
@@ -369,8 +400,10 @@ class blink_system:
                         "temperature_c": getattr(c_obj, 'temperature_c', None),
                         "temperature_calibrated": getattr(c_obj, 'temperature_calibrated', None),
                         "battery": getattr(c_obj, 'battery', None),
+                        "battery_state": getattr(c_obj, 'battery_state', None),
                         "battery_level": getattr(c_obj, 'battery_level', None),
                         "battery_voltage": getattr(c_obj, 'battery_voltage', None),
+                        "battery_check_time": getattr(c_obj, 'battery_check_time', None),
                         "arm": getattr(c_obj, 'arm', None),
                         "motion_enabled": getattr(c_obj, 'motion_enabled', None),
                         "motion_detected": getattr(c_obj, 'motion_detected', None),
@@ -378,10 +411,15 @@ class blink_system:
                         "sync_signal_strength": getattr(c_obj, 'sync_signal_strength', None),
                         "last_record": getattr(c_obj, 'last_record', None),
                     }
-                    logging.debug("Blink API [%s] Camera '%s': attributes=%s properties=%s",
-                                  context, c_name,
-                                  json.dumps(c_attrs, default=str),
-                                  json.dumps(c_props, default=str))
+                    c_vars = {k: v for k, v in vars(c_obj).items() if k not in ('sync', '_session', '_loop') and not callable(v)}
+                    hs_entry = self.get_device_homescreen_data(c_name)
+                    logging.debug("Camera '%s':\n  PROPERTIES:\n%s\n  INSTANCE VARS:\n%s\n  HOMESCREEN RAW:\n%s",
+                                  c_name,
+                                  json.dumps(c_props, indent=2, default=str),
+                                  json.dumps(c_vars, indent=2, default=str),
+                                  json.dumps(hs_entry, indent=2, default=str))
+
+            logging.debug("=================== END BLINK API DATA DUMP [%s] ===================", context)
         except Exception as e:
             logging.error("Error logging Blink API return structure: %s", e)
 
@@ -738,12 +776,33 @@ class blink_system:
         if camera_name in self.cameras:
             camera = self.cameras[camera_name]
             val = getattr(camera, 'battery', None)
-            if val is None:
+            if val is None or str(val).lower() in ('none', 'unknown', ''):
+                val = getattr(camera, 'battery_state', None)
+            if val is None or str(val).lower() in ('none', 'unknown', ''):
                 val = getattr(camera, 'battery_level', None)
-            if val is None:
+            if val is None or str(val).lower() in ('none', 'unknown', ''):
                 attrs = getattr(camera, 'attributes', {})
                 if isinstance(attrs, dict):
-                    val = attrs.get('battery') or attrs.get('battery_level')
+                    val = attrs.get('battery') or attrs.get('battery_state') or attrs.get('battery_level')
+
+            # Check homescreen device data (especially for doorbells and powered cameras)
+            hs_data = self.get_device_homescreen_data(camera_name)
+            if hs_data and isinstance(hs_data, dict):
+                # Check for explicit power status fields (wired/external power)
+                for pkey in ('power', 'power_source', 'ac_power', 'wired', 'wired_power', 'external_power', 'line_power', 'chime_power'):
+                    pval = hs_data.get(pkey)
+                    if pval is True or (isinstance(pval, (int, float)) and pval > 0) or (isinstance(pval, str) and pval.lower() in ('wired', 'external', 'ac', 'line', 'true', '1')):
+                        logging.debug("get_camera_battery_info: '%s' detected wired/external power via hs_data['%s']=%s", camera_name, pkey, pval)
+                        return 'wired'
+                
+                # If still no battery info, check hs_data for battery fields
+                if val is None or str(val).lower() in ('none', 'unknown', ''):
+                    for bkey in ('battery_state', 'battery', 'battery_level'):
+                        if hs_data.get(bkey) is not None:
+                            val = hs_data[bkey]
+                            break
+
+            logging.debug("get_camera_battery_info: '%s' resolved to: %s", camera_name, val)
             return val if val is not None else 'No Battery'
         return None
 
@@ -789,6 +848,11 @@ class blink_system:
             ct = getattr(self.cameras[camera_name], 'camera_type', '')
             if ct in ['mini', 'doorbell']:
                 return ct
+            hs_data = self.get_device_homescreen_data(camera_name)
+            if hs_data:
+                dtype = str(hs_data.get('type', '')).lower()
+                if dtype in ['doorbell', 'lotus', 'galapagos']: return 'doorbell'
+                elif dtype in ['owl', 'mini']: return 'mini'
             return 'default'
 
     def get_camera_motion_enabled_info(self, camera_name):
@@ -860,6 +924,13 @@ class blink_system:
             logging.debug("camera_supports_temperature: '%s' has signals['temp'] -> True", camera_name)
             return True
 
+        hs_data = self.get_device_homescreen_data(camera_name)
+        if isinstance(hs_data, dict):
+            for k in ('temperature', 'temp'):
+                if hs_data.get(k) is not None:
+                    logging.debug("camera_supports_temperature: '%s' has hs_data['%s'] -> True", camera_name, k)
+                    return True
+
         logging.debug("camera_supports_temperature: '%s' does not report or support temperature -> False", camera_name)
         return False
 
@@ -907,6 +978,15 @@ class blink_system:
                 return round((float(signals['temp']) - 32.0) * 5.0 / 9.0, 1)
             except (ValueError, TypeError):
                 pass
+        # 6. Check homescreen data
+        hs_data = self.get_device_homescreen_data(camera_name)
+        if isinstance(hs_data, dict):
+            for k in ('temperature', 'temp'):
+                if hs_data.get(k) is not None:
+                    try:
+                        return round((float(hs_data[k]) - 32.0) * 5.0 / 9.0, 1)
+                    except (ValueError, TypeError):
+                        pass
         return None
 
     def get_camera_recording_info(self, camera_name):

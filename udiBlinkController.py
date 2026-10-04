@@ -811,11 +811,12 @@ class BlinkSetup:
                 "ranges": [
                     {
                         "uom": "25",
-                        "subset": "0,1,2,10,99",
+                        "subset": "0,1,2,3,10,99",
                         "names": {
                             "0": "OK",
                             "1": "Not OK - TBD",
                             "2": "TBD",
+                            "3": "External / Wired",
                             "10": "USB powered",
                             "99": "Unknown",
                         },

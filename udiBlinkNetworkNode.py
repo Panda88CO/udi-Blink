@@ -209,26 +209,26 @@ class blink_network_node(udi_interface.Node):
     
     def set_connection_status(self, connected):
         logging.info('set_connection_status {} - {}'.format(self.name, connected))
-        self.setDriver('ST', 1 if connected else 0)
+        self.setDriver('GV0', 1 if connected else 0)
 
     def updateISYdrivers(self):
         if self.nodeDefineDone:
             logging.info('Network updateISYdrivers - {}'.format(self.network_id))
             try:
-                gv0_val = self.blink.get_network_arm_state(self.network_id)
-                if gv0_val is None or gv0_val == 99:
-                    logging.warning('Network %s: Could not retrieve valid arm state (%s) - skipping TIME update', self.network_id, gv0_val)
-                    if gv0_val == 99:
-                        self.BLINK_setDriver('GV0', 99)
+                arm_val = self.blink.get_network_arm_state(self.network_id)
+                if arm_val is None or arm_val == 99:
+                    logging.warning('Network %s: Could not retrieve valid arm state (%s) - skipping TIME update', self.network_id, arm_val)
+                    if arm_val == 99:
+                        self.BLINK_setDriver('ST', 99)
                     return
 
-                if gv0_val == 2:
-                    logging.info('Network %s: No sync unit, cameras only. Setting GV0 to 2 (Individually camera assigned).', self.network_id)
-                    self.BLINK_setDriver('GV0', 2)
-                elif gv0_val is True:
-                    self.BLINK_setDriver('GV0', 1)
-                elif gv0_val is False:
-                    self.BLINK_setDriver('GV0', 0)
+                if arm_val == 2:
+                    logging.info('Network %s: No sync unit, cameras only. Setting ST to 2 (Individually camera assigned).', self.network_id)
+                    self.BLINK_setDriver('ST', 2)
+                elif arm_val is True:
+                    self.BLINK_setDriver('ST', 1)
+                elif arm_val is False:
+                    self.BLINK_setDriver('ST', 0)
 
                 # Verify network is present in Blink system data
                 network_found = False
@@ -238,7 +238,10 @@ class blink_network_node(udi_interface.Node):
                         break
                 if not network_found and not any(str(getattr(s, 'network_id', '')) == str(self.network_id) for s in self.blink.sync.values()):
                     logging.warning('Network %s not found in Blink system data - skipping TIME update', self.network_id)
+                    self.BLINK_setDriver('GV0', 0)
                     return
+
+                self.BLINK_setDriver('GV0', 1)
 
                 # Timestamp reflects the last successful network data refresh without errors
                 self.BLINK_setDriver('TIME', int(time.time()), 151)
@@ -285,7 +288,7 @@ class blink_network_node(udi_interface.Node):
         time.sleep(1)
         ok = self.blink.get_network_arm_state(self.network_id)
         # logging.debug('get_network_arm_state returned (Armed): {}'.format(ok))
-        self.BLINK_setDriver('GV0', self.bool2isy(ok))
+        self.BLINK_setDriver('ST', self.bool2isy(ok))
         #    camera_list = self.blink.get_camera_list()
         #    for camera in camera_list:
         #        self.blink.set_camera_arm(camera, arm_enable)
@@ -311,9 +314,9 @@ class blink_network_node(udi_interface.Node):
                 }
 
     drivers= [ 
-            {'driver': 'ST', 'value': 1, 'uom': 25},
-            {'driver': 'GV0', 'value':0, 'uom':25}, # Armed
-            {'driver': 'TIME', 'value':0, 'uom':151}
+            {'driver': 'ST', 'value': 0, 'uom': 25}, # Armed (ARMED)
+            {'driver': 'GV0', 'value': 1, 'uom': 25}, # Connected (ONLINE)
+            {'driver': 'TIME', 'value': 0, 'uom': 151}
         ]
  
 

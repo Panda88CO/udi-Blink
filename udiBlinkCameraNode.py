@@ -26,8 +26,8 @@ class blink_camera_node(udi_interface.Node):
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, connection2isy, bat_V2isy, node_queue, wait_for_node_done
 
     id = 'BLINKCAMERAC' 
-    drivers= [  {'driver': 'ST' , 'value':0,  'uom':25},
-                {'driver': 'GV0', 'value':99, 'uom':25},  #Arm status
+    drivers= [  {'driver': 'ST' , 'value':99,  'uom':25}, # Motion Detection Status
+                {'driver': 'GV0', 'value':0, 'uom':25},  # Connected / Online
                 {'driver': 'GV1', 'value':99, 'uom':25}, # Battery
                 #{'driver': 'GV2', 'value':99, 'uom':25}, # Battery
                 {'driver': 'GV3', 'value':99, 'uom':25}, # Camera Type 
@@ -131,11 +131,11 @@ class blink_camera_node(udi_interface.Node):
                     logging.warning('Camera %s status is None - skipping TIME update', self.camera.name)
                     return
                 # logging.debug('get_camera_info: {}'.format(temp))
-                self.BLINK_setDriver('ST', self.connection2isy(str(temp)))
+                self.BLINK_setDriver('GV0', self.connection2isy(str(temp)))
 
                 temp = self.blink.get_camera_arm_info(self.camera.name)
-                # logging.debug('GV0 : {}'.format(temp))
-                self.BLINK_setDriver('GV0', self.bool2isy(temp))
+                # logging.debug('ST : {}'.format(temp))
+                self.BLINK_setDriver('ST', self.bool2isy(temp))
 
                 temp = self.blink.get_camera_battery_info(self.camera.name)
                 # logging.debug('GV1 : {}'.format(temp))          
@@ -206,7 +206,7 @@ class blink_camera_node(udi_interface.Node):
                 self.node.reportCmd('DON')
             else:
                 self.node.reportCmd('DOF')
-            self.BLINK_setDriver('GV0', value)
+            self.BLINK_setDriver('ST', value)
             self.blink.refresh()
             time.sleep(3)
             self.updateISYdrivers()
@@ -240,8 +240,8 @@ class blink_camera_no_temp_node(udi_interface.Node):
 
     id = 'BLINKCAMERA'
     drivers = [
-        {'driver': 'ST', 'value': 0, 'uom': 25},
-        {'driver': 'GV0', 'value': 99, 'uom': 25},  # Arm status
+        {'driver': 'ST', 'value': 99, 'uom': 25},  # Motion Detection Status
+        {'driver': 'GV0', 'value': 0, 'uom': 25},  # Connected / Online
         {'driver': 'GV1', 'value': 99, 'uom': 25},  # Battery
         {'driver': 'GV3', 'value': 99, 'uom': 25},  # Camera Type
         {'driver': 'GV5', 'value': 99, 'uom': 25},  # Motion Detected
@@ -300,10 +300,10 @@ class blink_camera_no_temp_node(udi_interface.Node):
                 if temp is None:
                     logging.warning('Camera %s status is None - skipping TIME update', self.camera.name)
                     return
-                self.BLINK_setDriver('ST', self.connection2isy(str(temp)))
+                self.BLINK_setDriver('GV0', self.connection2isy(str(temp)))
 
                 temp = self.blink.get_camera_arm_info(self.camera.name)
-                self.BLINK_setDriver('GV0', self.bool2isy(temp))
+                self.BLINK_setDriver('ST', self.bool2isy(temp))
 
                 temp = self.blink.get_camera_battery_info(self.camera.name)
                 self.BLINK_setDriver('GV1', self.bat2isy(temp))
@@ -346,7 +346,7 @@ class blink_camera_no_temp_node(udi_interface.Node):
                 self.node.reportCmd('DON')
             else:
                 self.node.reportCmd('DOF')
-            self.BLINK_setDriver('GV0', value)
+            self.BLINK_setDriver('ST', value)
             self.blink.refresh()
             time.sleep(3)
             self.updateISYdrivers()

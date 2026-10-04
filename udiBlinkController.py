@@ -919,7 +919,7 @@ class BlinkSetup:
                     "id": "ARM",
                     "name": "Set Motion Detection",
                     "parameters": [
-                        {"id": "", "editor": "DOMOTION", "init": "GV0"},
+                        {"id": "", "editor": "DOMOTION", "init": "ST"},
                     ],
                 },
                 {"id": "SNAPPIC", "name": "Take Picture"},
@@ -948,8 +948,8 @@ class BlinkSetup:
                 "name": "Network",
                 "icon": "GenericCtl",
                 "properties": [
-                    {"id": "ST", "editor": "ONLINE", "name": "Connected"},
-                    {"id": "GV0", "editor": "ARMED", "name": "Arm Status"},
+                    {"id": "ST", "editor": "ARMED", "name": "Arm Status"},
+                    {"id": "GV0", "editor": "ONLINE", "name": "Connected"},
                     {"id": "TIME", "editor": "UNIXTIME", "name": "Last Successful Update Time"},
                 ],
                 "cmds": {
@@ -963,7 +963,7 @@ class BlinkSetup:
                             "id": "ARMALL",
                             "name": "Set Arming",
                             "parameters": [
-                                {"id": "", "editor": "DOARM", "init": "GV0"},
+                                {"id": "", "editor": "DOARM", "init": "ST"},
                             ],
                         },
                     ],
@@ -976,8 +976,8 @@ class BlinkSetup:
                 "name": "Blink Camera",
                 "icon": "MotionSensor",
                 "properties": [
-                    {"id": "ST", "editor": "ONLINE", "name": "Connected"},
-                    {"id": "GV0", "editor": "MOTIONEN", "name": "Motion Detection Status"},
+                    {"id": "ST", "editor": "MOTIONEN", "name": "Motion Detection Status"},
+                    {"id": "GV0", "editor": "ONLINE", "name": "Connected"},
                     {"id": "GV1", "editor": "BATTERY", "name": "Battery Status"},
                     {"id": "GV3", "editor": "CAMERATYPE", "name": "CameraType"},
                     {"id": "GV5", "editor": "MOTIONDETC", "name": "Motion Detected"},
@@ -992,8 +992,8 @@ class BlinkSetup:
                 "name": "Blink Camera",
                 "icon": "MotionSensor",
                 "properties": [
-                    {"id": "ST", "editor": "ONLINE", "name": "Connected"},
-                    {"id": "GV0", "editor": "MOTIONEN", "name": "Motion Detection Status"},
+                    {"id": "ST", "editor": "MOTIONEN", "name": "Motion Detection Status"},
+                    {"id": "GV0", "editor": "ONLINE", "name": "Connected"},
                     {"id": "GV1", "editor": "BATTERY", "name": "Battery Status"},
                     {"id": "GV3", "editor": "CAMERATYPE", "name": "CameraType"},
                     {"id": "GV5", "editor": "MOTIONDETC", "name": "Motion Detected"},
@@ -1009,8 +1009,8 @@ class BlinkSetup:
                 "name": "Blink Camera",
                 "icon": "MotionSensor",
                 "properties": [
-                    {"id": "ST", "editor": "ONLINE", "name": "Connected"},
-                    {"id": "GV0", "editor": "MOTIONEN", "name": "Motion Detection Status"},
+                    {"id": "ST", "editor": "MOTIONEN", "name": "Motion Detection Status"},
+                    {"id": "GV0", "editor": "ONLINE", "name": "Connected"},
                     {"id": "GV1", "editor": "BATTERY", "name": "Battery Status"},
                     {"id": "GV3", "editor": "CAMERATYPE", "name": "CameraType"},
                     {"id": "GV5", "editor": "MOTIONDETC", "name": "Motion Detected"},

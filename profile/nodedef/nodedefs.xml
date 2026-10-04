@@ -16,8 +16,8 @@
    <nodeDef id="BLINKNETWORK" nls="NLSBLINKNETWORK">
       <editors />
       <sts>
-         <st id="ST" editor="ONLINE" />
-         <st id="GV0" editor="ARMED" />
+         <st id="ST" editor="ARMED" />
+         <st id="GV0" editor="ONLINE" />
          <st id="TIME" editor="UNIXTIME" />
       </sts>
       <cmds>
@@ -28,7 +28,7 @@
          <accepts>
             <cmd id="UPDATE" />
             <cmd id="ARMALL">
-               <p id="" editor="DOARM" init="GV0" />
+               <p id="" editor="DOARM" init="ST" />
             </cmd>
          </accepts>
       </cmds>
@@ -37,8 +37,8 @@
    <nodeDef id="BLINKCAMERAC" nls="NLSBLINKCAMERA">
       <editors />
       <sts>
-         <st id="ST" editor="ONLINE" />
-         <st id="GV0" editor="MOTIONEN" />
+         <st id="ST" editor="MOTIONEN" />
+         <st id="GV0" editor="ONLINE" />
          <st id="GV1" editor="BATTERY" />
          <st id="GV3" editor="CAMERATYPE" />
          <st id="GV5" editor="MOTIONDETC" />
@@ -50,7 +50,7 @@
          <accepts>
             <cmd id="UPDATE" />
             <cmd id="ARM">
-               <p id="" editor="DOMOTION" init="GV0" />
+               <p id="" editor="DOMOTION" init="ST" />
             </cmd>
             <cmd id="SNAPPIC" />
             <cmd id="SNAPVIDEO" />
@@ -61,8 +61,8 @@
    <nodeDef id="BLINKCAMERAF" nls="NLSBLINKCAMERA">
       <editors />
       <sts>
-         <st id="ST" editor="ONLINE" />
-         <st id="GV0" editor="MOTIONEN" />
+         <st id="ST" editor="MOTIONEN" />
+         <st id="GV0" editor="ONLINE" />
          <st id="GV1" editor="BATTERY" />
          <st id="GV3" editor="CAMERATYPE" />
          <st id="GV5" editor="MOTIONDETC" />
@@ -74,7 +74,7 @@
          <accepts>
             <cmd id="UPDATE" />
             <cmd id="ARM">
-               <p id="" editor="DOMOTION" init="GV0" />
+               <p id="" editor="DOMOTION" init="ST" />
             </cmd>
             <cmd id="SNAPPIC" />
             <cmd id="SNAPVIDEO" />
@@ -85,8 +85,8 @@
    <nodeDef id="BLINKCAMERA" nls="NLSBLINKCAMERA">
       <editors />
       <sts>
-         <st id="ST" editor="ONLINE" />
-         <st id="GV0" editor="MOTIONEN" />
+         <st id="ST" editor="MOTIONEN" />
+         <st id="GV0" editor="ONLINE" />
          <st id="GV1" editor="BATTERY" />
          <st id="GV3" editor="CAMERATYPE" />
          <st id="GV5" editor="MOTIONDETC" />
@@ -97,7 +97,7 @@
          <accepts>
             <cmd id="UPDATE" />
             <cmd id="ARM">
-               <p id="" editor="DOMOTION" init="GV0" />
+               <p id="" editor="DOMOTION" init="ST" />
             </cmd>
             <cmd id="SNAPPIC" />
             <cmd id="SNAPVIDEO" />

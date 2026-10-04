@@ -9,7 +9,7 @@ Optionally, snapped pictures can be emailed automatically to a configured recipi
 2. Start the node server. On initial setup, two-factor authentication (2FA) is required. A 2FA code is sent to your phone/email by Blink.
 3. Enter the 2FA code in the **AUTH_KEY** field and click **Save** (do not restart).
 4. The node will authenticate and discover the different networks defined in your Blink system.
-5. In Configuration, set each discovered network parameter to **ENABLED** or **DISABLED**, and click **Save**.
+5. In Configuration, set each discovered network parameter (defaulted to **ENABLED/DISABLED**) to **ENABLED** or **DISABLED**, and click **Save**.
 6. **Authentication Persistence:** Successful logins persist session tokens locally and in Polyglot storage. On subsequent node restarts or system reboots, the node will reuse the saved tokens and start up directly without requiring 2FA. If tokens ever expire or credentials change, the node will automatically start over and prompt for a new 2FA PIN.
 
 Note: The API does not handle special characters in camera and sync module names - please remove or rename those in the Blink app before setting up the node.

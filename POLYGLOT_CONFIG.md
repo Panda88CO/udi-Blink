@@ -23,12 +23,11 @@ An option to have snapped pictures emailed to you is also available.
 - **SMTP_PASSWORD**: Password for SMTP account.
 - **EMAIL_RECEPIENT**: Recipient email address where pictures are sent.
 
-### Network & Camera Configuration:
-- **Networks**: Discovered on initial run. Each network parameter (e.g. `HOME`) can be set to `ENABLED` or `DISABLED` in Custom Parameters.
-- **Cameras**: Discovered cameras default to `ENABLED/DISABLED` in Custom Parameters (e.g. `CAM_PATIO`). A notification will remain visible until all discovered cameras have been explicitly set to either `ENABLED` or `DISABLED`.
-  - Setting a camera to `ENABLED` creates its node in Polyglot/IoX.
-  - Setting a camera to `DISABLED` ignores/removes its node.
-  - Once all cameras have a selected value of either `ENABLED` or `DISABLED`, the notification is automatically cleared.
+### Network Configuration:
+- **Networks**: Discovered on initial run. Each discovered network parameter (e.g. `HOME`) defaults to `ENABLED/DISABLED` in Custom Parameters when not set, and a notification prompts you to set it to `ENABLED` or `DISABLED`.
+  - Setting a network parameter to `ENABLED` creates the network node and all of its cameras in Polyglot/IoX.
+  - Setting a network parameter to `DISABLED` disables/removes the network and its cameras.
+  - Once a network parameter is set to either `ENABLED` or `DISABLED`, its notification is automatically cleared.
 
 ## Notes
 - **Armed / Disarmed State**: You cannot enable an individual camera if the system/network is disarmed. If the system is armed, individual cameras can be enabled or disabled.

@@ -98,28 +98,3 @@ def parse_enable_state(val):
     if v in ('DISABLED', 'DISABLE', 'FALSE', '0', 'NO', 'OFF') or (v.startswith('D') and 'ENABLE' not in v):
         return 'DISABLED'
     return 'PENDING'
-
-def get_camera_param_info(camera_name, parameters):
-    """
-    Finds existing parameter key and value for a camera, or determines the default key.
-    Returns (key, value, state) where state is 'ENABLED', 'DISABLED', or 'PENDING'.
-    """
-    clean_name = re.sub(r'[^A-Za-z0-9_]', '_', str(camera_name).strip())
-    candidates = [
-        f"CAM_{clean_name.upper()}",
-        f"CAM_{str(camera_name).strip().upper()}",
-        f"CAM_{str(camera_name).strip()}",
-        f"CAM_{clean_name}",
-        clean_name.upper(),
-        str(camera_name).strip().upper(),
-        str(camera_name).strip(),
-        clean_name,
-    ]
-    if parameters:
-        for cand in candidates:
-            if cand in parameters:
-                val = parameters[cand]
-                return cand, val, parse_enable_state(val)
-
-    default_key = f"CAM_{clean_name.upper()}"
-    return default_key, None, 'PENDING'

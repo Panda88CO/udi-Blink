@@ -72,8 +72,52 @@ except ImportError:
 
 
 
- 
-VERSION = '0.6.24' 
+VERSION = '0.6.29' 
+
+def _sync_version_file():
+    """Ensure version.txt and profile version stay synchronized with VERSION in code"""
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+
+        # 1. Sync root version.txt
+        ver_file = os.path.join(base_dir, 'version.txt')
+        cur_version = None
+        if os.path.exists(ver_file):
+            with open(ver_file, 'r') as f:
+                cur_version = f.read().strip()
+        if cur_version != VERSION:
+            with open(ver_file, 'w') as f:
+                f.write(VERSION + '\n')
+            logging.info(f'Synchronized version.txt to VERSION {VERSION}')
+
+        # 2. Sync profile/version.txt and server.json (only if profile directory exists)
+        prof_dir = os.path.join(base_dir, 'profile')
+        if os.path.isdir(prof_dir):
+            prof_ver_file = os.path.join(prof_dir, 'version.txt')
+            cur_prof_version = None
+            if os.path.exists(prof_ver_file):
+                with open(prof_ver_file, 'r') as f:
+                    cur_prof_version = f.read().strip()
+            if cur_prof_version != VERSION:
+                with open(prof_ver_file, 'w') as f:
+                    f.write(VERSION + '\n')
+                logging.info(f'Synchronized profile/version.txt to VERSION {VERSION}')
+
+            server_json_file = os.path.join(base_dir, 'server.json')
+            if os.path.exists(server_json_file):
+                with open(server_json_file, 'r') as f:
+                    s_data = json.load(f)
+                if s_data.get('profile_version') != VERSION:
+                    s_data['profile_version'] = VERSION
+                    with open(server_json_file, 'w') as f:
+                        json.dump(s_data, f, indent=4)
+                        f.write('\n')
+                    logging.info(f'Synchronized server.json profile_version to VERSION {VERSION}')
+
+    except Exception as e:
+        logging.debug(f'Could not sync version files: {e}')
+
+_sync_version_file()
 
 class BlinkSetup:
     from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done, gen_uid
@@ -726,7 +770,12 @@ class BlinkSetup:
         self._update_dynamic_profile()
 
     def _update_dynamic_profile(self):
-        logging.info("Updating profile (dynamic & static)...")
+        profile_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'profile')
+        if os.path.isdir(profile_dir):
+            logging.info("Updating profile (dynamic & static)...")
+        else:
+            logging.info("Updating profile (dynamic)...")
+
         json_ok = False
         updater = getattr(self.poly, "updateJsonProfile", None)
         if callable(updater):
@@ -738,13 +787,15 @@ class BlinkSetup:
             except Exception as e:
                 logging.warning(f"updateJsonProfile failed: {e}; falling back to updateProfile")
         
-        try:
-            if hasattr(self.poly, "updateProfile"):
-                self.poly.updateProfile()
-                logging.info("Static profile updated successfully via updateProfile")
-        except Exception as e:
-            if not json_ok:
-                logging.error(f"updateProfile failed: {e}")
+        # Only update static profile if the directory exists
+        if os.path.isdir(profile_dir):
+            try:
+                if hasattr(self.poly, "updateProfile"):
+                    self.poly.updateProfile()
+                    logging.info("Static profile updated successfully via updateProfile")
+            except Exception as e:
+                if not json_ok:
+                    logging.error(f"updateProfile failed: {e}")
 
         self.remove_notice("profile")
 

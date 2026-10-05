@@ -90,7 +90,7 @@ def _sync_version_file():
                 f.write(VERSION + '\n')
             logging.info(f'Synchronized version.txt to VERSION {VERSION}')
 
-        # 2. Sync profile/version.txt and server.json (only if profile directory exists)
+        # 2. Sync profile/version.txt (only if profile directory exists)
         prof_dir = os.path.join(base_dir, 'profile')
         if os.path.isdir(prof_dir):
             prof_ver_file = os.path.join(prof_dir, 'version.txt')
@@ -103,16 +103,27 @@ def _sync_version_file():
                     f.write(VERSION + '\n')
                 logging.info(f'Synchronized profile/version.txt to VERSION {VERSION}')
 
-            server_json_file = os.path.join(base_dir, 'server.json')
-            if os.path.exists(server_json_file):
-                with open(server_json_file, 'r') as f:
-                    s_data = json.load(f)
-                if s_data.get('profile_version') != VERSION:
-                    s_data['profile_version'] = VERSION
-                    with open(server_json_file, 'w') as f:
-                        json.dump(s_data, f, indent=4)
-                        f.write('\n')
-                    logging.info(f'Synchronized server.json profile_version to VERSION {VERSION}')
+        # 3. Sync server.json (version, profile_version, credits)
+        server_json_file = os.path.join(base_dir, 'server.json')
+        if os.path.exists(server_json_file):
+            with open(server_json_file, 'r') as f:
+                s_data = json.load(f)
+            changed = False
+            if s_data.get('version') != VERSION:
+                s_data['version'] = VERSION
+                changed = True
+            if s_data.get('profile_version') != VERSION:
+                s_data['profile_version'] = VERSION
+                changed = True
+            if s_data.get('credits') and isinstance(s_data['credits'], list) and len(s_data['credits']) > 0:
+                if s_data['credits'][0].get('version') != VERSION:
+                    s_data['credits'][0]['version'] = VERSION
+                    changed = True
+            if changed:
+                with open(server_json_file, 'w') as f:
+                    json.dump(s_data, f, indent=4)
+                    f.write('\n')
+                logging.info(f'Synchronized server.json to VERSION {VERSION}')
 
     except Exception as e:
         logging.debug(f'Could not sync version files: {e}')

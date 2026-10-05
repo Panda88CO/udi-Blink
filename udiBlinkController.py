@@ -72,7 +72,7 @@ except ImportError:
 
 
 
-VERSION = '0.6.29' 
+VERSION = '0.6.30' 
 
 def _sync_version_file():
     """Ensure version.txt and profile version stay synchronized with VERSION in code"""
@@ -215,8 +215,8 @@ class BlinkSetup:
                     except Exception:
                         pass
 
-    def validate_params(self):
-        # logging.debug('validate_params: {}'.format(self.Parameters.dump()))
+    def validate_params(self, *args, **kwargs):
+        logging.info('Configuration validated from Polyglot (CONFIGDONE)')
         self.paramsProcessed = True    
 
     def strip_StringtoList(self, syncString):
@@ -343,21 +343,25 @@ class BlinkSetup:
     def start (self):
         logging.info('Executing start - BlinkSetup')
         try:
-
-            while not self.paramsProcessed or not self.nodeDefineDone:
-                logging.info('Waiting for setup to complete param:{} nodes:{}'.format(self.paramsProcessed, self.nodeDefineDone ))
+            wait_count = 0
+            max_wait = 15  # wait up to 30 seconds (15 * 2s)
+            while (not self.paramsProcessed or not self.nodeDefineDone) and wait_count < max_wait:
+                logging.info('Waiting for setup to complete param:{} nodes:{} (wait {}/{})'.format(
+                    self.paramsProcessed, self.nodeDefineDone, wait_count + 1, max_wait
+                ))
                 time.sleep(2)
-            #logging.setLevel(10)
-            #logging.debug('syncUnits / syncString: {} - {}'.format(self.syncUnits, self.syncUnitString))
-            #self.BLINK_setDriver('ST', 1)
-            #time.sleep(5)
-            # logging.debug('nodeDefineDone {}'.format(self.nodeDefineDone))
-            # logging.debug('credentilas : {} {}'.format(self.userName, self.password))
+                wait_count += 1
+                if not self.paramsProcessed and len(self.Parameters) > 0:
+                    logging.info('Parameters found in self.Parameters, processing now')
+                    self.handleParams(dict(self.Parameters))
+                    break
 
-            if self.userName == None or self.userName == '' or self.password==None or self.password=='':
-                logging.error('username and password must be provided to start node server')
-                self.poly.Notices['un'] = 'username and password must be provided to start node server'
-                exit()
+            self.paramsProcessed = True
+
+            if not self.userName or not self.password:
+                logging.warning('USERNAME and PASSWORD not provided - please configure in Polyglot custom parameters')
+                self.poly.Notices['un'] = 'Username and Password must be provided in Custom Parameters to start node server'
+                return
             else:
                 # logging.debug('STARTING BLINK SYSTEM')
                 saved_tokens = self.load_saved_tokens()
@@ -623,12 +627,20 @@ class BlinkSetup:
     
     
     def handleParams (self, customParams ):
-        # logging.debug('handleParams')
+        logging.info('Received custom parameters from Polyglot')
         try:
+            if customParams is None:
+                customParams = {}
+            elif not isinstance(customParams, dict):
+                try:
+                    customParams = dict(customParams)
+                except Exception:
+                    customParams = {}
+
             self.Parameters.load(customParams)
             # logging.debug('handleParams load - {}'.format(customParams))
             if 'TEMP_UNIT' in customParams and customParams['TEMP_UNIT']:
-                temp = customParams['TEMP_UNIT'].strip().upper()
+                temp = str(customParams['TEMP_UNIT']).strip().upper()
                 if temp and (temp[0] == 'C' or temp[0] == 'F'):
                     self.temp_unit = temp[0]
                     self.blink.set_temp_unit(self.temp_unit)
@@ -638,8 +650,8 @@ class BlinkSetup:
             else:
                 self.poly.Notices['TEMP_UNIT'] = 'Missing TEMP_UNIT parameter (C or F)'
 
-            if 'USERNAME' in customParams and customParams['USERNAME'].strip():
-                new_user = customParams['USERNAME'].strip()
+            if 'USERNAME' in customParams and str(customParams['USERNAME']).strip():
+                new_user = str(customParams['USERNAME']).strip()
                 if self.userName is not None and self.userName != '' and self.userName != new_user:
                     logging.info('Username changed in parameters, clearing saved tokens')
                     self.clear_saved_tokens()
@@ -650,7 +662,7 @@ class BlinkSetup:
                 self.userName = ''
             
             if 'PASSWORD' in customParams and customParams['PASSWORD']:
-                new_pass = customParams['PASSWORD']
+                new_pass = str(customParams['PASSWORD'])
                 if self.password is not None and self.password != '' and self.password != new_pass:
                     logging.info('Password changed in parameters, clearing saved tokens')
                     self.clear_saved_tokens()
@@ -685,9 +697,9 @@ class BlinkSetup:
             except Exception as e:
                 logging.debug(f'Error clearing network notices: {e}')
 
-            if 'EMAIL_ENABLED' in customParams and customParams['EMAIL_ENABLED']:
-                self.email_en = customParams['EMAIL_ENABLED'].strip()
-                if self.email_en.upper().startswith('T'):
+            if 'EMAIL_ENABLED' in customParams and customParams['EMAIL_ENABLED'] is not None:
+                val = str(customParams['EMAIL_ENABLED']).strip().upper()
+                if val.startswith('T') or val == '1':
                     self.email_en = True
                 else:
                     self.email_en = False
@@ -698,8 +710,8 @@ class BlinkSetup:
             self.email_info['email_en'] = self.email_en
 
             if self.email_en:
-                if 'SMTP' in customParams and customParams['SMTP'].strip():
-                    self.smtp = customParams['SMTP'].strip()
+                if 'SMTP' in customParams and str(customParams['SMTP']).strip():
+                    self.smtp = str(customParams['SMTP']).strip()
                     self.remove_notice('email_smtp')
                     self.remove_notice('email_smpt')
                 else:
@@ -719,22 +731,22 @@ class BlinkSetup:
                     self.remove_notice('email_smpt')
                 self.email_info['smtp_port'] = self.smtp_port
 
-                if 'SMTP_EMAIL' in customParams and customParams['SMTP_EMAIL'].strip():
-                    self.email_sender = customParams['SMTP_EMAIL'].strip()
+                if 'SMTP_EMAIL' in customParams and str(customParams['SMTP_EMAIL']).strip():
+                    self.email_sender = str(customParams['SMTP_EMAIL']).strip()
                     self.remove_notice('email_sender')
                 else:
                     self.poly.Notices['email_sender'] = 'Missing SMTP_EMAIL parameter'
                 self.email_info['email_sender'] = self.email_sender
 
                 if 'SMTP_PASSWORD' in customParams and customParams['SMTP_PASSWORD']:
-                    self.email_password = customParams['SMTP_PASSWORD']
+                    self.email_password = str(customParams['SMTP_PASSWORD'])
                     self.remove_notice('email_password')
                 else:
                     self.poly.Notices['email_password'] = 'Missing SMTP_PASSWORD parameter'
                 self.email_info['email_password'] = self.email_password
 
-                if 'EMAIL_RECEPIENT' in customParams and customParams['EMAIL_RECEPIENT'].strip():
-                    self.email_recepient = customParams['EMAIL_RECEPIENT'].strip()
+                if 'EMAIL_RECEPIENT' in customParams and str(customParams['EMAIL_RECEPIENT']).strip():
+                    self.email_recepient = str(customParams['EMAIL_RECEPIENT']).strip()
                     self.remove_notice('email_recepient')
                 else:
                     self.poly.Notices['email_recepient'] = 'Missing EMAIL_RECEPIENT parameter'
@@ -742,9 +754,6 @@ class BlinkSetup:
             else:
                 for email_key in ['email_smtp', 'email_smpt', 'email_port', 'email_sender', 'email_password', 'email_recepient']:
                     self.remove_notice(email_key)
-
-            #logging.debug('email_info : {}'.format(self.email_info))
-            self.paramsProcessed = True
 
             if getattr(self, 'connected', False):
                 self.add_network_nodes()
@@ -757,9 +766,15 @@ class BlinkSetup:
                 except Exception as e:
                     logging.debug(f'Error updating network node cameras in handleParams: {e}')
                 self._update_dynamic_profile()
+            else:
+                if self.userName and self.password:
+                    logging.info('Credentials available in handleParams, starting Blink connection')
+                    threading.Thread(target=self.start, daemon=True, name='BlinkStart').start()
 
         except Exception as e:
-            logging.debug('Error: {} {}'.format(e, customParams))
+            logging.error(f'Error in handleParams: {e}', exc_info=True)
+        finally:
+            self.paramsProcessed = True
 
     def update(self, command = None):
         self._update_dynamic_profile()

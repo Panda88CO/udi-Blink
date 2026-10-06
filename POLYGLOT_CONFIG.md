@@ -44,12 +44,14 @@ This node server integrates Blink Camera Systems into Universal Devices IoX / IS
   - Setting to `DISABLED` removes or skips the network and its cameras.
 
 ### Optional Email Snapshot Notifications:
-- **`EMAIL_ENABLED`**: Enable emailing snapped photos (`True` or `False`).
-- **`SMTP`**: Outgoing SMTP server address (e.g. `smtp-mail.outlook.com` or `smtp.gmail.com`).
-- **`SMTP_PORT`**: Port number for SMTP (default is `587`).
-- **`SMTP_EMAIL`**: Authentication email for the SMTP account.
-- **`SMTP_PASSWORD`**: Password or app password for the SMTP account.
-- **`EMAIL_RECEPIENT`**: Recipient email address where images are delivered.
+- **`EMAIL_ENABLED`**: Enable emailing snapped photos (`True` or `False`). Defaults to `False`.
+  - When set to `True`, the following SMTP configuration parameters will automatically appear in Custom Parameters:
+    - **`SMTP`**: Outgoing SMTP server address (e.g. `smtp-mail.outlook.com` or `smtp.gmail.com`).
+    - **`SMTP_PORT`**: Port number for SMTP (default is `587`).
+    - **`SMTP_EMAIL`**: Authentication email for the SMTP account.
+    - **`SMTP_PASSWORD`**: Password or app password for the SMTP account.
+    - **`EMAIL_RECEPIENT`**: Recipient email address where images are delivered.
+  - When set to `False`, these parameters are hidden and removed from the UI (any previously entered credentials are saved internally).
 
 ---
 

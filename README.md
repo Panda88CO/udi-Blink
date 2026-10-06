@@ -75,9 +75,11 @@ Represents individual Blink cameras, doorbells, and floodlights.
 | `<NETWORK_NAME>` | **Yes** | `ENABLED/DISABLED` | Set each discovered network to `ENABLED` or `DISABLED`. |
 
 ### Optional Email Configuration:
+*(These SMTP parameters are only exposed in Custom Configuration parameters when `EMAIL_ENABLED` is set to `True`)*
+
 | Parameter | Default | Description |
 | :--- | :--- | :--- |
-| `EMAIL_ENABLED` | `False` | Set to `True` to email snapped pictures. |
+| `EMAIL_ENABLED` | `False` | Set to `True` to enable email and expose the SMTP parameters below. |
 | `SMTP` | — | SMTP server address (e.g., `smtp-mail.outlook.com`). |
 | `SMTP_PORT` | `587` | SMTP port. |
 | `SMTP_EMAIL` | — | Sender email address for SMTP authentication. |

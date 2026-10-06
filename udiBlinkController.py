@@ -72,7 +72,7 @@ except ImportError:
 
 
 
-VERSION = '0.6.30' 
+VERSION = '0.6.31' 
 
 def _sync_version_file():
     """Ensure version.txt and profile version stay synchronized with VERSION in code"""
@@ -176,6 +176,10 @@ class BlinkSetup:
         self.poly.subscribe(self.poly.DISCOVER, self.discover)
 
         self.auth_key_updated = False
+        self.connected = False
+        self._is_starting = False
+        self._start_lock = threading.Lock()
+        self.waiting_for_2fa = False
 
         self.hb = 0
         self._heartbeat_threads = {}
@@ -189,7 +193,7 @@ class BlinkSetup:
         self.nodes_in_db = self.poly.getNodesFromDb()
         # logging.debug('BlinkSetup init DONE')
         self.nodeDefineDone = True
-        self.start()
+        threading.Thread(target=self.start, daemon=True, name='BlinkStart').start()
 
     def clear_notices(self):
         try:
@@ -352,6 +356,15 @@ class BlinkSetup:
 
 
     def start (self):
+        with self._start_lock:
+            if self._is_starting:
+                logging.info('Blink start/auth already in progress, ignoring duplicate start call')
+                return
+            if getattr(self, 'connected', False):
+                logging.info('Already connected to Blink, ignoring duplicate start call')
+                return
+            self._is_starting = True
+
         logging.info('Executing start - BlinkSetup')
         try:
             wait_count = 0
@@ -428,20 +441,40 @@ class BlinkSetup:
                     self.customData['unique_id'] = None
                     self.clear_saved_tokens()
                     self.remove_notice('TOKEN_INIT')
-                    self.poly.Notices['LOGIN'] = 'Login Failed - Try again'
-                    exit()
+                    self.poly.Notices['LOGIN'] = 'Login Failed - Check USERNAME/PASSWORD and save to retry'
+                    return
 
                 if auth_needed:
                     self.remove_notice('TOKEN_INIT')
                     logging.info('Enter 2FA PIN (message) in AUTH_KEY field and save') 
                     self.poly.Notices['PIN'] = 'Enter 2FA PIN (message) in AUTH_KEY field and save'
-                    self.auth_key_updated = False
-                    while not self.auth_key_updated:                      
-                        logging.debug('Waiting for new pin')
-                        time.sleep(3)
-                    self.poly.Notices['INIT'] = 'System Initializing - it may take a little while'    
-                    self.blink.auth_key(str(self.authKey))
-                    self.blink.finalize_auth()
+                    self.waiting_for_2fa = True
+                    pin_ok = False
+                    while not pin_ok:
+                        self.auth_key_updated = False
+                        while not self.auth_key_updated:                      
+                            logging.debug('Waiting for new pin')
+                            time.sleep(3)
+                        self.poly.Notices['INIT'] = 'Verifying 2FA PIN...'    
+                        auth_res = self.blink.auth_key(str(self.authKey))
+                        if auth_res is True or auth_res == 'ok':
+                            try:
+                                self.blink.finalize_auth()
+                                pin_ok = True
+                            except Exception as e:
+                                logging.error(f'Error finalizing auth: {e}')
+                                self.poly.Notices['PIN'] = 'Error finalizing auth - please re-enter PIN in AUTH_KEY and save'
+                                self.remove_notice('INIT')
+                        else:
+                            logging.warning(f'2FA PIN verification failed: {auth_res}')
+                            self.poly.Notices['PIN'] = '2FA PIN verification failed - enter correct PIN in AUTH_KEY and save'
+                            self.remove_notice('INIT')
+                    self.waiting_for_2fa = False
+                    if hasattr(self, 'Parameters') and 'AUTH_KEY' in self.Parameters:
+                        try:
+                            self.Parameters['AUTH_KEY'] = ''
+                        except Exception:
+                            pass
 
                 # Save tokens now that startup/2FA and post-verify are complete
                 current_auth = self.blink.get_auth_data()
@@ -455,15 +488,22 @@ class BlinkSetup:
                 self._update_dynamic_profile()
 
         except Exception as e:
-            logging.error('Blink Start Exception: {}'.format(e))
+            logging.error('Blink Start Exception: {}'.format(e), exc_info=True)
             self.remove_notice('TOKEN_INIT')
             #self.BLINK_setDriver('ST', 0)
+        finally:
+            self._is_starting = False
+            self.waiting_for_2fa = False
 
     def add_network_nodes (self):
         logging.info('Adding Blink network nodes:')
         node_adr_list = [self.address]
         network_node_list = self.blink.get_network_list()
         self.network_names = []
+
+        if not network_node_list:
+            logging.warning('No networks found in Blink homescreen data - skipping node sync to prevent accidental removal')
+            return
 
         # Remove leftover camera notices and clean up old CAM_ parameters if present
         self.remove_notice('cameras')
@@ -666,6 +706,7 @@ class BlinkSetup:
                 if self.userName is not None and self.userName != '' and self.userName != new_user:
                     logging.info('Username changed in parameters, clearing saved tokens')
                     self.clear_saved_tokens()
+                    self.connected = False
                 self.userName = new_user
                 self.remove_notice('userName')
             else:
@@ -677,6 +718,7 @@ class BlinkSetup:
                 if self.password is not None and self.password != '' and self.password != new_pass:
                     logging.info('Password changed in parameters, clearing saved tokens')
                     self.clear_saved_tokens()
+                    self.connected = False
                 self.password = new_pass
                 self.remove_notice('password')
             else:
@@ -717,54 +759,113 @@ class BlinkSetup:
                 self.remove_notice('email_en')
             else:
                 self.email_en = False
-                self.poly.Notices['email_en'] = 'Missing EMAIL_ENABLED parameter (True/False)'
+                if hasattr(self, 'Parameters') and 'EMAIL_ENABLED' not in self.Parameters:
+                    self.Parameters['EMAIL_ENABLED'] = 'False'
+                self.remove_notice('email_en')
             self.email_info['email_en'] = self.email_en
 
+            email_param_keys = ['SMTP', 'SMTP_PORT', 'SMTP_EMAIL', 'SMTP_PASSWORD', 'EMAIL_RECEPIENT']
+
             if self.email_en:
-                if 'SMTP' in customParams and str(customParams['SMTP']).strip():
-                    self.smtp = str(customParams['SMTP']).strip()
+                default_email_values = {
+                    'SMTP': 'SMTPServer',
+                    'SMTP_PORT': '587',
+                    'SMTP_EMAIL': 'serverlogin',
+                    'SMTP_PASSWORD': 'server password',
+                    'EMAIL_RECEPIENT': "receiver's email"
+                }
+
+                # Check for previously saved email credentials in customData
+                saved_config = {}
+                try:
+                    if 'saved_email_config' in self.customData and isinstance(self.customData['saved_email_config'], dict):
+                        saved_config = self.customData['saved_email_config']
+                except Exception:
+                    pass
+
+                # Expose email parameters in self.Parameters if not already present
+                if hasattr(self, 'Parameters'):
+                    for k, default_val in default_email_values.items():
+                        if k not in self.Parameters:
+                            val_to_use = saved_config.get(k, default_val)
+                            self.Parameters[k] = val_to_use
+
+                smtp_val = customParams.get('SMTP') or (self.Parameters.get('SMTP') if hasattr(self, 'Parameters') else '')
+                if smtp_val and str(smtp_val).strip() and str(smtp_val).strip() != 'SMTPServer':
+                    self.smtp = str(smtp_val).strip()
                     self.remove_notice('email_smtp')
                     self.remove_notice('email_smpt')
                 else:
-                    self.poly.Notices['email_smtp'] = 'Missing SMTP parameter'
+                    self.smtp = None
+                    self.poly.Notices['email_smtp'] = 'Configure SMTP parameter'
                 self.email_info['smtp'] = self.smtp
 
-                if 'SMTP_PORT' in customParams and str(customParams['SMTP_PORT']).strip():
-                    try:
-                        self.smtp_port = int(customParams['SMTP_PORT'])
-                    except (ValueError, TypeError):
-                        self.smtp_port = 587
-                    self.remove_notice('email_port')
-                    self.remove_notice('email_smpt')
-                else:
+                port_val = customParams.get('SMTP_PORT') or (self.Parameters.get('SMTP_PORT') if hasattr(self, 'Parameters') else '587')
+                try:
+                    self.smtp_port = int(str(port_val).strip())
+                except (ValueError, TypeError):
                     self.smtp_port = 587
-                    self.remove_notice('email_port')
-                    self.remove_notice('email_smpt')
+                self.remove_notice('email_port')
+                self.remove_notice('email_smpt')
                 self.email_info['smtp_port'] = self.smtp_port
 
-                if 'SMTP_EMAIL' in customParams and str(customParams['SMTP_EMAIL']).strip():
-                    self.email_sender = str(customParams['SMTP_EMAIL']).strip()
+                sender_val = customParams.get('SMTP_EMAIL') or (self.Parameters.get('SMTP_EMAIL') if hasattr(self, 'Parameters') else '')
+                if sender_val and str(sender_val).strip() and str(sender_val).strip() != 'serverlogin':
+                    self.email_sender = str(sender_val).strip()
                     self.remove_notice('email_sender')
                 else:
-                    self.poly.Notices['email_sender'] = 'Missing SMTP_EMAIL parameter'
+                    self.email_sender = None
+                    self.poly.Notices['email_sender'] = 'Configure SMTP_EMAIL parameter'
                 self.email_info['email_sender'] = self.email_sender
 
-                if 'SMTP_PASSWORD' in customParams and customParams['SMTP_PASSWORD']:
-                    self.email_password = str(customParams['SMTP_PASSWORD'])
+                pass_val = customParams.get('SMTP_PASSWORD') or (self.Parameters.get('SMTP_PASSWORD') if hasattr(self, 'Parameters') else '')
+                if pass_val and str(pass_val) and str(pass_val) != 'server password':
+                    self.email_password = str(pass_val)
                     self.remove_notice('email_password')
                 else:
-                    self.poly.Notices['email_password'] = 'Missing SMTP_PASSWORD parameter'
+                    self.email_password = None
+                    self.poly.Notices['email_password'] = 'Configure SMTP_PASSWORD parameter'
                 self.email_info['email_password'] = self.email_password
 
-                if 'EMAIL_RECEPIENT' in customParams and str(customParams['EMAIL_RECEPIENT']).strip():
-                    self.email_recepient = str(customParams['EMAIL_RECEPIENT']).strip()
+                recep_val = customParams.get('EMAIL_RECEPIENT') or (self.Parameters.get('EMAIL_RECEPIENT') if hasattr(self, 'Parameters') else '')
+                if recep_val and str(recep_val).strip() and str(recep_val).strip() not in ("receiver's email", "receiver''''s email"):
+                    self.email_recepient = str(recep_val).strip()
                     self.remove_notice('email_recepient')
                 else:
-                    self.poly.Notices['email_recepient'] = 'Missing EMAIL_RECEPIENT parameter'
+                    self.email_recepient = None
+                    self.poly.Notices['email_recepient'] = 'Configure EMAIL_RECEPIENT parameter'
                 self.email_info['email_recepient'] = self.email_recepient
             else:
+                # Email disabled: clean up notices
                 for email_key in ['email_smtp', 'email_smpt', 'email_port', 'email_sender', 'email_password', 'email_recepient']:
                     self.remove_notice(email_key)
+
+                # Save any user-entered values before deleting, so they can be restored if re-enabled
+                saved_email = {}
+                for k in email_param_keys:
+                    val = customParams.get(k) or (self.Parameters.get(k) if hasattr(self, 'Parameters') else None)
+                    if val is not None and str(val).strip() not in ('SMTPServer', '587', 'serverlogin', 'server password', "receiver's email", "receiver''''s email", ''):
+                        saved_email[k] = str(val).strip()
+                if saved_email:
+                    try:
+                        self.customData['saved_email_config'] = saved_email
+                    except Exception:
+                        pass
+
+                # Remove the 5 email parameters from self.Parameters so they are not exposed in Polyglot UI
+                if hasattr(self, 'Parameters') and self.Parameters:
+                    for k in email_param_keys:
+                        if k in self.Parameters:
+                            try:
+                                if hasattr(self.Parameters, 'delete'):
+                                    self.Parameters.delete(k)
+                                else:
+                                    del self.Parameters[k]
+                            except Exception as e:
+                                logging.debug(f'Error deleting {k} from Parameters: {e}')
+
+            if hasattr(self, 'blink') and self.blink:
+                self.blink.set_email_info(self.email_info)
 
             if getattr(self, 'connected', False):
                 self.add_network_nodes()
@@ -777,10 +878,12 @@ class BlinkSetup:
                 except Exception as e:
                     logging.debug(f'Error updating network node cameras in handleParams: {e}')
                 self._update_dynamic_profile()
-            else:
+            elif not self._is_starting:
                 if self.userName and self.password:
                     logging.info('Credentials available in handleParams, starting Blink connection')
                     threading.Thread(target=self.start, daemon=True, name='BlinkStart').start()
+            else:
+                logging.debug('Blink start/auth already in progress; updated credentials/parameters')
 
         except Exception as e:
             logging.error(f'Error in handleParams: {e}', exc_info=True)

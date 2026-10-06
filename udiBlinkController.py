@@ -458,6 +458,8 @@ class BlinkSetup:
                         self.poly.Notices['INIT'] = 'Verifying 2FA PIN...'    
                         auth_res = self.blink.auth_key(str(self.authKey))
                         if auth_res is True or auth_res == 'ok':
+                            self.remove_notice('PIN')
+                            self.poly.Notices['INIT'] = 'Processing data - it may take a while'
                             try:
                                 self.blink.finalize_auth()
                                 pin_ok = True

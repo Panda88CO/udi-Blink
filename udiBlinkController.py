@@ -470,6 +470,7 @@ class BlinkSetup:
                             self.poly.Notices['PIN'] = '2FA PIN verification failed - enter correct PIN in AUTH_KEY and save'
                             self.remove_notice('INIT')
                     self.waiting_for_2fa = False
+                    self.remove_notice('PIN')
                     if hasattr(self, 'Parameters') and 'AUTH_KEY' in self.Parameters:
                         try:
                             self.Parameters['AUTH_KEY'] = ''
@@ -481,19 +482,24 @@ class BlinkSetup:
                 if current_auth and current_auth.get('refresh_token'):
                     self.save_saved_tokens(current_auth)
 
-                for n in ['PIN', 'INIT', 'LOGIN', 'un', 'TOKEN_INIT', 'userName', 'password']:
+                for n in ['PIN', 'LOGIN', 'un', 'TOKEN_INIT', 'userName', 'password']:
                     self.remove_notice(n)
+                self.poly.Notices['INIT'] = 'Processing data - it may take a while'
+
                 #self.add_sync_nodes()
                 self.add_network_nodes()
                 self._update_dynamic_profile()
+                self.remove_notice('INIT')
 
         except Exception as e:
             logging.error('Blink Start Exception: {}'.format(e), exc_info=True)
             self.remove_notice('TOKEN_INIT')
+            self.remove_notice('INIT')
             #self.BLINK_setDriver('ST', 0)
         finally:
             self._is_starting = False
             self.waiting_for_2fa = False
+            self.remove_notice('INIT')
 
     def add_network_nodes (self):
         logging.info('Adding Blink network nodes:')

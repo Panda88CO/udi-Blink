@@ -225,6 +225,8 @@ class blink_system:
         
         if "device_id" in login_data:
             self._blink.auth.device_id = login_data["device_id"]
+        if "hardware_id" in login_data:
+            self._blink.auth.hardware_id = login_data["hardware_id"]
         if "unique_id" in login_data:
             self._blink.auth.unique_id = login_data["unique_id"]
         return True
@@ -246,6 +248,7 @@ class blink_system:
     async def start(self):
         """Start Blink (login/refresh)"""
         self._key_required = False
+        self._last_error = None
         try:
             await self._blink.start()
             self._log_api_return_structure("start")
@@ -256,10 +259,26 @@ class blink_system:
             return True
         except (asyncio.CancelledError, concurrent.futures.CancelledError):
             logging.info("Blink start was cancelled")
+            self._last_error = "Cancelled"
             return False
         except Exception as e:
             logging.error(f"Start error: {e}")
+            self._last_error = e
             return False
+
+    @property
+    def last_error(self):
+        return getattr(self, '_last_error', None)
+
+    @property
+    def is_network_error(self):
+        err = getattr(self, '_last_error', None)
+        if not err:
+            return False
+        err_str = str(err).lower()
+        err_type = type(err).__name__.lower()
+        network_keywords = ['connect', 'timeout', 'dns', 'network', 'unreachable', 'connection reset', 'refused', 'oserror', 'clienterror']
+        return any(k in err_str or k in err_type for k in network_keywords)
 
     @property
     def auth(self):
@@ -319,11 +338,13 @@ class blink_system:
                 if not username and self.login_data:
                     username = self.login_data.get("username")
                 hardware_id = getattr(self._blink.auth, "hardware_id", None) or attrs.get("hardware_id")
+                device_id = getattr(self._blink.auth, "device_id", None) or hardware_id
                 return {
                     "username": username,
                     "token": attrs.get("token"),
                     "refresh_token": attrs.get("refresh_token"),
                     "hardware_id": hardware_id,
+                    "device_id": device_id,
                     "client_id": attrs.get("client_id"),
                     "account_id": attrs.get("account_id"),
                     "user_id": attrs.get("user_id"),

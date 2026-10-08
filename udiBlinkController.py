@@ -13,6 +13,7 @@ import time
 import re
 import threading
 import json
+import uuid
 import subprocess
 import site
 
@@ -72,7 +73,8 @@ except ImportError:
 
 
 
-VERSION = '0.6.31' 
+VERSION = '0.6.32' 
+TOKEN_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'blink_tokens.json') 
 
 def _sync_version_file():
     """Ensure version.txt and profile version stay synchronized with VERSION in code"""
@@ -175,6 +177,9 @@ class BlinkSetup:
         self.poly.subscribe(self.poly.CONFIGDONE, self.validate_params)
         self.poly.subscribe(self.poly.DISCOVER, self.discover)
 
+        self.paramsProcessed = False
+        self.dataProcessed = False
+        self.configDone = False
         self.auth_key_updated = False
         self.connected = False
         self._is_starting = False
@@ -233,6 +238,8 @@ class BlinkSetup:
     def validate_params(self, *args, **kwargs):
         logging.info('Configuration validated from Polyglot (CONFIGDONE)')
         self.paramsProcessed = True    
+        self.dataProcessed = True
+        self.configDone = True    
 
     def strip_StringtoList(self, syncString):
         tmp = re.sub(r"[^A-Za-z0-9_,]", "", syncString)
@@ -255,21 +262,25 @@ class BlinkSetup:
         except Exception as e:
             logging.debug(f'Could not load auth_tokens from customData: {e}')
 
-        # If not in customData, try local file
+        # If not in customData, try TOKEN_FILE and local file fallback
         if not tokens or not isinstance(tokens, dict) or not tokens.get('refresh_token'):
-            if os.path.exists('blink_tokens.json'):
-                try:
-                    with open('blink_tokens.json', 'r') as f:
-                        file_tokens = json.load(f)
-                    if isinstance(file_tokens, dict) and file_tokens.get('refresh_token'):
-                        tokens = file_tokens
-                        logging.debug('Loaded auth_tokens from blink_tokens.json')
-                        try:
-                            self.customData['auth_tokens'] = tokens
-                        except Exception:
-                            pass
-                except Exception as e:
-                    logging.error(f'Error reading blink_tokens.json: {e}')
+            for path in [TOKEN_FILE, 'blink_tokens.json']:
+                if os.path.exists(path):
+                    try:
+                        with open(path, 'r') as f:
+                            file_tokens = json.load(f)
+                        if isinstance(file_tokens, dict) and file_tokens.get('refresh_token'):
+                            tokens = file_tokens
+                            logging.debug(f'Loaded auth_tokens from {path}')
+                            try:
+                                self.customData['auth_tokens'] = tokens
+                                if tokens.get('hardware_id'):
+                                    self.customData['hardware_id'] = tokens['hardware_id']
+                            except Exception:
+                                pass
+                            break
+                    except Exception as e:
+                        logging.error(f'Error reading {path}: {e}')
 
         if tokens and isinstance(tokens, dict):
             # Check if username matches current username
@@ -291,15 +302,17 @@ class BlinkSetup:
             auth_data['username'] = self.userName
         try:
             self.customData['auth_tokens'] = auth_data
+            if auth_data.get('hardware_id'):
+                self.customData['hardware_id'] = auth_data['hardware_id']
         except Exception as e:
             logging.error(f'Error storing auth_tokens in customData: {e}')
         try:
-            with open('blink_tokens.json', 'w') as f:
+            with open(TOKEN_FILE, 'w') as f:
                 json.dump(auth_data, f, indent=2)
-            os.chmod('blink_tokens.json', 0o600)
-            logging.debug('Auth tokens saved to blink_tokens.json')
+            os.chmod(TOKEN_FILE, 0o600)
+            logging.debug(f'Auth tokens saved to {TOKEN_FILE}')
         except Exception as e:
-            logging.error(f'Failed to save blink_tokens.json: {e}')
+            logging.error(f'Failed to save {TOKEN_FILE}: {e}')
 
     def clear_saved_tokens(self):
         logging.info('Clearing stored Blink authentication tokens')
@@ -307,38 +320,57 @@ class BlinkSetup:
             self.customData['auth_tokens'] = None
         except Exception as e:
             logging.error(f'Error clearing auth_tokens from customData: {e}')
-        try:
-            if os.path.exists('blink_tokens.json'):
-                os.remove('blink_tokens.json')
-        except Exception as e:
-            logging.error(f'Error removing blink_tokens.json: {e}')
+        for path in [TOKEN_FILE, 'blink_tokens.json']:
+            try:
+                if os.path.exists(path):
+                    os.remove(path)
+            except Exception as e:
+                logging.error(f'Error removing {path}: {e}')
 
     def prepare_login_data(self, auth_tokens=None):
-        # logging.debug('prepare_login_data')
         login_data = {}
         login_data['username'] = self.userName
         login_data['password'] = self.password
-        login_data['device_id'] = 'ISY_PG3x'
         login_data['reauth'] = True
-        #logging.debug('custom data: {}'.format(self.customData))
-        if 'unique_id' in self.customData.keys():
-            # logging.debug('uid found: {}'.format(self.customData['unique_id']))
-            if self.customData['unique_id'] is not None: 
-                login_data['unique_id'] = self.customData['unique_id']
-            else:
-                login_data['unique_id'] = self.gen_uid(16, True)
-                self.customData['unique_id'] = login_data['unique_id']
-                # logging.debug('uid created: {}'.format(self.customData['unique_id']))              
+
+        # Resolve persistent hardware_id (must be a valid uppercase UUID for Blink OAuth v2)
+        hardware_id = None
+        if auth_tokens and isinstance(auth_tokens, dict) and auth_tokens.get('hardware_id'):
+            hardware_id = auth_tokens.get('hardware_id')
+        elif hasattr(self, 'customData') and 'hardware_id' in self.customData and self.customData['hardware_id']:
+            hardware_id = self.customData['hardware_id']
+
+        if hardware_id:
+            try:
+                hardware_id = str(uuid.UUID(str(hardware_id))).upper()
+            except (ValueError, TypeError):
+                hardware_id = None
+
+        if not hardware_id:
+            hardware_id = str(uuid.uuid4()).upper()
+            try:
+                self.customData['hardware_id'] = hardware_id
+            except Exception:
+                pass
+
+        login_data['hardware_id'] = hardware_id
+        # In Blink OAuth v2, device_id must match hardware_id (valid UUID)
+        login_data['device_id'] = hardware_id
+
+        # Maintain unique_id for backward compatibility
+        if hasattr(self, 'customData') and 'unique_id' in self.customData and self.customData['unique_id'] is not None:
+            login_data['unique_id'] = self.customData['unique_id']
         else:
-            login_data['unique_id'] = self.gen_uid(16, True)
-            self.customData['unique_id'] = login_data['unique_id']
-            # logging.debug('uid created: {}'.format(self.customData['unique_id']))
+            login_data['unique_id'] = hardware_id
+            try:
+                self.customData['unique_id'] = hardware_id
+            except Exception:
+                pass
 
         if auth_tokens and isinstance(auth_tokens, dict):
             for k in [
                 'token',
                 'refresh_token',
-                'hardware_id',
                 'client_id',
                 'account_id',
                 'user_id',
@@ -349,10 +381,8 @@ class BlinkSetup:
             ]:
                 if k in auth_tokens and auth_tokens[k] is not None:
                     login_data[k] = auth_tokens[k]
-            # logging.debug('prepare_login_data included stored auth tokens and hardware_id')
 
-        #logging.debug('prepare_login_data {}'.format(login_data))
-        return(login_data)
+        return login_data
 
 
     def start (self):
@@ -369,18 +399,23 @@ class BlinkSetup:
         try:
             wait_count = 0
             max_wait = 15  # wait up to 30 seconds (15 * 2s)
-            while (not self.paramsProcessed or not self.nodeDefineDone) and wait_count < max_wait:
-                logging.info('Waiting for setup to complete param:{} nodes:{} (wait {}/{})'.format(
-                    self.paramsProcessed, self.nodeDefineDone, wait_count + 1, max_wait
+            while (not (self.paramsProcessed and self.dataProcessed) or not self.nodeDefineDone) and wait_count < max_wait:
+                logging.info('Waiting for setup to complete param:{} data:{} nodes:{} (wait {}/{})'.format(
+                    self.paramsProcessed, self.dataProcessed, self.nodeDefineDone, wait_count + 1, max_wait
                 ))
                 time.sleep(2)
                 wait_count += 1
                 if not self.paramsProcessed and len(self.Parameters) > 0:
                     logging.info('Parameters found in self.Parameters, processing now')
                     self.handleParams(dict(self.Parameters))
+                if not self.dataProcessed and len(self.customData) > 0:
+                    logging.info('Custom data found in self.customData, marking processed')
+                    self.dataProcessed = True
+                if self.paramsProcessed and self.dataProcessed and self.nodeDefineDone:
                     break
 
             self.paramsProcessed = True
+            self.dataProcessed = True
 
             if not self.userName or not self.password:
                 logging.warning('USERNAME and PASSWORD not provided - please configure in Polyglot custom parameters')
@@ -404,38 +439,50 @@ class BlinkSetup:
                 self.blink.set_temp_unit(self.temp_unit) 
 
                 ok = False
-                try:
-                    ok = self.blink.start()
-                except Exception as e:
-                    logging.error(f'Exception during blink start: {e}')
-                    ok = False
-
-                auth_needed = self.blink.key_required
-                logging.debug(f'Auth step 1: ok={ok}, 2FA required={auth_needed}')
-
-                # If starting with saved tokens failed (not ok and not waiting for 2FA),
-                # clear tokens and start over from scratch!
-                if attempt_with_tokens and not ok and not auth_needed:
-                    logging.warning('Starting with saved tokens failed. Clearing tokens and restarting fresh login...')
-                    self.remove_notice('TOKEN_INIT')
-                    self.clear_saved_tokens()
-                    try:
-                        self.blink.stop()
-                    except Exception as e:
-                        logging.debug(f'Error stopping blink: {e}')
-
-                    self.blink = blink_system()
-                    self.blink.set_token_refresh_callback(self.save_saved_tokens)
-                    login_data = self.prepare_login_data()
-                    self.blink.start_blink(login_data, True)
-                    self.blink.set_temp_unit(self.temp_unit)
+                max_retries = 3 if attempt_with_tokens else 1
+                for attempt in range(max_retries):
                     try:
                         ok = self.blink.start()
                     except Exception as e:
-                        logging.error(f'Exception during fresh blink start: {e}')
+                        logging.error(f'Exception during blink start (attempt {attempt + 1}/{max_retries}): {e}')
                         ok = False
+
                     auth_needed = self.blink.key_required
-                    logging.debug(f'Fresh start: ok={ok}, 2FA required={auth_needed}')
+                    logging.debug(f'Auth step 1 (attempt {attempt + 1}/{max_retries}): ok={ok}, 2FA required={auth_needed}')
+                    if ok or auth_needed:
+                        break
+                    if attempt < max_retries - 1:
+                        logging.info(f'Blink start attempt {attempt + 1} failed, retrying in 5 seconds...')
+                        time.sleep(5)
+
+                # If starting with saved tokens failed and it's NOT a network error, and NOT waiting for 2FA:
+                if attempt_with_tokens and not ok and not auth_needed:
+                    if getattr(self.blink, 'is_network_error', False):
+                        logging.warning(f'Blink start failed due to network error ({getattr(self.blink, "last_error", "Unknown")}). Keeping saved tokens and not restarting fresh.')
+                        self.remove_notice('TOKEN_INIT')
+                        self.poly.Notices['LOGIN'] = 'Blink connection failed (network error) - will retry on next poll'
+                        return
+                    else:
+                        logging.warning('Starting with saved tokens failed (auth rejected). Clearing tokens and restarting fresh login...')
+                        self.remove_notice('TOKEN_INIT')
+                        self.clear_saved_tokens()
+                        try:
+                            self.blink.stop()
+                        except Exception as e:
+                            logging.debug(f'Error stopping blink: {e}')
+
+                        self.blink = blink_system()
+                        self.blink.set_token_refresh_callback(self.save_saved_tokens)
+                        login_data = self.prepare_login_data()
+                        self.blink.start_blink(login_data, True)
+                        self.blink.set_temp_unit(self.temp_unit)
+                        try:
+                            ok = self.blink.start()
+                        except Exception as e:
+                            logging.error(f'Exception during fresh blink start: {e}')
+                            ok = False
+                        auth_needed = self.blink.key_required
+                        logging.debug(f'Fresh start: ok={ok}, 2FA required={auth_needed}')
 
                 if not ok and not auth_needed:
                     self.customData['unique_id'] = None
@@ -683,6 +730,7 @@ class BlinkSetup:
             # logging.debug('handleData load - {}'.format(self.customData))
         except Exception as e:
             logging.error ("Exceptions : {}".format(e))
+        self.dataProcessed = True
     
     
     def handleParams (self, customParams ):

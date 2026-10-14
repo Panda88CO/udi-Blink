@@ -73,7 +73,7 @@ except ImportError:
 
 
 
-VERSION = '0.6.32' 
+VERSION = '0.6.34' 
 TOKEN_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'blink_tokens.json') 
 
 def _sync_version_file():
@@ -595,6 +595,13 @@ class BlinkSetup:
                             net_node.start()
                     else:
                         logging.info('Network {} already exists'.format(node_name))
+                        if hasattr(existing, 'name') and existing.name != node_name:
+                            logging.info('Updating network node {} name from {} to {}'.format(node_address, existing.name, node_name))
+                            try:
+                                self.poly.renameNode(node_address, node_name)
+                                existing.name = node_name
+                            except Exception as e:
+                                logging.debug('Error renaming network node {}: {}'.format(node_address, e))
                 elif state == 'DISABLED':
                     self.remove_notice(name)
                     self.remove_notice(network['name'])
@@ -607,10 +614,17 @@ class BlinkSetup:
                 self.poly.Notices[name] = str(name) + ' network found - Set value to ENABLED or DISABLED in Custom Parameters and save'
 
         self.blink.set_email_info(self.email_info)
+        enabled_network_addrs = [a for a in node_adr_list if a != self.address]
         nodes_in_db = self.poly.getNodesFromDb()
         for nde, node in enumerate(nodes_in_db):
-            if node['primaryNode'] not in node_adr_list:
-                self.poly.delNode(node['address'])
+            addr = node.get('address')
+            prim = node.get('primaryNode')
+            if addr == self.address:
+                continue
+            # Keep node if it's an enabled network node or a child belonging to an enabled network
+            if addr not in enabled_network_addrs and prim not in enabled_network_addrs:
+                logging.info(f"Removing disabled/unused node {addr} ({node.get('name')}) from IoX")
+                self.poly.delNode(addr)
 
         self.connected = True
         self.remove_notice('TOKEN_INIT')
@@ -656,15 +670,16 @@ class BlinkSetup:
                     else:
                         logging.warning('Blink System refresh failed - skipping driver updates')
                     nodes = self.poly.getNodes()
-                    for nde in nodes:
-                        if nde != 'setup':   # but not the setup node
-                            if nodes[nde].id in ('BLINKNETWORK', 'blinknetwork') and hasattr(nodes[nde], 'set_connection_status'):
+                    for nde in list(nodes.keys()):
+                        if nde != 'setup' and nde in nodes:   # but not the setup node
+                            node_obj = nodes[nde]
+                            if getattr(node_obj, 'id', None) in ('BLINKNETWORK', 'blinknetwork') and hasattr(node_obj, 'set_connection_status'):
                                 # logging.debug('Updating connection status for node {} to {}'.format(nde, success))
-                                nodes[nde].set_connection_status(True if success else False)
+                                node_obj.set_connection_status(True if success else False)
                                 if success:
                                     # logging.debug('Updating heartbeat for node {}'.format(nde))
-                                    heartbeat_cb = getattr(nodes[nde], 'heartbeat', None)
-                                    if nodes[nde].id in ('BLINKNETWORK', 'blinknetwork') and callable(heartbeat_cb):
+                                    heartbeat_cb = getattr(node_obj, 'heartbeat', None)
+                                    if node_obj.id in ('BLINKNETWORK', 'blinknetwork') and callable(heartbeat_cb):
                                         heartbeat_thread = self._heartbeat_threads.get(nde)
                                         if heartbeat_thread and heartbeat_thread.is_alive():
                                             # logging.debug('Heartbeat already running for node {}'.format(nde))
@@ -679,14 +694,14 @@ class BlinkSetup:
                                             )
                                             self._heartbeat_threads[nde] = heartbeat_thread
                                             heartbeat_thread.start()
-                                    elif nodes[nde].id in ('BLINKNETWORK', 'blinknetwork'):
+                                    elif node_obj.id in ('BLINKNETWORK', 'blinknetwork'):
                                         logging.warning('Node {} is missing callable heartbeat'.format(nde))
 
                             if success:
                                 # logging.debug('updating node {} data'.format(nde)) 
                                 
-                                if nodes[nde].nodeDefineDone and hasattr(nodes[nde], 'updateISYdrivers'):                         
-                                    nodes[nde].updateISYdrivers()
+                                if getattr(node_obj, 'nodeDefineDone', False) and hasattr(node_obj, 'updateISYdrivers'):                         
+                                    node_obj.updateISYdrivers()
                          
                 except Exception as e:
                     logging.error('Exception occcured : {}'.format(e))

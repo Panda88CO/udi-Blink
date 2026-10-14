@@ -47,7 +47,10 @@ class blink_sync_node(udi_interface.Node):
         self.poly.subscribe(self.poly.STOP, self.stop)
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
 
-        self.poly.addNode(self)
+        try:
+            self.poly.addNode(self, rename=True)
+        except TypeError:
+            self.poly.addNode(self)
         self.wait_for_node_done()
         self.node = self.poly.getNode(address)
         logging.info('Start {} sync module Node'.format(self.name))  
@@ -83,7 +86,7 @@ class blink_sync_node(udi_interface.Node):
     def updateISYdrivers(self):
         if self.nodeDefineDone:
             try:
-                sync_name = getattr(self.sync_unit, 'name', self.name)
+                sync_name = getattr(self.sync_unit, 'device_name', None) or getattr(self.sync_unit, 'name', None) or self.name
                 logging.info('Sync updateISYdrivers - {}'.format(sync_name))
                 online = self.blink.get_sync_online(sync_name)
                 self.BLINK_setDriver('ST', self.bool2isy(online))

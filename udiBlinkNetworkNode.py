@@ -59,7 +59,10 @@ class blink_network_node(udi_interface.Node):
 
              
 
-        self.poly.addNode(self)
+        try:
+            self.poly.addNode(self, rename=True)
+        except TypeError:
+            self.poly.addNode(self)
         self.wait_for_node_done()
         self.node = self.poly.getNode(address)
         logging.info('Start {} network Node'.format(self.name))  
@@ -85,7 +88,7 @@ class blink_network_node(udi_interface.Node):
         try:
             for n in self.poly.getNodesFromDb():
                 if isinstance(n, dict) and 'address' in n:
-                    db_nodes[n['address']] = n.get('nodeDefId')
+                    db_nodes[n['address']] = n
         except Exception as e:
             logging.debug(f'Error getting db nodes: {e}')
 
@@ -99,9 +102,25 @@ class blink_network_node(udi_interface.Node):
             target_def = 'BLINKCAMERAF' if (supports_temp and temp_unit == 'F') else ('BLINKCAMERAC' if supports_temp else 'BLINKCAMERA')
 
             existing = self.poly.getNode(nodeAdr)
-            existing_def = getattr(existing, 'id', None) or db_nodes.get(nodeAdr)
-            if existing_def and existing_def != target_def:
-                logging.info(f"Camera node {nodeAdr} ({nodeName}) has nodeDefId '{existing_def}', but target is '{target_def}'. Deleting old node from IoX to reload updated nodeDef...")
+            db_entry = db_nodes.get(nodeAdr)
+            needs_delete = False
+
+            if db_entry:
+                db_name = db_entry.get('name')
+                db_primary = db_entry.get('primaryNode')
+                db_def = db_entry.get('nodeDefId')
+
+                if db_primary and str(db_primary) != str(self.primary):
+                    logging.info(f"Camera node {nodeAdr} ({nodeName}) has primary '{db_primary}', but target network is '{self.primary}'. Deleting old node from IoX to reassign network...")
+                    needs_delete = True
+                elif db_def and str(db_def) != target_def:
+                    logging.info(f"Camera node {nodeAdr} ({nodeName}) has nodeDefId '{db_def}', but target is '{target_def}'. Deleting old node from IoX to reload updated nodeDef...")
+                    needs_delete = True
+                elif db_name and str(db_name) != nodeName:
+                    logging.info(f"Camera node {nodeAdr} has name '{db_name}' in IoX, but current name is '{nodeName}'. Deleting old node from IoX to update name...")
+                    needs_delete = True
+
+            if needs_delete:
                 self.poly.delNode(nodeAdr)
                 existing = None
                 db_nodes.pop(nodeAdr, None)
@@ -119,17 +138,57 @@ class blink_network_node(udi_interface.Node):
         self.sync_list = self.blink.get_sync_modules_on_network(self.network_id)
         # logging.debug('Sync list : {}'.format(self.sync_list))
         for indx, sync in enumerate(self.sync_list):
-            if str(sync.sync_id) in camera_ids:
-                logging.info('Skipping SYNC unit {} on network {} because sync_id matches a camera_id'.format(sync.name, self.network_id))
+            sync_id = getattr(sync, 'sync_id', None)
+            if not sync_id or str(sync_id).lower() == 'none':
+                logging.info(f"Skipping SYNC unit on network {self.network_id} because sync_id is missing")
                 continue
-            # logging.debug('Sync: {}'.format(sync.name))
-            nodeName = self.poly.getValidName(str(sync.name))
-            nodeAdr = self.poly.getValidAddress(str(sync.sync_id))
+
+            if str(sync_id) in camera_ids:
+                logging.info(f"Skipping SYNC unit {sync_id} on network {self.network_id} because sync_id matches a camera_id")
+                continue
+
+            raw_name = self.blink.get_sync_module_name(sync, self.network_id) if hasattr(self.blink, 'get_sync_module_name') else getattr(sync, 'name', None)
+            if not raw_name or str(raw_name).strip().lower() in ('none', ''):
+                raw_name = f"{self.name} Sync"
+
+            nodeName = self.poly.getValidName(str(raw_name))
+            if not nodeName:
+                nodeName = f"Sync_{sync_id}"
+            nodeAdr = self.poly.getValidAddress(str(sync_id))
+
             if nodeAdr in self._camera_list:
-                logging.info('Skipping SYNC unit {} on network {} because normalized address {} collides with a camera address'.format(sync.name, self.network_id, nodeAdr))
+                logging.info(f"Skipping SYNC unit {nodeName} on network {self.network_id} because normalized address {nodeAdr} collides with a camera address")
                 continue
-            logging.info('Adding SYNC unit  {} {} {}'.format(self.address, nodeAdr, nodeName))
-            blink_sync_node(self.poly, self.primary, nodeAdr, nodeName, sync, self.blink)
+
+            target_def = 'BLINKSYNC'
+            existing = self.poly.getNode(nodeAdr)
+            db_entry = db_nodes.get(nodeAdr)
+            needs_delete = False
+
+            if db_entry:
+                db_name = db_entry.get('name')
+                db_primary = db_entry.get('primaryNode')
+                db_def = db_entry.get('nodeDefId')
+
+                if db_primary and str(db_primary) != str(self.primary):
+                    logging.info(f"Sync node {nodeAdr} ({nodeName}) has primary '{db_primary}' in IoX, but belongs to '{self.primary}'. Deleting old node from IoX to reassign network...")
+                    needs_delete = True
+                elif db_def and str(db_def) != target_def:
+                    logging.info(f"Sync node {nodeAdr} ({nodeName}) has nodeDefId '{db_def}', but target is '{target_def}'. Deleting old node from IoX to reload updated nodeDef...")
+                    needs_delete = True
+                elif db_name and str(db_name) != nodeName:
+                    logging.info(f"Sync node {nodeAdr} has name '{db_name}' in IoX, but current name is '{nodeName}'. Deleting old node from IoX to update name...")
+                    needs_delete = True
+
+            if needs_delete:
+                self.poly.delNode(nodeAdr)
+                existing = None
+                db_nodes.pop(nodeAdr, None)
+                time.sleep(0.5)
+
+            if not existing:
+                logging.info('Adding SYNC unit  {} {} {}'.format(self.address, nodeAdr, nodeName))
+                blink_sync_node(self.poly, self.primary, nodeAdr, nodeName, sync, self.blink)
             self._sync_list.append(nodeAdr)
         self.nodeDefineDone = True
         self.set_connection_status(True)
@@ -152,6 +211,83 @@ class blink_network_node(udi_interface.Node):
                 if node['address'] not in self._camera_list and node['address'] not in self._sync_list and node['address'] != self.primary:
                     self.poly.delNode(node['address'])
 
+    def update_sync_modules(self):
+        """Ensure all sync modules on this network exist as nodes with verified name and network assignment"""
+        if not getattr(self, '_started', False) or not self.nodeDefineDone:
+            return
+
+        db_nodes = {}
+        try:
+            for n in self.poly.getNodesFromDb():
+                if isinstance(n, dict) and 'address' in n:
+                    db_nodes[n['address']] = n
+        except Exception as e:
+            logging.debug(f'Error getting db nodes: {e}')
+
+        self.sync_list = self.blink.get_sync_modules_on_network(self.network_id)
+        current_sync_nodes = list(self._sync_list)
+        new_sync_nodes = []
+        camera_ids = {str(getattr(c, 'camera_id', '')) for c in getattr(self, 'camera_list', [])}
+
+        for sync in self.sync_list:
+            sync_id = getattr(sync, 'sync_id', None)
+            if not sync_id or str(sync_id).lower() == 'none':
+                continue
+
+            if str(sync_id) in camera_ids:
+                logging.info(f"Skipping SYNC unit {sync_id} on network {self.network_id} because sync_id matches a camera_id")
+                continue
+
+            raw_name = self.blink.get_sync_module_name(sync, self.network_id) if hasattr(self.blink, 'get_sync_module_name') else getattr(sync, 'name', None)
+            if not raw_name or str(raw_name).strip().lower() in ('none', ''):
+                raw_name = f"{self.name} Sync"
+
+            nodeName = self.poly.getValidName(str(raw_name))
+            if not nodeName:
+                nodeName = f"Sync_{sync_id}"
+            nodeAdr = self.poly.getValidAddress(str(sync_id))
+
+            if nodeAdr in self._camera_list:
+                continue
+
+            new_sync_nodes.append(nodeAdr)
+            target_def = 'BLINKSYNC'
+            existing = self.poly.getNode(nodeAdr)
+            db_entry = db_nodes.get(nodeAdr)
+            needs_delete = False
+
+            if db_entry:
+                db_name = db_entry.get('name')
+                db_primary = db_entry.get('primaryNode')
+                db_def = db_entry.get('nodeDefId')
+
+                if db_primary and str(db_primary) != str(self.primary):
+                    logging.info(f"Sync node {nodeAdr} ({nodeName}) has primary '{db_primary}' in IoX, but belongs to '{self.primary}'. Deleting old node from IoX to reassign network...")
+                    needs_delete = True
+                elif db_def and str(db_def) != target_def:
+                    logging.info(f"Sync node {nodeAdr} ({nodeName}) has nodeDefId '{db_def}', but target is '{target_def}'. Deleting old node from IoX to reload updated nodeDef...")
+                    needs_delete = True
+                elif db_name and str(db_name) != nodeName:
+                    logging.info(f"Sync node {nodeAdr} has name '{db_name}' in IoX, but current name is '{nodeName}'. Deleting old node from IoX to update name...")
+                    needs_delete = True
+
+            if needs_delete:
+                self.poly.delNode(nodeAdr)
+                existing = None
+                db_nodes.pop(nodeAdr, None)
+                time.sleep(0.5)
+
+            if not existing or nodeAdr not in current_sync_nodes:
+                logging.info('Adding SYNC unit {} {} {}'.format(self.address, nodeAdr, nodeName))
+                blink_sync_node(self.poly, self.primary, nodeAdr, nodeName, sync, self.blink)
+
+        for old_adr in current_sync_nodes:
+            if old_adr not in new_sync_nodes:
+                logging.info(f"Removing deleted sync node {old_adr} from network {self.name}")
+                self.poly.delNode(old_adr)
+
+        self._sync_list = new_sync_nodes
+
     def update_cameras(self):
         """Ensure all cameras on this network exist as nodes"""
         if not getattr(self, '_started', False) or not self.nodeDefineDone:
@@ -161,7 +297,7 @@ class blink_network_node(udi_interface.Node):
         try:
             for n in self.poly.getNodesFromDb():
                 if isinstance(n, dict) and 'address' in n:
-                    db_nodes[n['address']] = n.get('nodeDefId')
+                    db_nodes[n['address']] = n
         except Exception as e:
             logging.debug(f'Error getting db nodes: {e}')
 
@@ -180,10 +316,25 @@ class blink_network_node(udi_interface.Node):
             target_def = 'BLINKCAMERAF' if (supports_temp and temp_unit == 'F') else ('BLINKCAMERAC' if supports_temp else 'BLINKCAMERA')
 
             existing = self.poly.getNode(nodeAdr)
-            existing_def = getattr(existing, 'id', None) or db_nodes.get(nodeAdr)
+            db_entry = db_nodes.get(nodeAdr)
+            needs_delete = False
 
-            if existing_def and existing_def != target_def:
-                logging.info(f"Camera node {nodeAdr} ({nodeName}) has nodeDefId '{existing_def}', but target is '{target_def}'. Deleting old node from IoX to reload updated nodeDef...")
+            if db_entry:
+                db_name = db_entry.get('name')
+                db_primary = db_entry.get('primaryNode')
+                db_def = db_entry.get('nodeDefId')
+
+                if db_primary and str(db_primary) != str(self.primary):
+                    logging.info(f"Camera node {nodeAdr} ({nodeName}) has primary '{db_primary}', but target network is '{self.primary}'. Deleting old node from IoX to reassign network...")
+                    needs_delete = True
+                elif db_def and str(db_def) != target_def:
+                    logging.info(f"Camera node {nodeAdr} ({nodeName}) has nodeDefId '{db_def}', but target is '{target_def}'. Deleting old node from IoX to reload updated nodeDef...")
+                    needs_delete = True
+                elif db_name and str(db_name) != nodeName:
+                    logging.info(f"Camera node {nodeAdr} has name '{db_name}' in IoX, but current name is '{nodeName}'. Deleting old node from IoX to update name...")
+                    needs_delete = True
+
+            if needs_delete:
                 self.poly.delNode(nodeAdr)
                 existing = None
                 db_nodes.pop(nodeAdr, None)
@@ -199,7 +350,14 @@ class blink_network_node(udi_interface.Node):
                     blink_camera_node(self.poly, self.primary, nodeAdr, nodeName, camera, self.blink)
                 changed = True
 
+        for old_adr in current_cam_nodes:
+            if old_adr not in new_cam_nodes:
+                logging.info(f"Removing deleted camera node {old_adr} from network {self.name}")
+                self.poly.delNode(old_adr)
+                changed = True
+
         self._camera_list = new_cam_nodes
+        self.update_sync_modules()
         if changed and hasattr(self.controller, '_update_dynamic_profile'):
             self.controller._update_dynamic_profile()
 

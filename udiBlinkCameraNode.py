@@ -92,7 +92,10 @@ class blink_camera_node(udi_interface.Node):
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
            
 
-        self.poly.addNode(self)
+        try:
+            self.poly.addNode(self, rename=True)
+        except TypeError:
+            self.poly.addNode(self)
         self.wait_for_node_done()
         self.node = self.poly.getNode(address)
         self.nodeDefineDone = True
@@ -265,7 +268,10 @@ class blink_camera_no_temp_node(udi_interface.Node):
         self.poly.subscribe(polyglot.STOP, self.stop)
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
 
-        self.poly.addNode(self)
+        try:
+            self.poly.addNode(self, rename=True)
+        except TypeError:
+            self.poly.addNode(self)
         self.wait_for_node_done()
         self.node = self.poly.getNode(address)
         self.nodeDefineDone = True

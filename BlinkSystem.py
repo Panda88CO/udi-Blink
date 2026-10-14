@@ -502,11 +502,29 @@ class blink_system:
         # Old code returned self.homescreen['networks']
         return self.homescreen.get('networks', [])
 
+    def get_network_name(self, network_id):
+        for net in self.get_network_list():
+            if str(net.get('id', '')) == str(network_id):
+                return net.get('name')
+        return None
+
     def get_sync_unit(self, sync_unit_name):
+        if not sync_unit_name:
+            return False
+        target = re.sub(r"[^A-Za-z0-9_,]", "", str(sync_unit_name)).upper()
         for sync_name, sync_obj in self.sync.items():
-            tmp = re.sub(r"[^A-Za-z0-9_,]", "", sync_name)
-            if tmp.upper() == sync_unit_name:
-                 return sync_obj
+            tmp = re.sub(r"[^A-Za-z0-9_,]", "", str(sync_name)).upper()
+            if tmp == target:
+                return sync_obj
+            s_name = re.sub(r"[^A-Za-z0-9_,]", "", str(getattr(sync_obj, 'name', ''))).upper()
+            if s_name and s_name == target:
+                return sync_obj
+            s_dev = re.sub(r"[^A-Za-z0-9_,]", "", str(getattr(sync_obj, 'device_name', ''))).upper()
+            if s_dev and s_dev == target:
+                return sync_obj
+            s_id = str(getattr(sync_obj, 'sync_id', ''))
+            if s_id and s_id == str(sync_unit_name):
+                return sync_obj
         return False
 
     def get_camera_list(self):
@@ -520,41 +538,98 @@ class blink_system:
         return list(cameras)
 
     def get_sync_arm_info(self, sync_name):
+        sync_obj = self.get_sync_unit(sync_name)
+        if sync_obj:
+            return getattr(sync_obj, 'arm', None)
         if sync_name in self.sync:
             return getattr(self.sync[sync_name], 'arm', None)
         return None
 
     @async_to_sync
     async def set_sync_arm(self, sync_name, armed=True):
+        sync_obj = self.get_sync_unit(sync_name)
+        if sync_obj and hasattr(sync_obj, 'async_arm'):
+            await sync_obj.async_arm(armed)
+            return True
         if sync_name in self.sync:
             await self.sync[sync_name].async_arm(armed)
             return True
         return False
 
-    def get_sync_online(self, sync_name):
-        if sync_name not in self.sync:
-            return None
+    def get_sync_module_name(self, sync_obj, network_id=None):
+        """Retrieve the display name for a sync module, prioritizing homescreen device name."""
+        sync_id = getattr(sync_obj, 'sync_id', None)
+        if not sync_id and isinstance(sync_obj, dict):
+            sync_id = sync_obj.get('id')
+        net_id = network_id or getattr(sync_obj, 'network_id', None)
 
-        sync_obj = self.sync[sync_name]
-        # logging.debug(
-        #     "get_sync_online raw values for %s: status=%r enabled=%r attributes=%r",
-        #     sync_name,
-        #     getattr(sync_obj, 'status', None),
-        #     getattr(sync_obj, 'enabled', None),
-        #     getattr(sync_obj, 'attributes', None),
-        # )
+        # 1. Check homescreen sync_modules
+        hs_syncs = self.homescreen.get('sync_modules', []) if isinstance(getattr(self, 'homescreen', None), dict) else []
+        for mod in hs_syncs:
+            if sync_id is not None and str(mod.get('id', '')) == str(sync_id):
+                name = mod.get('name')
+                if name and str(name).strip().lower() not in ('none', ''):
+                    return str(name).strip()
+            elif net_id is not None and str(mod.get('network_id', '')) == str(net_id):
+                name = mod.get('name')
+                if name and str(name).strip().lower() not in ('none', ''):
+                    return str(name).strip()
+
+        # 2. Check device_name attribute if set
+        dev_name = getattr(sync_obj, 'device_name', None)
+        if dev_name and str(dev_name).strip().lower() not in ('none', ''):
+            return str(dev_name).strip()
+
+        # 3. Check summary dictionary
+        summary = getattr(sync_obj, 'summary', None)
+        if isinstance(summary, dict):
+            s_name = summary.get('name')
+            if s_name and str(s_name).strip().lower() not in ('none', ''):
+                return str(s_name).strip()
+
+        # 4. Check sync object name
+        obj_name = getattr(sync_obj, 'name', None)
+        if obj_name and str(obj_name).strip().lower() not in ('none', ''):
+            return str(obj_name).strip()
+
+        # 5. Fallback based on network or sync_id
+        if net_id is not None:
+            net_name = self.get_network_name(net_id)
+            if net_name:
+                return f"Sync_{net_name}"
+        if sync_id:
+            return f"Sync_{sync_id}"
+        return "Sync Module"
+
+    def get_sync_online(self, sync_name):
+        sync_obj = self.get_sync_unit(sync_name)
+        if not sync_obj and isinstance(self.sync, dict) and sync_name in self.sync:
+            sync_obj = self.sync[sync_name]
 
         # Prefer raw status fields and avoid sync.online, which can emit
         # "Unknown sync module status" with some blinkpy payloads.
-        for attr in ('status', 'enabled'):
-            value = self._normalize_online_value(getattr(sync_obj, attr, None))
-            if value is not None:
-                return value
+        if sync_obj is not None:
+            for attr in ('status', 'enabled'):
+                value = self._normalize_online_value(getattr(sync_obj, attr, None))
+                if value is not None:
+                    return value
 
-        attrs = getattr(sync_obj, 'attributes', None)
-        if isinstance(attrs, dict):
-            for key in ('status', 'online', 'enabled'):
-                value = self._normalize_online_value(attrs.get(key))
+            attrs = getattr(sync_obj, 'attributes', None)
+            if isinstance(attrs, dict):
+                for key in ('status', 'online', 'enabled'):
+                    value = self._normalize_online_value(attrs.get(key))
+                    if value is not None:
+                        return value
+
+        # Check homescreen sync_modules fallback
+        hs_syncs = self.homescreen.get('sync_modules', []) if isinstance(getattr(self, 'homescreen', None), dict) else []
+        target_str = str(sync_name).strip().lower()
+        for mod in hs_syncs:
+            mod_id = str(mod.get('id', '')).strip().lower()
+            mod_name = str(mod.get('name', '')).strip().lower()
+            mod_net = str(mod.get('network_id', '')).strip().lower()
+            if target_str in (mod_id, mod_name, mod_net):
+                value = self._normalize_online_value(mod.get('status'))
                 if value is not None:
                     return value
 
@@ -614,14 +689,57 @@ class blink_system:
                 if camera_id is not None:
                     camera_ids.add(str(camera_id))
 
+        hs_syncs = self.homescreen.get('sync_modules', []) if isinstance(getattr(self, 'homescreen', None), dict) else []
+        seen_sync_ids = set()
+
         for name, sync in self.sync.items():
             sync_id = getattr(sync, 'sync_id', None)
-            if str(getattr(sync, 'network_id', '')) == str(network_id):
-                # Skip fake sync units (where sync_id matches a camera_id)
-                if sync_id is not None and str(sync_id) in camera_ids:
-                    # logging.debug('Skipping fake sync unit %s (sync_id %s matches a camera_id) for network %s', name, sync_id, network_id)
+            sync_net = getattr(sync, 'network_id', None)
+
+            # Match sync module to homescreen data if available to ensure correct ID and network
+            for mod in hs_syncs:
+                mod_id = mod.get('id')
+                mod_net = mod.get('network_id')
+                if sync_id is not None and str(mod_id) == str(sync_id):
+                    sync.network_id = mod_net
+                    sync.device_name = mod.get('name')
+                    sync_net = mod_net
+                    break
+                elif str(mod_net) == str(network_id) and str(getattr(sync, 'name', '')).strip().lower() == str(name).strip().lower():
+                    if sync_id is None and mod_id is not None:
+                        sync.sync_id = mod_id
+                        sync_id = mod_id
+                    sync.device_name = mod.get('name')
+                    sync.network_id = mod_net
+                    sync_net = mod_net
+                    break
+
+            if str(sync_net) == str(network_id):
+                if sync_id is None:
+                    # Check if homescreen has a sync module for this network
+                    for mod in hs_syncs:
+                        if str(mod.get('network_id', '')) == str(network_id) and mod.get('id'):
+                            sync.sync_id = mod.get('id')
+                            sync.device_name = mod.get('name')
+                            sync_id = mod.get('id')
+                            break
+
+                # If sync_id is still None, this is a placeholder sync on a sync-less network — skip it
+                if sync_id is None or str(sync_id).lower() == 'none':
+                    logging.info('Skipping placeholder sync module on network %s (no valid sync_id)', network_id)
                     continue
+
+                # Skip fake sync units (where sync_id matches a camera_id)
+                if str(sync_id) in camera_ids:
+                    logging.info('Skipping fake sync unit %s (sync_id %s matches a camera_id) for network %s', name, sync_id, network_id)
+                    continue
+
+                if str(sync_id) in seen_sync_ids:
+                    continue
+
+                seen_sync_ids.add(str(sync_id))
                 sync_list.append(sync)
+
         return sync_list
 
     def get_network_arm_state(self, network_id):

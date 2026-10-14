@@ -73,7 +73,7 @@ except ImportError:
 
 
 
-VERSION = '0.6.34' 
+VERSION = '0.6.35' 
 TOKEN_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'blink_tokens.json') 
 
 def _sync_version_file():

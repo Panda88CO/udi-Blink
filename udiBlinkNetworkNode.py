@@ -190,6 +190,7 @@ class blink_network_node(udi_interface.Node):
                 logging.info('Adding SYNC unit  {} {} {}'.format(self.address, nodeAdr, nodeName))
                 blink_sync_node(self.poly, self.primary, nodeAdr, nodeName, sync, self.blink)
             self._sync_list.append(nodeAdr)
+            break  # Exactly at most one sync module per network
         self.nodeDefineDone = True
         self.set_connection_status(True)
         self.updateISYdrivers()
@@ -209,6 +210,7 @@ class blink_network_node(udi_interface.Node):
             if node['primaryNode'] == self.primary:                
                 # logging.debug('Checking network nodes: {} {}'.format(node['name'], node))
                 if node['address'] not in self._camera_list and node['address'] not in self._sync_list and node['address'] != self.primary:
+                    logging.info(f"Removing extra/stale node {node['address']} ({node.get('name')}) from network {self.name}")
                     self.poly.delNode(node['address'])
 
     def update_sync_modules(self):
@@ -281,10 +283,18 @@ class blink_network_node(udi_interface.Node):
                 logging.info('Adding SYNC unit {} {} {}'.format(self.address, nodeAdr, nodeName))
                 blink_sync_node(self.poly, self.primary, nodeAdr, nodeName, sync, self.blink)
 
+            break  # Exactly at most one sync module per network
+
         for old_adr in current_sync_nodes:
             if old_adr not in new_sync_nodes:
                 logging.info(f"Removing deleted sync node {old_adr} from network {self.name}")
                 self.poly.delNode(old_adr)
+
+        for addr, db_entry in db_nodes.items():
+            if isinstance(db_entry, dict) and db_entry.get('primaryNode') == self.primary and addr != self.primary:
+                if addr not in self._camera_list and addr not in new_sync_nodes:
+                    logging.info(f"Removing extra/stale node {addr} ({db_entry.get('name')}) from network {self.name}")
+                    self.poly.delNode(addr)
 
         self._sync_list = new_sync_nodes
 

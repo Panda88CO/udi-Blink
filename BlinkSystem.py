@@ -118,6 +118,7 @@ class blink_system:
         self.email_recepient = None
         self._key_required = False
         self._token_refresh_callback = None
+        self._sync_proxies = {}
 
     def set_token_refresh_callback(self, callback):
         """Set callback to be called when tokens are refreshed"""
@@ -525,6 +526,10 @@ class blink_system:
             s_id = str(getattr(sync_obj, 'sync_id', ''))
             if s_id and s_id == str(sync_unit_name):
                 return sync_obj
+        if hasattr(self, '_sync_proxies') and isinstance(self._sync_proxies, dict):
+            for p_id, p_obj in self._sync_proxies.items():
+                if str(p_id) == str(sync_unit_name) or str(getattr(p_obj, 'name', '')) == str(sync_unit_name):
+                    return p_obj
         return False
 
     def get_camera_list(self):
@@ -674,71 +679,110 @@ class blink_system:
         return camera_list
 
     def get_sync_modules_on_network(self, network_id):
-        sync_list = []
-        # logging.debug('Finding sync modules for network_id: {}'.format(network_id))
-        # logging.debug('Available sync modules: {} {}'.format(list(self.sync.keys()), list(self.sync.items())))
-        # Collect all camera IDs for this network
+        """Retrieve at most ONE sync module for a network.
+        
+        A Blink network can have at most one physical sync module.
+        If homescreen data is available, it is the authoritative source:
+        networks without an entry in homescreen['sync_modules'] have no sync module.
+        """
         camera_ids = set()
         for name, camera in self.cameras.items():
-            cam_network_id = getattr(camera, 'network_id', None)
-            cam_attrs = getattr(camera, 'attributes', None)
-            if isinstance(cam_attrs, dict) and cam_network_id is None:
-                cam_network_id = cam_attrs.get('network_id')
-            if cam_network_id is not None and str(cam_network_id) == str(network_id):
-                camera_id = getattr(camera, 'camera_id', None)
-                if camera_id is not None:
-                    camera_ids.add(str(camera_id))
+            cid = getattr(camera, 'camera_id', None)
+            if cid is not None:
+                camera_ids.add(str(cid))
+            c_attrs = getattr(camera, 'attributes', None)
+            if isinstance(c_attrs, dict) and c_attrs.get('id'):
+                camera_ids.add(str(c_attrs.get('id')))
 
         hs_syncs = self.homescreen.get('sync_modules', []) if isinstance(getattr(self, 'homescreen', None), dict) else []
-        seen_sync_ids = set()
 
-        for name, sync in self.sync.items():
-            sync_id = getattr(sync, 'sync_id', None)
-            sync_net = getattr(sync, 'network_id', None)
-
-            # Match sync module to homescreen data if available to ensure correct ID and network
+        if hs_syncs:
+            # 1. Authoritative check: does homescreen have a sync module for this network?
+            target_mod = None
             for mod in hs_syncs:
-                mod_id = mod.get('id')
-                mod_net = mod.get('network_id')
-                if sync_id is not None and str(mod_id) == str(sync_id):
-                    sync.network_id = mod_net
-                    sync.device_name = mod.get('name')
-                    sync_net = mod_net
-                    break
-                elif str(mod_net) == str(network_id) and str(getattr(sync, 'name', '')).strip().lower() == str(name).strip().lower():
-                    if sync_id is None and mod_id is not None:
-                        sync.sync_id = mod_id
-                        sync_id = mod_id
-                    sync.device_name = mod.get('name')
-                    sync.network_id = mod_net
-                    sync_net = mod_net
+                if str(mod.get('network_id', '')) == str(network_id) and mod.get('id'):
+                    target_mod = mod
                     break
 
-            if str(sync_net) == str(network_id):
-                if sync_id is None:
-                    # Check if homescreen has a sync module for this network
-                    for mod in hs_syncs:
-                        if str(mod.get('network_id', '')) == str(network_id) and mod.get('id'):
-                            sync.sync_id = mod.get('id')
-                            sync.device_name = mod.get('name')
-                            sync_id = mod.get('id')
+            if not target_mod:
+                logging.info(f"Network {network_id} has no physical sync module in Blink homescreen data (sync-less network)")
+                return []
+
+            target_id = str(target_mod.get('id'))
+            target_name = target_mod.get('name')
+
+            # 2. Find matching BlinkSyncModule in self.sync
+            matched_sync = None
+            # Check by sync_id / id
+            for name, sync in self.sync.items():
+                s_id = str(getattr(sync, 'sync_id', '')) or str(getattr(sync, 'id', ''))
+                if not s_id and isinstance(getattr(sync, 'summary', None), dict):
+                    s_id = str(sync.summary.get('id', ''))
+                if not s_id and isinstance(getattr(sync, 'attributes', None), dict):
+                    s_id = str(sync.attributes.get('id', ''))
+
+                if s_id and s_id == target_id:
+                    matched_sync = sync
+                    break
+
+            # Check by device_name or name
+            if not matched_sync:
+                for name, sync in self.sync.items():
+                    s_dev = str(getattr(sync, 'device_name', '')).strip().lower()
+                    s_name = str(getattr(sync, 'name', '')).strip().lower()
+                    t_name = str(target_name).strip().lower()
+                    if t_name and (s_dev == t_name or s_name == t_name or str(name).strip().lower() == t_name):
+                        matched_sync = sync
+                        break
+
+            # Check by network_id (filtering out any camera-backed pseudo syncs)
+            if not matched_sync:
+                for name, sync in self.sync.items():
+                    s_net = str(getattr(sync, 'network_id', ''))
+                    if s_net == str(network_id) and not self._is_camera_backed_sync(sync, network_id):
+                        s_id = str(getattr(sync, 'sync_id', ''))
+                        if s_id not in camera_ids:
+                            matched_sync = sync
                             break
 
-                # If sync_id is still None, this is a placeholder sync on a sync-less network — skip it
-                if sync_id is None or str(sync_id).lower() == 'none':
-                    logging.info('Skipping placeholder sync module on network %s (no valid sync_id)', network_id)
-                    continue
+            if matched_sync:
+                matched_sync.sync_id = target_mod.get('id')
+                matched_sync.device_name = target_mod.get('name')
+                matched_sync.network_id = target_mod.get('network_id')
+                return [matched_sync]
+            else:
+                # If blinkpy didn't create a sync object in self.sync, create a proxy
+                class SyncModuleProxy:
+                    def __init__(self, mod_data, blink):
+                        self.sync_id = mod_data.get('id')
+                        self.name = mod_data.get('name') or f"Sync_{self.sync_id}"
+                        self.device_name = self.name
+                        self.network_id = mod_data.get('network_id')
+                        self.status = mod_data.get('status')
+                        self.arm = None
+                        self._blink = blink
+                    async def async_arm(self, val):
+                        if hasattr(self._blink, 'arm_network'):
+                            return await self._blink.arm_network(self.network_id, val)
+                        return False
 
-                # Skip fake sync units (where sync_id matches a camera_id)
-                if str(sync_id) in camera_ids:
-                    logging.info('Skipping fake sync unit %s (sync_id %s matches a camera_id) for network %s', name, sync_id, network_id)
-                    continue
+                proxy = SyncModuleProxy(target_mod, self._blink)
+                if not hasattr(self, '_sync_proxies'):
+                    self._sync_proxies = {}
+                self._sync_proxies[str(proxy.sync_id)] = proxy
+                return [proxy]
 
-                if str(sync_id) in seen_sync_ids:
+        # Fallback if homescreen sync_modules is not populated (mock or offline)
+        sync_list = []
+        for name, sync in self.sync.items():
+            if str(getattr(sync, 'network_id', '')) == str(network_id):
+                if self._is_camera_backed_sync(sync, network_id):
                     continue
-
-                seen_sync_ids.add(str(sync_id))
+                s_id = getattr(sync, 'sync_id', None)
+                if s_id is not None and str(s_id) in camera_ids:
+                    continue
                 sync_list.append(sync)
+                break  # Exactly at most one sync module per network!
 
         return sync_list
 

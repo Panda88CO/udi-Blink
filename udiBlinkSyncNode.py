@@ -89,6 +89,10 @@ class blink_sync_node(udi_interface.Node):
                 sync_name = getattr(self.sync_unit, 'device_name', None) or getattr(self.sync_unit, 'name', None) or self.name
                 logging.info('Sync updateISYdrivers - {}'.format(sync_name))
                 online = self.blink.get_sync_online(sync_name)
+                if online is None and getattr(self.sync_unit, 'sync_id', None):
+                    online = self.blink.get_sync_online(self.sync_unit.sync_id)
+                if online is None and hasattr(self.sync_unit, 'status') and hasattr(self.blink, '_normalize_online_value'):
+                    online = self.blink._normalize_online_value(getattr(self.sync_unit, 'status', None))
                 self.BLINK_setDriver('ST', self.bool2isy(online))
             except Exception as e:
                 logging.error('Error updating ISY drivers for sync %s: %s', self.name, e)

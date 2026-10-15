@@ -23,21 +23,18 @@ except ImportError:
 
                
 class blink_camera_node(udi_interface.Node):
-    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, connection2isy, bat_V2isy, node_queue, wait_for_node_done
+    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, connection2isy, bat_V2isy, node_queue, wait_for_node_done, apply_profile_driver_names
 
-    id = 'BLINKCAMERAC' 
-    drivers= [  {'driver': 'ST' , 'value':99,  'uom':25}, # Motion Detection Status
-                {'driver': 'GV0', 'value':0, 'uom':25},  # Connected / Online
-                {'driver': 'GV1', 'value':99, 'uom':25}, # Battery
-                #{'driver': 'GV2', 'value':99, 'uom':25}, # Battery
-                {'driver': 'GV3', 'value':99, 'uom':25}, # Camera Type 
-                #{'driver': 'GV4', 'value':99, 'uom':25}, # Motion Detection Enabled
-                {'driver': 'GV5', 'value':99, 'uom':25}, # Motion Detected
-                {'driver': 'CLITEMP', 'value':0, 'uom':4}, # Temp
-                #{'driver': 'GV7', 'value':99, 'uom':25}, # Recording
-                #{'driver': 'GV8', 'value':0, 'uom':25}, # Email Picture Eanble
-                {'driver': 'TIME', 'value':0, 'uom':151},
-                 ] 
+    id = 'BLINKCAMERAC'
+    drivers = [
+        {'driver': 'ST', 'value': 99, 'uom': 25, 'name': 'Motion Detection Status'},
+        {'driver': 'GV0', 'value': 0, 'uom': 25, 'name': 'Connected'},
+        {'driver': 'GV1', 'value': 99, 'uom': 25, 'name': 'Battery Status'},
+        {'driver': 'GV3', 'value': 99, 'uom': 25, 'name': 'Camera Type'},
+        {'driver': 'GV5', 'value': 99, 'uom': 25, 'name': 'Motion Detected'},
+        {'driver': 'CLITEMP', 'value': 0, 'uom': 4, 'name': 'Temperature'},
+        {'driver': 'TIME', 'value': 0, 'uom': 151, 'name': 'Last Update Time'},
+    ] 
         
     cameraType= {  'mini' : 0, #mini/owl
                     'doorbell': 1, #doorbell/lotus/tulip/freesia
@@ -92,6 +89,7 @@ class blink_camera_node(udi_interface.Node):
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
            
 
+        self.apply_profile_driver_names(self.id)
         try:
             self.poly.addNode(self, rename=True)
         except TypeError:
@@ -239,16 +237,16 @@ class blink_camera_node(udi_interface.Node):
 
 
 class blink_camera_no_temp_node(udi_interface.Node):
-    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, connection2isy, bat_V2isy, node_queue, wait_for_node_done
+    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, connection2isy, bat_V2isy, node_queue, wait_for_node_done, apply_profile_driver_names
 
     id = 'BLINKCAMERA'
     drivers = [
-        {'driver': 'ST', 'value': 99, 'uom': 25},  # Motion Detection Status
-        {'driver': 'GV0', 'value': 0, 'uom': 25},  # Connected / Online
-        {'driver': 'GV1', 'value': 99, 'uom': 25},  # Battery
-        {'driver': 'GV3', 'value': 99, 'uom': 25},  # Camera Type
-        {'driver': 'GV5', 'value': 99, 'uom': 25},  # Motion Detected
-        {'driver': 'TIME', 'value': 0, 'uom': 151},
+        {'driver': 'ST', 'value': 99, 'uom': 25, 'name': 'Motion Detection Status'},
+        {'driver': 'GV0', 'value': 0, 'uom': 25, 'name': 'Connected'},
+        {'driver': 'GV1', 'value': 99, 'uom': 25, 'name': 'Battery Status'},
+        {'driver': 'GV3', 'value': 99, 'uom': 25, 'name': 'Camera Type'},
+        {'driver': 'GV5', 'value': 99, 'uom': 25, 'name': 'Motion Detected'},
+        {'driver': 'TIME', 'value': 0, 'uom': 151, 'name': 'Last Update Time'},
     ]
 
     def __init__(self, polyglot, primary, address, name, camera, blinkSys):
@@ -268,6 +266,7 @@ class blink_camera_no_temp_node(udi_interface.Node):
         self.poly.subscribe(polyglot.STOP, self.stop)
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
 
+        self.apply_profile_driver_names(self.id)
         try:
             self.poly.addNode(self, rename=True)
         except TypeError:

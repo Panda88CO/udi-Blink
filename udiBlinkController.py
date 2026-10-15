@@ -73,7 +73,7 @@ except ImportError:
 
 
 
-VERSION = '0.6.35' 
+VERSION = '0.6.37' 
 TOKEN_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'blink_tokens.json') 
 
 def _sync_version_file():
@@ -1162,116 +1162,8 @@ class BlinkSetup:
         ]
 
     def _profile_nodedefs(self):
-        camera_cmds = {
-            "sends": [],
-            "accepts": [
-                {"id": "UPDATE", "name": "Update Camera"},
-                {
-                    "id": "ARM",
-                    "name": "Set Motion Detection",
-                    "parameters": [
-                        {"id": "", "editor": "DOMOTION", "init": "ST"},
-                    ],
-                },
-                {"id": "SNAPPIC", "name": "Take Picture"},
-                {"id": "SNAPVIDEO", "name": "Take Video"},
-            ],
-        }
-
-        return [
-            {
-                "id": "BLINKSYNC",
-                "name": "Sync Unit",
-                "icon": "GenericCtl",
-                "properties": [
-                    {"id": "ST", "editor": "ONLINE", "name": "Connected"},
-                ],
-                "cmds": {
-                    "sends": [],
-                    "accepts": [
-                        {"id": "UPDATE", "name": "Update SyncUnit"},
-                    ],
-                },
-                "links": {"ctl": [], "rsp": []},
-            },
-            {
-                "id": "BLINKNETWORK",
-                "name": "Network",
-                "icon": "GenericCtl",
-                "properties": [
-                    {"id": "ST", "editor": "ARMED", "name": "Arm Status"},
-                    {"id": "GV0", "editor": "ONLINE", "name": "Connected"},
-                    {"id": "TIME", "editor": "UNIXTIME", "name": "Last Successful Update Time"},
-                ],
-                "cmds": {
-                    "sends": [
-                        {"id": "DON", "name": "On"},
-                        {"id": "DOF", "name": "Off"},
-                    ],
-                    "accepts": [
-                        {"id": "UPDATE", "name": "Update Network"},
-                        {
-                            "id": "ARMALL",
-                            "name": "Set Arming",
-                            "parameters": [
-                                {"id": "", "editor": "DOARM", "init": "ST"},
-                            ],
-                        },
-                    ],
-                },
-                "links": {"ctl": [], "rsp": []},
-            },
-            {
-                # Camera without temperature measurement - CLITEMP completely omitted
-                "id": "BLINKCAMERA",
-                "name": "Blink Camera",
-                "icon": "MotionSensor",
-                "properties": [
-                    {"id": "ST", "editor": "MOTIONEN", "name": "Motion Detection Status"},
-                    {"id": "GV0", "editor": "ONLINE", "name": "Connected"},
-                    {"id": "GV1", "editor": "BATTERY", "name": "Battery Status"},
-                    {"id": "GV3", "editor": "CAMERATYPE", "name": "CameraType"},
-                    {"id": "GV5", "editor": "MOTIONDETC", "name": "Motion Detected"},
-                    {"id": "TIME", "editor": "UNIXTIME", "name": "Last Update TIME"},
-                ],
-                "cmds": camera_cmds,
-                "links": {"ctl": [], "rsp": []},
-            },
-            {
-                # Camera with Celsius temperature measurement
-                "id": "BLINKCAMERAC",
-                "name": "Blink Camera",
-                "icon": "MotionSensor",
-                "properties": [
-                    {"id": "ST", "editor": "MOTIONEN", "name": "Motion Detection Status"},
-                    {"id": "GV0", "editor": "ONLINE", "name": "Connected"},
-                    {"id": "GV1", "editor": "BATTERY", "name": "Battery Status"},
-                    {"id": "GV3", "editor": "CAMERATYPE", "name": "CameraType"},
-                    {"id": "GV5", "editor": "MOTIONDETC", "name": "Motion Detected"},
-                    {"id": "CLITEMP", "editor": "TEMPC", "name": "Temperature"},
-                    {"id": "TIME", "editor": "UNIXTIME", "name": "Last Update TIME"},
-                ],
-                "cmds": camera_cmds,
-                "links": {"ctl": [], "rsp": []},
-            },
-            {
-                # Camera with Fahrenheit temperature measurement
-                "id": "BLINKCAMERAF",
-                "name": "Blink Camera",
-                "icon": "MotionSensor",
-                "properties": [
-                    {"id": "ST", "editor": "MOTIONEN", "name": "Motion Detection Status"},
-                    {"id": "GV0", "editor": "ONLINE", "name": "Connected"},
-                    {"id": "GV1", "editor": "BATTERY", "name": "Battery Status"},
-                    {"id": "GV3", "editor": "CAMERATYPE", "name": "CameraType"},
-                    {"id": "GV5", "editor": "MOTIONDETC", "name": "Motion Detected"},
-                    {"id": "CLITEMP", "editor": "TEMPF", "name": "Temperature"},
-                    {"id": "TIME", "editor": "UNIXTIME", "name": "Last Update TIME"},
-                ],
-                "cmds": camera_cmds,
-                "links": {"ctl": [], "rsp": []},
-            },
-        ]
+        from udiBlinkLib import get_dynamic_profile_nodedefs
+        return get_dynamic_profile_nodedefs()
 
     def _dynamic_profile_payload(self):
         return {

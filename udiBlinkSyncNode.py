@@ -24,7 +24,7 @@ except ImportError:
 
                
 class blink_sync_node(udi_interface.Node):
-    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done
+    from udiBlinkLib import BLINK_setDriver, bat2isy, bool2isy, bat_V2isy, node_queue, wait_for_node_done, apply_profile_driver_names
 
 
     def __init__(self, polyglot, primary, address, name, sync_unit, blinkSys  ):
@@ -47,6 +47,7 @@ class blink_sync_node(udi_interface.Node):
         self.poly.subscribe(self.poly.STOP, self.stop)
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
 
+        self.apply_profile_driver_names()
         try:
             self.poly.addNode(self, rename=True)
         except TypeError:
@@ -114,13 +115,9 @@ class blink_sync_node(udi_interface.Node):
 
                 }
 
-    drivers= [ 
-                {'driver': 'ST', 'value':0, 'uom':25}, # on line 
-                #{'driver': 'GV1', 'value':0, 'uom':25},
-
-
-
-        ] 
+    drivers = [
+        {'driver': 'ST', 'value': 0, 'uom': 25, 'name': 'Connected'},
+    ] 
 
         
 

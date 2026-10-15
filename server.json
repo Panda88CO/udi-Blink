@@ -8,13 +8,13 @@
     "notice": "Uses APIs from https://github.com/fronzbot/blinkpy - not official Blink APIs.",
     "shortPoll": "30",
     "longPoll": "180",
-    "version": "0.6.35",
-    "profile_version": "0.6.35",
+    "version": "0.6.37",
+    "profile_version": "0.6.37",
     "credits": [
         {
             "title": "A NodeServer to integrate Blink Camera Systems",
             "author": "Panda88CO",
-            "version": "0.6.35",
+            "version": "0.6.37",
             "date": "Sept 30,  2022",
             "source": "https://github.com/Panda88CO/udi-Blink",
             "license": "https://github.com/Panda88CO/udi-Blink/blob/main/license"

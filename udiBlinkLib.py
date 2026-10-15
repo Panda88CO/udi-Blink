@@ -8,6 +8,8 @@ MIT License
 import time
 import secrets
 import re
+import os
+import xml.etree.ElementTree as ET
 try:
     import udi_interface
     logging = udi_interface.LOGGER
@@ -117,3 +119,186 @@ def parse_enable_state(val):
     if v in ('DISABLED', 'DISABLE', 'FALSE', '0', 'NO', 'OFF') or (v.startswith('D') and 'ENABLE' not in v):
         return 'DISABLED'
     return 'PENDING'
+
+def get_dynamic_profile_nodedefs():
+    """
+    Return the dynamic JSON nodedefs structure.
+    Used for updateJsonProfile and as a fallback when no profile/ directory exists.
+    """
+    camera_cmds = {
+        "sends": [],
+        "accepts": [
+            {"id": "UPDATE", "name": "Update Camera"},
+            {
+                "id": "ARM",
+                "name": "Set Motion Detection",
+                "parameters": [
+                    {"id": "", "editor": "DOMOTION", "init": "ST"},
+                ],
+            },
+            {"id": "SNAPPIC", "name": "Take Picture"},
+            {"id": "SNAPVIDEO", "name": "Take Video"},
+        ],
+    }
+
+    return [
+        {
+            "id": "BLINKSYNC",
+            "name": "Sync Unit",
+            "icon": "GenericCtl",
+            "properties": [
+                {"id": "ST", "editor": "ONLINE", "name": "Connected"},
+            ],
+            "cmds": {
+                "sends": [],
+                "accepts": [
+                    {"id": "UPDATE", "name": "Update SyncUnit"},
+                ],
+            },
+            "links": {"ctl": [], "rsp": []},
+        },
+        {
+            "id": "BLINKNETWORK",
+            "name": "Network",
+            "icon": "GenericCtl",
+            "properties": [
+                {"id": "ST", "editor": "ARMED", "name": "Arm Status"},
+                {"id": "GV0", "editor": "ONLINE", "name": "Connected"},
+                {"id": "TIME", "editor": "UNIXTIME", "name": "Last Successful Update Time"},
+            ],
+            "cmds": {
+                "sends": [
+                    {"id": "DON", "name": "On"},
+                    {"id": "DOF", "name": "Off"},
+                ],
+                "accepts": [
+                    {"id": "UPDATE", "name": "Update Network"},
+                    {
+                        "id": "ARMALL",
+                        "name": "Set Arming",
+                        "parameters": [
+                            {"id": "", "editor": "DOARM", "init": "ST"},
+                        ],
+                    },
+                ],
+            },
+            "links": {"ctl": [], "rsp": []},
+        },
+        {
+            "id": "BLINKCAMERA",
+            "name": "Blink Camera",
+            "icon": "MotionSensor",
+            "properties": [
+                {"id": "ST", "editor": "MOTIONEN", "name": "Motion Detection Status"},
+                {"id": "GV0", "editor": "ONLINE", "name": "Connected"},
+                {"id": "GV1", "editor": "BATTERY", "name": "Battery Status"},
+                {"id": "GV3", "editor": "CAMERATYPE", "name": "CameraType"},
+                {"id": "GV5", "editor": "MOTIONDETC", "name": "Motion Detected"},
+                {"id": "TIME", "editor": "UNIXTIME", "name": "Last Update TIME"},
+            ],
+            "cmds": camera_cmds,
+            "links": {"ctl": [], "rsp": []},
+        },
+        {
+            "id": "BLINKCAMERAC",
+            "name": "Blink Camera",
+            "icon": "MotionSensor",
+            "properties": [
+                {"id": "ST", "editor": "MOTIONEN", "name": "Motion Detection Status"},
+                {"id": "GV0", "editor": "ONLINE", "name": "Connected"},
+                {"id": "GV1", "editor": "BATTERY", "name": "Battery Status"},
+                {"id": "GV3", "editor": "CAMERATYPE", "name": "CameraType"},
+                {"id": "GV5", "editor": "MOTIONDETC", "name": "Motion Detected"},
+                {"id": "CLITEMP", "editor": "TEMPC", "name": "Temperature"},
+                {"id": "TIME", "editor": "UNIXTIME", "name": "Last Update TIME"},
+            ],
+            "cmds": camera_cmds,
+            "links": {"ctl": [], "rsp": []},
+        },
+        {
+            "id": "BLINKCAMERAF",
+            "name": "Blink Camera",
+            "icon": "MotionSensor",
+            "properties": [
+                {"id": "ST", "editor": "MOTIONEN", "name": "Motion Detection Status"},
+                {"id": "GV0", "editor": "ONLINE", "name": "Connected"},
+                {"id": "GV1", "editor": "BATTERY", "name": "Battery Status"},
+                {"id": "GV3", "editor": "CAMERATYPE", "name": "CameraType"},
+                {"id": "GV5", "editor": "MOTIONDETC", "name": "Motion Detected"},
+                {"id": "CLITEMP", "editor": "TEMPF", "name": "Temperature"},
+                {"id": "TIME", "editor": "UNIXTIME", "name": "Last Update TIME"},
+            ],
+            "cmds": camera_cmds,
+            "links": {"ctl": [], "rsp": []},
+        },
+    ]
+
+_profile_driver_names = None
+
+def get_profile_driver_names():
+    """
+    Extract the mapping of (nodeDefId, driver_id) -> display name.
+    1. First tries profile/nodedef/nodedefs.xml and profile/nls/en_us.txt (static profile).
+    2. If no static profile directory exists, falls back to dynamic JSON profile definitions.
+    Cached after the first load.
+    """
+    global _profile_driver_names
+    if _profile_driver_names is not None:
+        return _profile_driver_names
+
+    _profile_driver_names = {}
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    xml_path = os.path.join(base_dir, 'profile', 'nodedef', 'nodedefs.xml')
+    nls_path = os.path.join(base_dir, 'profile', 'nls', 'en_us.txt')
+
+    # 1. Try static profile files if they exist
+    if os.path.exists(xml_path) and os.path.exists(nls_path):
+        try:
+            st_labels = {}
+            with open(nls_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    m = re.match(r'^ST-([\w\-]+)-([\w\-]+)-NAME\s*=\s*(.+)', line.strip())
+                    if m:
+                        nls, driver, label = m.groups()
+                        st_labels[(nls, driver)] = label.strip()
+
+            tree = ET.parse(xml_path)
+            root = tree.getroot()
+            for node_def in root.findall('.//nodeDef'):
+                node_id = node_def.get('id')
+                nls = node_def.get('nls')
+                if not node_id or not nls:
+                    continue
+                for st in node_def.findall('.//st'):
+                    driver_id = st.get('id')
+                    if driver_id and (nls, driver_id) in st_labels:
+                        _profile_driver_names[(node_id, driver_id)] = st_labels[(nls, driver_id)]
+        except Exception as e:
+            logging.warning(f'Could not load driver names from static profile: {e}')
+
+    # 2. If static files did not yield names (e.g. pure dynamic profile mode), extract from dynamic nodedefs
+    if not _profile_driver_names:
+        for nd in get_dynamic_profile_nodedefs():
+            node_id = nd.get('id')
+            for prop in nd.get('properties', []):
+                driver_id = prop.get('id')
+                name = prop.get('name')
+                if node_id and driver_id and name:
+                    _profile_driver_names[(node_id, driver_id)] = name
+
+    return _profile_driver_names
+
+def apply_profile_driver_names(node, node_id=None):
+    """
+    Populate or update 'name' in each driver dictionary of a node instance
+    using definitions extracted from static or dynamic profiles.
+    """
+    target_id = node_id or getattr(node, 'id', None)
+    if not target_id or not hasattr(node, 'drivers') or not node.drivers:
+        return
+    names = get_profile_driver_names()
+    for d in node.drivers:
+        driver_id = d.get('driver')
+        if driver_id and (target_id, driver_id) in names:
+            d['name'] = names[(target_id, driver_id)]
+

@@ -21,7 +21,7 @@ except ImportError:
     )
 from  udiBlinkCameraNode import blink_camera_node, blink_camera_no_temp_node
 from  udiBlinkSyncNode import blink_sync_node
-from  udiBlinkLib import parse_enable_state
+from  udiBlinkLib import parse_enable_state, apply_profile_driver_names
 
 
                
@@ -58,6 +58,8 @@ class blink_network_node(udi_interface.Node):
         self.poly.subscribe(self.poly.ADDNODEDONE, self.node_queue)
 
              
+
+        apply_profile_driver_names(self)
 
         try:
             self.poly.addNode(self, rename=True)
@@ -147,9 +149,12 @@ class blink_network_node(udi_interface.Node):
                 logging.info(f"Skipping SYNC unit {sync_id} on network {self.network_id} because sync_id matches a camera_id")
                 continue
 
-            raw_name = self.blink.get_sync_module_name(sync, self.network_id) if hasattr(self.blink, 'get_sync_module_name') else getattr(sync, 'name', None)
-            if not raw_name or str(raw_name).strip().lower() in ('none', ''):
-                raw_name = f"{self.name} Sync"
+            raw_name = self.blink.get_sync_module_name(sync, self.network_id) if hasattr(self.blink, 'get_sync_module_name') else None
+            if not raw_name or str(raw_name).strip().lower() in ('none', '', 'my blink sync module', 'sync module'):
+                net_name = self.blink.get_network_name(self.network_id) if hasattr(self.blink, 'get_network_name') else None
+                if not net_name:
+                    net_name = self.name.replace('Blink_', '') if self.name.startswith('Blink_') else self.name
+                raw_name = f"{net_name} Sync Module"
 
             nodeName = self.poly.getValidName(str(raw_name))
             if not nodeName:
@@ -240,9 +245,12 @@ class blink_network_node(udi_interface.Node):
                 logging.info(f"Skipping SYNC unit {sync_id} on network {self.network_id} because sync_id matches a camera_id")
                 continue
 
-            raw_name = self.blink.get_sync_module_name(sync, self.network_id) if hasattr(self.blink, 'get_sync_module_name') else getattr(sync, 'name', None)
-            if not raw_name or str(raw_name).strip().lower() in ('none', ''):
-                raw_name = f"{self.name} Sync"
+            raw_name = self.blink.get_sync_module_name(sync, self.network_id) if hasattr(self.blink, 'get_sync_module_name') else None
+            if not raw_name or str(raw_name).strip().lower() in ('none', '', 'my blink sync module', 'sync module'):
+                net_name = self.blink.get_network_name(self.network_id) if hasattr(self.blink, 'get_network_name') else None
+                if not net_name:
+                    net_name = self.name.replace('Blink_', '') if self.name.startswith('Blink_') else self.name
+                raw_name = f"{net_name} Sync Module"
 
             nodeName = self.poly.getValidName(str(raw_name))
             if not nodeName:
@@ -481,11 +489,11 @@ class blink_network_node(udi_interface.Node):
 
                 }
 
-    drivers= [ 
-            {'driver': 'ST', 'value': 0, 'uom': 25}, # Armed (ARMED)
-            {'driver': 'GV0', 'value': 1, 'uom': 25}, # Connected (ONLINE)
-            {'driver': 'TIME', 'value': 0, 'uom': 151}
-        ]
+    drivers = [
+        {'driver': 'ST', 'value': 0, 'uom': 25, 'name': 'Arm Status'},
+        {'driver': 'GV0', 'value': 1, 'uom': 25, 'name': 'Connected'},
+        {'driver': 'TIME', 'value': 0, 'uom': 151, 'name': 'Last Successful Update Time'},
+    ]
  
 
         

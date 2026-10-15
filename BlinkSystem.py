@@ -526,6 +526,16 @@ class blink_system:
             s_id = str(getattr(sync_obj, 'sync_id', ''))
             if s_id and s_id == str(sync_unit_name):
                 return sync_obj
+            s_net_id = getattr(sync_obj, 'network_id', None)
+            if s_net_id:
+                net_name = self.get_network_name(s_net_id)
+                if net_name:
+                    net_target = re.sub(r"[^A-Za-z0-9_,]", "", f"{net_name}SyncModule").upper()
+                    if net_target == target:
+                        return sync_obj
+                    net_target2 = re.sub(r"[^A-Za-z0-9_,]", "", f"{net_name}Sync").upper()
+                    if net_target2 == target:
+                        return sync_obj
         if hasattr(self, '_sync_proxies') and isinstance(self._sync_proxies, dict):
             for p_id, p_obj in self._sync_proxies.items():
                 if str(p_id) == str(sync_unit_name) or str(getattr(p_obj, 'name', '')) == str(sync_unit_name):
@@ -562,46 +572,36 @@ class blink_system:
         return False
 
     def get_sync_module_name(self, sync_obj, network_id=None):
-        """Retrieve the display name for a sync module, prioritizing homescreen device name."""
+        """Retrieve the display name for a sync module as '<network_name> Sync Module'."""
         sync_id = getattr(sync_obj, 'sync_id', None)
         if not sync_id and isinstance(sync_obj, dict):
             sync_id = sync_obj.get('id')
         net_id = network_id or getattr(sync_obj, 'network_id', None)
 
-        # 1. Check homescreen sync_modules
-        hs_syncs = self.homescreen.get('sync_modules', []) if isinstance(getattr(self, 'homescreen', None), dict) else []
-        for mod in hs_syncs:
-            if sync_id is not None and str(mod.get('id', '')) == str(sync_id):
-                name = mod.get('name')
-                if name and str(name).strip().lower() not in ('none', ''):
-                    return str(name).strip()
-            elif net_id is not None and str(mod.get('network_id', '')) == str(net_id):
-                name = mod.get('name')
-                if name and str(name).strip().lower() not in ('none', ''):
-                    return str(name).strip()
-
-        # 2. Check device_name attribute if set
-        dev_name = getattr(sync_obj, 'device_name', None)
-        if dev_name and str(dev_name).strip().lower() not in ('none', ''):
-            return str(dev_name).strip()
-
-        # 3. Check summary dictionary
-        summary = getattr(sync_obj, 'summary', None)
-        if isinstance(summary, dict):
-            s_name = summary.get('name')
-            if s_name and str(s_name).strip().lower() not in ('none', ''):
-                return str(s_name).strip()
-
-        # 4. Check sync object name
-        obj_name = getattr(sync_obj, 'name', None)
-        if obj_name and str(obj_name).strip().lower() not in ('none', ''):
-            return str(obj_name).strip()
-
-        # 5. Fallback based on network or sync_id
+        # 1. Prefer network_name + " Sync Module"
         if net_id is not None:
             net_name = self.get_network_name(net_id)
-            if net_name:
-                return f"Sync_{net_name}"
+            if net_name and str(net_name).strip().lower() not in ('none', ''):
+                return f"{str(net_name).strip()} Sync Module"
+
+        # 2. Check homescreen sync_modules for network_id match
+        hs_syncs = self.homescreen.get('sync_modules', []) if isinstance(getattr(self, 'homescreen', None), dict) else []
+        for mod in hs_syncs:
+            if (sync_id is not None and str(mod.get('id', '')) == str(sync_id)) or (net_id is not None and str(mod.get('network_id', '')) == str(net_id)):
+                mod_net = mod.get('network_id')
+                if mod_net is not None:
+                    n_name = self.get_network_name(mod_net)
+                    if n_name:
+                        return f"{n_name} Sync Module"
+
+        # 3. Fallback to device_name or name if not generic default
+        for name_candidate in (getattr(sync_obj, 'device_name', None), getattr(sync_obj, 'name', None)):
+            if name_candidate:
+                c_str = str(name_candidate).strip()
+                if c_str.lower() not in ('none', '', 'my blink sync module', 'sync module'):
+                    return c_str
+
+        # 4. Fallback based on sync_id
         if sync_id:
             return f"Sync_{sync_id}"
         return "Sync Module"
@@ -633,7 +633,8 @@ class blink_system:
             mod_id = str(mod.get('id', '')).strip().lower()
             mod_name = str(mod.get('name', '')).strip().lower()
             mod_net = str(mod.get('network_id', '')).strip().lower()
-            if target_str in (mod_id, mod_name, mod_net):
+            net_name = str(self.get_network_name(mod.get('network_id')) or '').strip().lower()
+            if target_str in (mod_id, mod_name, mod_net) or (net_name and target_str in (f"{net_name} sync module", f"{net_name} sync", net_name)):
                 value = self._normalize_online_value(mod.get('status'))
                 if value is not None:
                     return value

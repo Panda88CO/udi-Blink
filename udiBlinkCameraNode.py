@@ -117,7 +117,7 @@ class blink_camera_node(udi_interface.Node):
     def updateISYdrivers(self):
         if self.drivers != [] and self.nodeDefineDone:
             try:
-                logging.info('Camera updateISYdrivers - {}'.format(self.camera.name))
+                logging.debug('Camera updateISYdrivers - {}'.format(self.camera.name))
                 if self.camera.name not in self.blink.cameras:
                     logging.warning('Camera %s not found in Blink system - skipping TIME update', self.camera.name)
                     return
@@ -291,7 +291,7 @@ class blink_camera_no_temp_node(udi_interface.Node):
     def updateISYdrivers(self):
         if self.drivers != [] and self.nodeDefineDone:
             try:
-                logging.info('Camera updateISYdrivers (no temp) - {}'.format(self.camera.name))
+                logging.debug('Camera updateISYdrivers (no temp) - {}'.format(self.camera.name))
                 if self.camera.name not in self.blink.cameras:
                     logging.warning('Camera %s not found in Blink system - skipping TIME update', self.camera.name)
                     return

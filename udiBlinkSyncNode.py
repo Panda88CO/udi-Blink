@@ -88,7 +88,7 @@ class blink_sync_node(udi_interface.Node):
         if self.nodeDefineDone:
             try:
                 sync_name = getattr(self.sync_unit, 'device_name', None) or getattr(self.sync_unit, 'name', None) or self.name
-                logging.info('Sync updateISYdrivers - {}'.format(sync_name))
+                logging.debug('Sync updateISYdrivers - {}'.format(sync_name))
                 online = self.blink.get_sync_online(sync_name)
                 if online is None and getattr(self.sync_unit, 'sync_id', None):
                     online = self.blink.get_sync_online(self.sync_unit.sync_id)

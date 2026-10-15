@@ -384,12 +384,18 @@ class blink_network_node(udi_interface.Node):
 
     
     def set_connection_status(self, connected):
-        logging.info('set_connection_status {} - {}'.format(self.name, connected))
-        self.setDriver('GV0', 1 if connected else 0)
+        new_val = 1 if connected else 0
+        old_val = getattr(self, '_last_connected_val', None)
+        if old_val != new_val:
+            self._last_connected_val = new_val
+            logging.info('set_connection_status {} - {}'.format(self.name, connected))
+        else:
+            logging.debug('set_connection_status {} - {}'.format(self.name, connected))
+        self.setDriver('GV0', new_val)
 
     def updateISYdrivers(self):
         if self.nodeDefineDone:
-            logging.info('Network updateISYdrivers - {}'.format(self.network_id))
+            logging.debug('Network updateISYdrivers - {}'.format(self.network_id))
             try:
                 arm_val = self.blink.get_network_arm_state(self.network_id)
                 if arm_val is None or arm_val == 99:
@@ -399,7 +405,7 @@ class blink_network_node(udi_interface.Node):
                     return
 
                 if arm_val == 2:
-                    logging.info('Network %s: No sync unit, cameras only. Setting ST to 2 (Individually camera assigned).', self.network_id)
+                    logging.debug('Network %s: No sync unit, cameras only. Setting ST to 2 (Individually camera assigned).', self.network_id)
                     self.BLINK_setDriver('ST', 2)
                 elif arm_val is True:
                     self.BLINK_setDriver('ST', 1)
@@ -424,16 +430,20 @@ class blink_network_node(udi_interface.Node):
             except Exception as e:
                 logging.error('Error updating ISY drivers for network %s: %s', self.network_id, e)
 
-                         
+                          
         #tmp = self.blink.get_sync_arm_info(self.sync_unit.name)
         #self.BLINK_setDriver('GV2', self.bool2isy(tmp))
 
-  
     def heartbeat(self):
-        # logging.debug('heartbeat')        
-        self.reportCmd('DON',2)
-        time.sleep(5)
-        self.reportCmd('DOF',2)
+        try:
+            logging.debug(f'Sending heartbeat DON for network {self.name}')
+            self.reportCmd('DON')
+            time.sleep(5)
+            logging.debug(f'Sending heartbeat DOF for network {self.name}')
+            self.reportCmd('DOF')
+            logging.debug(f'Heartbeat cycle completed for network {self.name}')
+        except Exception as e:
+            logging.error(f'Error executing heartbeat for network {self.name}: {e}')
 
 
     def ISYupdate(self, command=None):

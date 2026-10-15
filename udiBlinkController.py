@@ -73,7 +73,7 @@ except ImportError:
 
 
 
-VERSION = '0.6.38' 
+VERSION = '0.6.39' 
 TOKEN_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'blink_tokens.json') 
 
 def _sync_version_file():
@@ -188,6 +188,7 @@ class BlinkSetup:
 
         self.hb = 0
         self._heartbeat_threads = {}
+        self._consecutive_refresh_failures = 0
         self.userParam = ['TEMP_UNIT', 'USERNAME','PASSWORD', 'AUTH_KEY', 'SYNC_UNITS' ]
         # logging.debug('BlinkSetup init')
         #logging.debug('self.address : ' + str(self.address))
@@ -651,70 +652,87 @@ class BlinkSetup:
             heartbeat_cb()
         except Exception as e:
             logging.error('Heartbeat thread failed for node {}: {}'.format(node_key, e))
+        finally:
+            self._heartbeat_threads.pop(node_key, None)
 
 
     def systemPoll (self, polltype):
         self.remove_notice('TOKEN_INIT')
-        if self.nodeDefineDone:
-
-            if 'longPoll' in polltype:
-                logging.info('System Poll executing: {}'.format(polltype))
-                #Keep token current
-                #self.node.setDriver('GV0', self.temp_unit, True, True)
-                try:
-                    success = self.blink.refresh()
-                    if success:
-                        current_auth = self.blink.get_auth_data()
-                        if current_auth and current_auth.get('refresh_token'):
-                            self.save_saved_tokens(current_auth)
-                    else:
-                        logging.warning('Blink System refresh failed - skipping driver updates')
-                    nodes = self.poly.getNodes()
-                    for nde in list(nodes.keys()):
-                        if nde != 'setup' and nde in nodes:   # but not the setup node
-                            node_obj = nodes[nde]
-                            if getattr(node_obj, 'id', None) in ('BLINKNETWORK', 'blinknetwork') and hasattr(node_obj, 'set_connection_status'):
-                                # logging.debug('Updating connection status for node {} to {}'.format(nde, success))
-                                node_obj.set_connection_status(True if success else False)
-                                if success:
-                                    # logging.debug('Updating heartbeat for node {}'.format(nde))
-                                    heartbeat_cb = getattr(node_obj, 'heartbeat', None)
-                                    if node_obj.id in ('BLINKNETWORK', 'blinknetwork') and callable(heartbeat_cb):
-                                        heartbeat_thread = self._heartbeat_threads.get(nde)
-                                        if heartbeat_thread and heartbeat_thread.is_alive():
-                                            # logging.debug('Heartbeat already running for node {}'.format(nde))
-                                            pass
-                                        else:
-                                            # logging.debug('Starting heartbeat thread for node {}'.format(nde))
-                                            heartbeat_thread = threading.Thread(
-                                                target=self._run_heartbeat,
-                                                args=(heartbeat_cb, nde),
-                                                daemon=True,
-                                                name='heartbeat-{}'.format(nde)
-                                            )
-                                            self._heartbeat_threads[nde] = heartbeat_thread
-                                            heartbeat_thread.start()
-                                    elif node_obj.id in ('BLINKNETWORK', 'blinknetwork'):
-                                        logging.warning('Node {} is missing callable heartbeat'.format(nde))
-
-                            if success:
-                                # logging.debug('updating node {} data'.format(nde)) 
-                                
-                                if getattr(node_obj, 'nodeDefineDone', False) and hasattr(node_obj, 'updateISYdrivers'):                         
-                                    node_obj.updateISYdrivers()
-                         
-                except Exception as e:
-                    logging.error('Exception occcured : {}'.format(e))
-   
-                
-            if 'shortPoll' in polltype:
-                #if self.connected:
-                #    self.heartbeat()
-                #else:
-                #    logging.warning('System Apperas offline - stopping heartbeat')
-                pass
-        else:
+        if not self.nodeDefineDone:
             logging.info('System Poll - Waiting for all nodes to be added')
+            return
+
+        if 'longPoll' in polltype:
+            logging.debug('System Poll executing: {}'.format(polltype))
+
+            # 1. Trigger network node heartbeats at the start of longPoll if system is connected.
+            # Sending heartbeats immediately avoids cloud latency jitter and ensures regular intervals.
+            is_connected = getattr(self, 'connected', False)
+            failures = getattr(self, '_consecutive_refresh_failures', 0)
+            if is_connected and failures < 3:
+                nodes = self.poly.getNodes()
+                for nde in list(nodes.keys()):
+                    if nde != 'setup' and nde in nodes:
+                        node_obj = nodes[nde]
+                        if getattr(node_obj, 'id', None) in ('BLINKNETWORK', 'blinknetwork'):
+                            heartbeat_cb = getattr(node_obj, 'heartbeat', None)
+                            if callable(heartbeat_cb):
+                                heartbeat_thread = self._heartbeat_threads.get(nde)
+                                if heartbeat_thread and heartbeat_thread.is_alive():
+                                    logging.debug('Heartbeat already running for node {}'.format(nde))
+                                else:
+                                    logging.debug('Starting heartbeat thread for node {}'.format(nde))
+                                    heartbeat_thread = threading.Thread(
+                                        target=self._run_heartbeat,
+                                        args=(heartbeat_cb, nde),
+                                        daemon=True,
+                                        name='heartbeat-{}'.format(nde)
+                                    )
+                                    self._heartbeat_threads[nde] = heartbeat_thread
+                                    heartbeat_thread.start()
+
+            # 2. Perform Blink cloud refresh
+            try:
+                success = self.blink.refresh()
+                if success:
+                    self._consecutive_refresh_failures = 0
+                    current_auth = self.blink.get_auth_data()
+                    if current_auth and current_auth.get('refresh_token'):
+                        self.save_saved_tokens(current_auth)
+                else:
+                    self._consecutive_refresh_failures = getattr(self, '_consecutive_refresh_failures', 0) + 1
+                    logging.warning(
+                        'Blink System refresh failed (failure {}/3) - {}'.format(
+                            self._consecutive_refresh_failures,
+                            'keeping online state' if self._consecutive_refresh_failures < 3 else 'marking offline'
+                        )
+                    )
+
+                is_online = (self._consecutive_refresh_failures < 3)
+                nodes = self.poly.getNodes()
+                for nde in list(nodes.keys()):
+                    if nde != 'setup' and nde in nodes:
+                        node_obj = nodes[nde]
+                        if getattr(node_obj, 'id', None) in ('BLINKNETWORK', 'blinknetwork') and hasattr(node_obj, 'set_connection_status'):
+                            node_obj.set_connection_status(is_online)
+
+                        if success:
+                            if getattr(node_obj, 'nodeDefineDone', False) and hasattr(node_obj, 'updateISYdrivers'):
+                                node_obj.updateISYdrivers()
+
+            except Exception as e:
+                self._consecutive_refresh_failures = getattr(self, '_consecutive_refresh_failures', 0) + 1
+                logging.error('Exception occurred during systemPoll refresh: {}'.format(e))
+                is_online = (self._consecutive_refresh_failures < 3)
+                nodes = self.poly.getNodes()
+                for nde in list(nodes.keys()):
+                    if nde != 'setup' and nde in nodes:
+                        node_obj = nodes[nde]
+                        if getattr(node_obj, 'id', None) in ('BLINKNETWORK', 'blinknetwork') and hasattr(node_obj, 'set_connection_status'):
+                            node_obj.set_connection_status(is_online)
+
+        if 'shortPoll' in polltype:
+            pass
   
 
 

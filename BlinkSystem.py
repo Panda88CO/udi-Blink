@@ -252,7 +252,6 @@ class blink_system:
         self._last_error = None
         try:
             await self._blink.start()
-            self._log_api_return_structure("start")
             return True
         except BlinkTwoFARequiredError:
             logging.info("Two-Factor Authentication required")
@@ -322,7 +321,6 @@ class blink_system:
             await self._blink.setup_post_verify()
             await asyncio.sleep(1)
         await self._blink.refresh()
-        self._log_api_return_structure("finalize_auth")
         return 'ok'
 
     def stop(self):
@@ -392,8 +390,11 @@ class blink_system:
         return {}
 
     def _log_api_return_structure(self, context="API"):
-        """Log full return structure from Blink API calls nicely formatted to debug log."""
+        """Log full return structure from Blink API calls nicely formatted to debug log.
+        Only runs when BLINK_DEBUG_DUMP environment variable is set to 1."""
         try:
+            if os.environ.get('BLINK_DEBUG_DUMP', '0') != '1':
+                return
             if hasattr(logging, 'isEnabledFor') and not logging.isEnabledFor(10):
                 return
             if not self._blink:
@@ -481,7 +482,6 @@ class blink_system:
         if self._blink:
             try:
                 await self._blink.refresh()
-                self._log_api_return_structure("refresh")
                 return True
             except (asyncio.CancelledError, concurrent.futures.CancelledError):
                 logging.info("Blink refresh was cancelled")
@@ -492,7 +492,7 @@ class blink_system:
         return False
     
     def _debug_camera_data(self):
-        """Log debug buffer with all camera data after refresh"""
+        """Log debug buffer with all camera data after refresh (requires BLINK_DEBUG_DUMP=1)"""
         self._log_api_return_structure("debug_camera_data")
         
     def refresh_sys(self):
@@ -706,7 +706,7 @@ class blink_system:
                     break
 
             if not target_mod:
-                logging.info(f"Network {network_id} has no physical sync module in Blink homescreen data (sync-less network)")
+                logging.debug(f"Network {network_id} has no physical sync module in Blink homescreen data (sync-less network)")
                 return []
 
             target_id = str(target_mod.get('id'))
@@ -812,7 +812,7 @@ class blink_system:
 
         # If all syncs for this network are camera-backed, treat as camera-only and return 2
         if found_sync and matched_camera_backed_sync and only_camera_backed_sync:
-            logging.info('get_network_arm_state: All syncs for network %s are camera-backed. Returning 2 (Individually camera assigned).', network_id)
+            logging.debug('get_network_arm_state: All syncs for network %s are camera-backed. Returning 2 (Individually camera assigned).', network_id)
             return 2
 
         if matched_camera_backed_sync:
@@ -833,10 +833,10 @@ class blink_system:
         # No sync unit: check if there are cameras on this network
         cameras_on_network = self.get_cameras_on_network(network_id)
         if cameras_on_network:
-            logging.info('get_network_arm_state: No sync unit found for network %s, but cameras exist. Returning 2 (Individually camera assigned).', network_id)
+            logging.debug('get_network_arm_state: No sync unit found for network %s, but cameras exist. Returning 2 (Individually camera assigned).', network_id)
             return 2
         else:
-            logging.info('get_network_arm_state: No sync unit and no cameras found for network %s. Returning None.', network_id)
+            logging.debug('get_network_arm_state: No sync unit and no cameras found for network %s. Returning None.', network_id)
             return None
 
     def _derive_network_arm_from_cameras(self, network_id):
@@ -1010,7 +1010,6 @@ class blink_system:
                 for pkey in ('power', 'power_source', 'ac_power', 'wired', 'wired_power', 'external_power', 'line_power', 'chime_power'):
                     pval = hs_data.get(pkey)
                     if pval is True or (isinstance(pval, (int, float)) and pval > 0) or (isinstance(pval, str) and pval.lower() in ('wired', 'external', 'ac', 'line', 'true', '1')):
-                        logging.debug("get_camera_battery_info: '%s' detected wired/external power via hs_data['%s']=%s", camera_name, pkey, pval)
                         return 'wired'
                 
                 # If still no battery info, check hs_data for battery fields
@@ -1020,7 +1019,6 @@ class blink_system:
                             val = hs_data[bkey]
                             break
 
-            logging.debug("get_camera_battery_info: '%s' resolved to: %s", camera_name, val)
             return val if val is not None else 'No Battery'
         return None
 
@@ -1097,59 +1095,64 @@ class blink_system:
     def camera_supports_temperature(self, camera_name):
         if camera_name not in self.cameras:
             return False
+        if not hasattr(self, '_temp_support_cache'):
+            self._temp_support_cache = {}
+        if camera_name in self._temp_support_cache:
+            return self._temp_support_cache[camera_name]
+
         cam = self.cameras[camera_name]
 
         # 1. If an actual temperature reading is available, it definitely supports temperature
         temp_c = self.get_camera_temperatureC_info(camera_name)
         if temp_c is not None:
-            logging.debug("camera_supports_temperature: '%s' reports temperature %s C -> True", camera_name, temp_c)
+            self._temp_support_cache[camera_name] = True
             return True
 
         # 2. Known models without temperature sensor
         product_type = str(getattr(cam, 'product_type', '')).lower()
         if product_type in ['owl', 'hawk', 'pigeon', 'superior', 'chickadee', 'lotus', 'galapagos', 'tulip', 'freesia']:
-            logging.debug("camera_supports_temperature: '%s' (product_type='%s') does not support temperature -> False", camera_name, product_type)
+            self._temp_support_cache[camera_name] = False
             return False
 
         cam_type = str(self.get_camera_type_info(camera_name)).lower()
         if cam_type in ['mini', 'mini2', 'mini2k+', 'wiredfloodlight', 'doorbell']:
-            logging.debug("camera_supports_temperature: '%s' (cam_type='%s') does not support temperature -> False", camera_name, cam_type)
+            self._temp_support_cache[camera_name] = False
             return False
 
         # 3. Known battery cameras with built-in temperature sensor
         if cam_type in ['gen2', 'xt-2', 'gen3', 'outdoor4', 'outdoor2k+', 'floodlight', 'blink outdoor']:
-            logging.debug("camera_supports_temperature: '%s' is known temp-capable cam_type '%s' -> True", camera_name, cam_type)
+            self._temp_support_cache[camera_name] = True
             return True
         if product_type in ['catalina', 'xt2', 'clownfish', 'sedona', 'sonoran', 'trogon']:
-            logging.debug("camera_supports_temperature: '%s' is known temp-capable product_type '%s' -> True", camera_name, product_type)
+            self._temp_support_cache[camera_name] = True
             return True
 
         # 4. Check camera attributes/signals for temperature keys
         for attr in ('temperature', 'temperature_c', 'temperature_calibrated'):
             if getattr(cam, attr, None) is not None:
-                logging.debug("camera_supports_temperature: '%s' has attribute '%s' -> True", camera_name, attr)
+                self._temp_support_cache[camera_name] = True
                 return True
 
         attrs = getattr(cam, 'attributes', None)
         if isinstance(attrs, dict):
             for k in ('temperature', 'temperature_c', 'temperature_calibrated'):
                 if attrs.get(k) is not None:
-                    logging.debug("camera_supports_temperature: '%s' has attrs['%s'] -> True", camera_name, k)
+                    self._temp_support_cache[camera_name] = True
                     return True
 
         signals = getattr(cam, 'signals', None)
         if isinstance(signals, dict) and signals.get('temp') is not None:
-            logging.debug("camera_supports_temperature: '%s' has signals['temp'] -> True", camera_name)
+            self._temp_support_cache[camera_name] = True
             return True
 
         hs_data = self.get_device_homescreen_data(camera_name)
         if isinstance(hs_data, dict):
             for k in ('temperature', 'temp'):
                 if hs_data.get(k) is not None:
-                    logging.debug("camera_supports_temperature: '%s' has hs_data['%s'] -> True", camera_name, k)
+                    self._temp_support_cache[camera_name] = True
                     return True
 
-        logging.debug("camera_supports_temperature: '%s' does not report or support temperature -> False", camera_name)
+        self._temp_support_cache[camera_name] = False
         return False
 
     def get_camera_temperatureC_info(self, camera_name):
